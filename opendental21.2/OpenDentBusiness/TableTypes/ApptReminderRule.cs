@@ -184,7 +184,6 @@ namespace OpenDentBusiness {
 				}
 				//Rounds 1.1 to 2. Anything with n days + x hours will be n+1 days.
 				//This is necessary because we can have a case of 1 day and 23 hours (essentially 2 days), and don't want to skip sending for that rule.
-				//Write a unit test around this for reminders.
 				return (int)Math.Ceiling(TSPrior.TotalDays);
 			}
 		}
