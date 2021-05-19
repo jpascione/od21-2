@@ -59,8 +59,8 @@ namespace OpenDentBusiness.Eclaims {
 				string postData=
 					"Function=Auth"//CONSTANT; signifies that this is an authentication request
 					+"&Source=EDI"//CONSTANT; file format
-					+"&Username="+clearinghouseClin.LoginID
-					+"&Password="+clearinghouseClin.Password
+					+"&Username="+HttpUtility.UrlEncode(clearinghouseClin.LoginID)
+					+"&Password="+HttpUtility.UrlEncode(clearinghouseClin.Password)
 					+"&UploaderName=OpenDental"//CONSTANT
 					+"&UploaderVersion="+myVersion.Major.ToString()+"."+myVersion.Minor.ToString()+"."+myVersion.Build.ToString();//eg 12.3.24
 				webReq.KeepAlive=false;
