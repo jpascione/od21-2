@@ -245,6 +245,9 @@ namespace OpenDentBusiness {
 		///<summary>6 - Birthday. Defines rule for sending out automated birthday emails.</summary>
 		[Description("Birthday")]
 		Birthday,
+		///<summary>7 - General Message. Defines rules for sending out automated messages after an appointment is set complete.</summary>
+		[Description("General Message")]
+		GeneralMessage,
 	}
 
 	[Flags]
@@ -293,6 +296,9 @@ namespace OpenDentBusiness {
 		[ShortCode(SmsMessageSource=new SmsMessageSource[] { SmsMessageSource.Arrival }
 			,EServicePrefNames=new PrefName[] { PrefName.ApptConfirmAutoSignedUp,PrefName.ApptConfirmAutoEnabled })]
 		Arrivals=0b10000000000,
+		[ShortCode(SmsMessageSource=new SmsMessageSource[] { SmsMessageSource.GeneralMessage }
+			,EServicePrefNames=new PrefName[] { PrefName.ApptGeneralMessageAutoEnabled })]
+		GeneralMessage=0b100000000000,
 	}
 
 	public class ShortCodeAttribute:Attribute {

@@ -169,6 +169,9 @@ namespace OpenDentBusiness {
 		Arrival,
 		///<summary>23. Used for 2 factor authentication in mobile apps.</summary>
 		ByodToken,
+		///<summary>24. Used when sending appointment general messages.</summary>
+		[Description("General Message")]
+		GeneralMessage,
 	}
 
 	///<summary>None should never be used, the code should be re-written to not use it.</summary>

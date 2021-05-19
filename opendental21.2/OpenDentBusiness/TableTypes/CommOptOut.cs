@@ -63,6 +63,8 @@ namespace OpenDentBusiness {
 		Arrivals=							0b1000000000,
 		///<summary></summary> 
 		Birthdays=						0b10000000000,
+		///<summary></summary>
+		GeneralMessages=                0b100000000000,
 	}
 
 	public enum CommOptOutMode {

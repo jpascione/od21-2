@@ -370,6 +370,23 @@ If you have questions, call <a href=""tel:[OfficePhone]"">[OfficePhone]</a>.",
 						SendOrder=((int)CommType.Email).ToString(),//Email Only
 					};
 					break;
+				case ApptReminderType.GeneralMessage:
+					rule=new ApptReminderRule() {
+						ClinicNum=clinicNum,
+						TypeCur=ApptReminderType.GeneralMessage,
+						TSPrior=TimeSpan.FromHours(-1),//Send 1 hour after the appointment
+						SendOrder="0,1,2",//part of ctor
+						TemplateSMS="Thank you for your visit to [OfficeName]. If you have questions call [OfficePhone].",//default message
+						TemplateSMSAggShared="Thank you for your visit to [OfficeName]. If you have questions call [OfficePhone].",
+						TemplateSMSAggPerAppt="",
+						TemplateEmailSubject="Thank You For Your Visit",//default subject
+						TemplateEmail=@"Thank you for your visit to [OfficeName]. We look forward to seeing you again. If you have any questions, please call us at <a href=""tel:[OfficePhone]"">[OfficePhone]</a>.",
+						TemplateEmailSubjAggShared="Thank You For Your Visit",
+						TemplateEmailAggShared=@"Thank you for your visit to [OfficeName]. We look forward to seeing you again. If you have any questions, please call us at <a href=""tel:[OfficePhone]"">[OfficePhone]</a>.",
+						TemplateEmailAggPerAppt="",
+						IsAutoReplyEnabled=false,
+					};
+					break;
 			}
 			if(PrefC.GetBool(PrefName.EmailDisclaimerIsOn)) {
 				rule.TemplateEmail+="\r\n\r\n\r\n[EmailDisclaimer]";

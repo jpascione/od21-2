@@ -1224,6 +1224,26 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 			command="UPDATE userodpref SET ValueString='' WHERE FkeyType=0";//Expanded imaging categories were full of meaningless junk strings. No ValueString needed.
 			Db.NonQ(command);
+			command=$"INSERT INTO preference (PrefName,ValueString) VALUES('ApptGeneralMessageAutoEnabled','0')"; //Defaults to disabled
+			Db.NonQ(command);
+			command="DROP TABLE IF EXISTS apptgeneralmessagesent";
+			Db.NonQ(command);
+			command=@"CREATE TABLE apptgeneralmessagesent (
+				ApptGeneralMessageSentNum bigint NOT NULL auto_increment PRIMARY KEY,
+				ApptNum bigint NOT NULL,
+				PatNum bigint NOT NULL,
+				ClinicNum bigint NOT NULL,
+				DateTimeEntry datetime NOT NULL DEFAULT '0001-01-01 00:00:00',
+				TSPrior bigint NOT NULL,
+				ApptReminderRuleNum bigint NOT NULL,
+				SmsSendStatus tinyint NOT NULL,
+				EmailSendStatus tinyint NOT NULL,
+				INDEX(ApptNum),
+				INDEX(PatNum),
+				INDEX(ClinicNum),
+				INDEX(ApptReminderRuleNum)
+				) DEFAULT CHARSET=utf8";
+			Db.NonQ(command);
 		}//End of 21_2_1() method
 	}
 }

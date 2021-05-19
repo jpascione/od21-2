@@ -330,6 +330,7 @@
     <Compile Include="Crud\AddressCrud.cs" />
     <Compile Include="Crud\AlertCategoryCrud.cs" />
     <Compile Include="Crud\AlertCategoryLinkCrud.cs" />
+    <Compile Include="Crud\ApptGeneralMessageSentCrud.cs" />
     <Compile Include="Crud\ApptThankYouSentCrud.cs" />
     <Compile Include="Crud\AsapCommCrud.cs" />
     <Compile Include="Crud\BugSubmissionCrud.cs" />
@@ -412,6 +413,7 @@
     <Compile Include="Data Interface\Addresses.cs" />
     <Compile Include="Data Interface\AlertCategories.cs" />
     <Compile Include="Data Interface\AlertCategoryLinks.cs" />
+    <Compile Include="Data Interface\ApptGeneralMessageSents.cs" />
     <Compile Include="Data Interface\CareCreditWebResponses.cs" />
     <Compile Include="Data Interface\CloudAddresses.cs" />
     <Compile Include="Data Interface\ReferralClinicLinks.cs" />
@@ -652,6 +654,7 @@
     <Compile Include="SheetFramework\SheetPrinting2.cs" />
     <Compile Include="SheetFramework\SheetUtil.cs" />
     <Compile Include="SheetFramework\ToothChartHelper.cs" />
+    <Compile Include="TableTypes\ApptGeneralMessageSent.cs" />
     <Compile Include="TableTypes\CertEmployee.cs" />
     <Compile Include="TableTypes\Cert.cs" />
     <Compile Include="TableTypes\ActiveInstance.cs" />

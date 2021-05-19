@@ -91,6 +91,7 @@
     <Compile Include="TableTypes\AppointmentT.cs" />
     <Compile Include="TableTypes\AppointmentTypeT.cs" />
     <Compile Include="TableTypes\ApptFieldDefT.cs" />
+    <Compile Include="TableTypes\ApptGeneralMessageSentT.cs" />
     <Compile Include="TableTypes\ApptReminderRuleT.cs" />
     <Compile Include="TableTypes\ApptThankYouSentT.cs" />
     <Compile Include="TableTypes\ApptReminderSentT.cs" />

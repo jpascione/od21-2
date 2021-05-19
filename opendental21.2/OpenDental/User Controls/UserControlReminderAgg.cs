@@ -128,6 +128,9 @@ namespace OpenDental {
 				if(string.IsNullOrWhiteSpace(textSMSAggShared.Text)) {
 					errors.Add(Lan.g(this,"Text message cannot be blank."));
 				}
+			}
+			//Patient portal invites and general messages do not require the [appts] tag.
+			if(!ListTools.In(Rule.TypeCur,ApptReminderType.PatientPortalInvite,ApptReminderType.GeneralMessage)) {
 				if(!textSMSAggShared.Text.ToLower().Contains("[appts]")) {
 					errors.Add(Lan.g(this,"Text message must contain the \"[Appts]\" tag."));
 				}

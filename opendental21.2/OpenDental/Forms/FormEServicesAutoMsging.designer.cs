@@ -54,16 +54,22 @@ namespace OpenDental{
 			this.textStatusNotifications = new System.Windows.Forms.TextBox();
 			this.butActivateInvites = new OpenDental.UI.Button();
 			this.menuMain = new OpenDental.UI.MenuOD();
-			this.butAddPPInviteRule = new OpenDental.UI.Button();
+			this.butAddPatientPortalInvite = new OpenDental.UI.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.checkUseDefaultsInviteBefore = new System.Windows.Forms.CheckBox();
+			this.butAddPatientPortalInviteBefore = new OpenDental.UI.Button();
 			this.checkUseDefaultThanks = new System.Windows.Forms.CheckBox();
 			this.checkUseDefaultsConfirmation = new System.Windows.Forms.CheckBox();
 			this.checkUseDefaultsReminder = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkUseDefaultsArrival = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.checkUseDefaultsGeneralMessage = new System.Windows.Forms.CheckBox();
+			this.butAddGeneralMessage = new OpenDental.UI.Button();
 			this.checkUseDefaultsInvite = new System.Windows.Forms.CheckBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.textStatusGeneralMessage = new System.Windows.Forms.TextBox();
+			this.butActivateGeneralMessages = new OpenDental.UI.Button();
 			this.menuWebSchedVerifyTextTemplate.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -142,9 +148,9 @@ namespace OpenDental{
 			// 
 			this.butAddReminder.Icon = OpenDental.UI.EnumIcons.Add;
 			this.butAddReminder.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddReminder.Location = new System.Drawing.Point(121, 19);
+			this.butAddReminder.Location = new System.Drawing.Point(156, 17);
 			this.butAddReminder.Name = "butAddReminder";
-			this.butAddReminder.Size = new System.Drawing.Size(169, 24);
+			this.butAddReminder.Size = new System.Drawing.Size(185, 24);
 			this.butAddReminder.TabIndex = 92;
 			this.butAddReminder.Text = "Add eReminder";
 			this.butAddReminder.UseVisualStyleBackColor = true;
@@ -154,9 +160,9 @@ namespace OpenDental{
 			// 
 			this.butAddConfirmation.Icon = OpenDental.UI.EnumIcons.Add;
 			this.butAddConfirmation.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddConfirmation.Location = new System.Drawing.Point(121, 49);
+			this.butAddConfirmation.Location = new System.Drawing.Point(156, 46);
 			this.butAddConfirmation.Name = "butAddConfirmation";
-			this.butAddConfirmation.Size = new System.Drawing.Size(169, 24);
+			this.butAddConfirmation.Size = new System.Drawing.Size(185, 24);
 			this.butAddConfirmation.TabIndex = 93;
 			this.butAddConfirmation.Text = "Add eConfirmation";
 			this.butAddConfirmation.UseVisualStyleBackColor = true;
@@ -164,7 +170,7 @@ namespace OpenDental{
 			// 
 			// label54
 			// 
-			this.label54.Location = new System.Drawing.Point(277, 33);
+			this.label54.Location = new System.Drawing.Point(304, 33);
 			this.label54.Name = "label54";
 			this.label54.Size = new System.Drawing.Size(57, 16);
 			this.label54.TabIndex = 165;
@@ -174,7 +180,7 @@ namespace OpenDental{
 			// comboClinicEConfirm
 			// 
 			this.comboClinicEConfirm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboClinicEConfirm.Location = new System.Drawing.Point(338, 32);
+			this.comboClinicEConfirm.Location = new System.Drawing.Point(365, 32);
 			this.comboClinicEConfirm.MaxDropDownItems = 30;
 			this.comboClinicEConfirm.Name = "comboClinicEConfirm";
 			this.comboClinicEConfirm.Size = new System.Drawing.Size(194, 21);
@@ -184,7 +190,7 @@ namespace OpenDental{
 			// checkIsConfirmEnabled
 			// 
 			this.checkIsConfirmEnabled.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkIsConfirmEnabled.Location = new System.Drawing.Point(541, 33);
+			this.checkIsConfirmEnabled.Location = new System.Drawing.Point(568, 33);
 			this.checkIsConfirmEnabled.Name = "checkIsConfirmEnabled";
 			this.checkIsConfirmEnabled.Size = new System.Drawing.Size(198, 19);
 			this.checkIsConfirmEnabled.TabIndex = 167;
@@ -193,9 +199,9 @@ namespace OpenDental{
 			// 
 			// butActivateConfirm
 			// 
-			this.butActivateConfirm.Location = new System.Drawing.Point(143, 46);
+			this.butActivateConfirm.Location = new System.Drawing.Point(164, 46);
 			this.butActivateConfirm.Name = "butActivateConfirm";
-			this.butActivateConfirm.Size = new System.Drawing.Size(147, 23);
+			this.butActivateConfirm.Size = new System.Drawing.Size(177, 23);
 			this.butActivateConfirm.TabIndex = 257;
 			this.butActivateConfirm.Text = "Activate eConfirmations";
 			this.butActivateConfirm.UseVisualStyleBackColor = true;
@@ -203,9 +209,9 @@ namespace OpenDental{
 			// 
 			// butActivateReminder
 			// 
-			this.butActivateReminder.Location = new System.Drawing.Point(143, 17);
+			this.butActivateReminder.Location = new System.Drawing.Point(164, 17);
 			this.butActivateReminder.Name = "butActivateReminder";
-			this.butActivateReminder.Size = new System.Drawing.Size(147, 23);
+			this.butActivateReminder.Size = new System.Drawing.Size(177, 23);
 			this.butActivateReminder.TabIndex = 261;
 			this.butActivateReminder.Text = "Activate eReminders";
 			this.butActivateReminder.UseVisualStyleBackColor = true;
@@ -215,9 +221,9 @@ namespace OpenDental{
 			// 
 			this.butAddThankYouVerify.Icon = OpenDental.UI.EnumIcons.Add;
 			this.butAddThankYouVerify.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddThankYouVerify.Location = new System.Drawing.Point(121, 79);
+			this.butAddThankYouVerify.Location = new System.Drawing.Point(156, 75);
 			this.butAddThankYouVerify.Name = "butAddThankYouVerify";
-			this.butAddThankYouVerify.Size = new System.Drawing.Size(169, 24);
+			this.butAddThankYouVerify.Size = new System.Drawing.Size(185, 24);
 			this.butAddThankYouVerify.TabIndex = 271;
 			this.butAddThankYouVerify.Text = "Add Auto Thank-You";
 			this.butAddThankYouVerify.UseVisualStyleBackColor = true;
@@ -225,9 +231,9 @@ namespace OpenDental{
 			// 
 			// butActivateThanks
 			// 
-			this.butActivateThanks.Location = new System.Drawing.Point(143, 75);
+			this.butActivateThanks.Location = new System.Drawing.Point(164, 75);
 			this.butActivateThanks.Name = "butActivateThanks";
-			this.butActivateThanks.Size = new System.Drawing.Size(147, 23);
+			this.butActivateThanks.Size = new System.Drawing.Size(177, 23);
 			this.butActivateThanks.TabIndex = 272;
 			this.butActivateThanks.Text = "Activate Auto Thank-You";
 			this.butActivateThanks.UseVisualStyleBackColor = true;
@@ -239,9 +245,9 @@ namespace OpenDental{
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.gridRemindersMain.HasMultilineHeaders = true;
-			this.gridRemindersMain.Location = new System.Drawing.Point(317, 59);
+			this.gridRemindersMain.Location = new System.Drawing.Point(365, 59);
 			this.gridRemindersMain.Name = "gridRemindersMain";
-			this.gridRemindersMain.Size = new System.Drawing.Size(838, 553);
+			this.gridRemindersMain.Size = new System.Drawing.Size(790, 553);
 			this.gridRemindersMain.TabIndex = 68;
 			this.gridRemindersMain.Title = "Automated Messaging Rules";
 			this.gridRemindersMain.TranslationName = "TableRules";
@@ -252,7 +258,7 @@ namespace OpenDental{
 			this.textStatusConfirmations.Location = new System.Drawing.Point(6, 48);
 			this.textStatusConfirmations.Name = "textStatusConfirmations";
 			this.textStatusConfirmations.ReadOnly = true;
-			this.textStatusConfirmations.Size = new System.Drawing.Size(131, 20);
+			this.textStatusConfirmations.Size = new System.Drawing.Size(152, 20);
 			this.textStatusConfirmations.TabIndex = 260;
 			this.textStatusConfirmations.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
@@ -261,7 +267,7 @@ namespace OpenDental{
 			this.textStatusReminders.Location = new System.Drawing.Point(6, 19);
 			this.textStatusReminders.Name = "textStatusReminders";
 			this.textStatusReminders.ReadOnly = true;
-			this.textStatusReminders.Size = new System.Drawing.Size(131, 20);
+			this.textStatusReminders.Size = new System.Drawing.Size(152, 20);
 			this.textStatusReminders.TabIndex = 262;
 			this.textStatusReminders.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
@@ -270,7 +276,7 @@ namespace OpenDental{
 			this.textStatusThankYous.Location = new System.Drawing.Point(6, 77);
 			this.textStatusThankYous.Name = "textStatusThankYous";
 			this.textStatusThankYous.ReadOnly = true;
-			this.textStatusThankYous.Size = new System.Drawing.Size(131, 20);
+			this.textStatusThankYous.Size = new System.Drawing.Size(152, 20);
 			this.textStatusThankYous.TabIndex = 273;
 			this.textStatusThankYous.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
@@ -289,9 +295,9 @@ namespace OpenDental{
 			// 
 			this.butAddArrival.Icon = OpenDental.UI.EnumIcons.Add;
 			this.butAddArrival.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddArrival.Location = new System.Drawing.Point(121, 19);
+			this.butAddArrival.Location = new System.Drawing.Point(156, 17);
 			this.butAddArrival.Name = "butAddArrival";
-			this.butAddArrival.Size = new System.Drawing.Size(169, 24);
+			this.butAddArrival.Size = new System.Drawing.Size(185, 24);
 			this.butAddArrival.TabIndex = 502;
 			this.butAddArrival.Text = "Add Arrival";
 			this.butAddArrival.UseVisualStyleBackColor = true;
@@ -302,15 +308,15 @@ namespace OpenDental{
 			this.textStatusArrivals.Location = new System.Drawing.Point(6, 106);
 			this.textStatusArrivals.Name = "textStatusArrivals";
 			this.textStatusArrivals.ReadOnly = true;
-			this.textStatusArrivals.Size = new System.Drawing.Size(131, 20);
+			this.textStatusArrivals.Size = new System.Drawing.Size(152, 20);
 			this.textStatusArrivals.TabIndex = 504;
 			this.textStatusArrivals.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
 			// butActivateArrivals
 			// 
-			this.butActivateArrivals.Location = new System.Drawing.Point(143, 104);
+			this.butActivateArrivals.Location = new System.Drawing.Point(164, 104);
 			this.butActivateArrivals.Name = "butActivateArrivals";
-			this.butActivateArrivals.Size = new System.Drawing.Size(147, 23);
+			this.butActivateArrivals.Size = new System.Drawing.Size(177, 23);
 			this.butActivateArrivals.TabIndex = 503;
 			this.butActivateArrivals.Text = "Activate Arrivals";
 			this.butActivateArrivals.UseVisualStyleBackColor = true;
@@ -318,20 +324,20 @@ namespace OpenDental{
 			// 
 			// textStatusNotifications
 			// 
-			this.textStatusNotifications.Location = new System.Drawing.Point(6, 134);
+			this.textStatusNotifications.Location = new System.Drawing.Point(6, 135);
 			this.textStatusNotifications.Name = "textStatusNotifications";
 			this.textStatusNotifications.ReadOnly = true;
-			this.textStatusNotifications.Size = new System.Drawing.Size(131, 20);
+			this.textStatusNotifications.Size = new System.Drawing.Size(152, 20);
 			this.textStatusNotifications.TabIndex = 507;
 			this.textStatusNotifications.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
 			// butActivateInvites
 			// 
-			this.butActivateInvites.Location = new System.Drawing.Point(143, 132);
+			this.butActivateInvites.Location = new System.Drawing.Point(164, 133);
 			this.butActivateInvites.Name = "butActivateInvites";
-			this.butActivateInvites.Size = new System.Drawing.Size(147, 23);
+			this.butActivateInvites.Size = new System.Drawing.Size(177, 23);
 			this.butActivateInvites.TabIndex = 506;
-			this.butActivateInvites.Text = "Activate Invites";
+			this.butActivateInvites.Text = "Activate Patient Portal Invites";
 			this.butActivateInvites.UseVisualStyleBackColor = true;
 			this.butActivateInvites.Click += new System.EventHandler(this.butActivateInvites_Click);
 			// 
@@ -345,36 +351,60 @@ namespace OpenDental{
 			this.menuMain.TabIndex = 509;
 			this.menuMain.Text = "menuOD1";
 			// 
-			// butAddPPInviteRule
+			// butAddPatientPortalInvite
 			// 
-			this.butAddPPInviteRule.Icon = OpenDental.UI.EnumIcons.Add;
-			this.butAddPPInviteRule.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAddPPInviteRule.Location = new System.Drawing.Point(121, 19);
-			this.butAddPPInviteRule.Name = "butAddPPInviteRule";
-			this.butAddPPInviteRule.Size = new System.Drawing.Size(169, 24);
-			this.butAddPPInviteRule.TabIndex = 510;
-			this.butAddPPInviteRule.Text = "Add  Invite";
-			this.butAddPPInviteRule.UseVisualStyleBackColor = true;
-			this.butAddPPInviteRule.Click += new System.EventHandler(this.butAddPPInviteRule_Click);
+			this.butAddPatientPortalInvite.Icon = OpenDental.UI.EnumIcons.Add;
+			this.butAddPatientPortalInvite.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butAddPatientPortalInvite.Location = new System.Drawing.Point(156, 17);
+			this.butAddPatientPortalInvite.Name = "butAddPatientPortalInvite";
+			this.butAddPatientPortalInvite.Size = new System.Drawing.Size(185, 24);
+			this.butAddPatientPortalInvite.TabIndex = 510;
+			this.butAddPatientPortalInvite.Text = "Add Patient Portal Invite";
+			this.butAddPatientPortalInvite.UseVisualStyleBackColor = true;
+			this.butAddPatientPortalInvite.Click += new System.EventHandler(this.butAddPatientPortalInvite_Click);
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.checkUseDefaultsInviteBefore);
+			this.groupBox1.Controls.Add(this.butAddPatientPortalInviteBefore);
 			this.groupBox1.Controls.Add(this.checkUseDefaultThanks);
 			this.groupBox1.Controls.Add(this.checkUseDefaultsConfirmation);
 			this.groupBox1.Controls.Add(this.checkUseDefaultsReminder);
 			this.groupBox1.Controls.Add(this.butAddThankYouVerify);
 			this.groupBox1.Controls.Add(this.butAddReminder);
 			this.groupBox1.Controls.Add(this.butAddConfirmation);
-			this.groupBox1.Location = new System.Drawing.Point(12, 251);
+			this.groupBox1.Location = new System.Drawing.Point(12, 279);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(299, 113);
+			this.groupBox1.Size = new System.Drawing.Size(347, 136);
 			this.groupBox1.TabIndex = 512;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Before Appointment";
 			// 
+			// checkUseDefaultsInviteBefore
+			// 
+			this.checkUseDefaultsInviteBefore.Location = new System.Drawing.Point(6, 109);
+			this.checkUseDefaultsInviteBefore.Name = "checkUseDefaultsInviteBefore";
+			this.checkUseDefaultsInviteBefore.Size = new System.Drawing.Size(105, 19);
+			this.checkUseDefaultsInviteBefore.TabIndex = 276;
+			this.checkUseDefaultsInviteBefore.Text = "Use Defaults";
+			this.checkUseDefaultsInviteBefore.UseVisualStyleBackColor = true;
+			this.checkUseDefaultsInviteBefore.Click += new System.EventHandler(this.checkUseDefaultsInviteBefore_Click);
+			// 
+			// butAddPatientPortalInviteBefore
+			// 
+			this.butAddPatientPortalInviteBefore.Icon = OpenDental.UI.EnumIcons.Add;
+			this.butAddPatientPortalInviteBefore.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butAddPatientPortalInviteBefore.Location = new System.Drawing.Point(156, 105);
+			this.butAddPatientPortalInviteBefore.Name = "butAddPatientPortalInviteBefore";
+			this.butAddPatientPortalInviteBefore.Size = new System.Drawing.Size(185, 24);
+			this.butAddPatientPortalInviteBefore.TabIndex = 275;
+			this.butAddPatientPortalInviteBefore.Text = "Add Patient Portal Invite";
+			this.butAddPatientPortalInviteBefore.UseVisualStyleBackColor = true;
+			this.butAddPatientPortalInviteBefore.Click += new System.EventHandler(this.butAddPatientPortalInviteBefore_Click);
+			// 
 			// checkUseDefaultThanks
 			// 
-			this.checkUseDefaultThanks.Location = new System.Drawing.Point(6, 83);
+			this.checkUseDefaultThanks.Location = new System.Drawing.Point(6, 79);
 			this.checkUseDefaultThanks.Name = "checkUseDefaultThanks";
 			this.checkUseDefaultThanks.Size = new System.Drawing.Size(105, 19);
 			this.checkUseDefaultThanks.TabIndex = 274;
@@ -384,7 +414,7 @@ namespace OpenDental{
 			// 
 			// checkUseDefaultsConfirmation
 			// 
-			this.checkUseDefaultsConfirmation.Location = new System.Drawing.Point(6, 53);
+			this.checkUseDefaultsConfirmation.Location = new System.Drawing.Point(6, 50);
 			this.checkUseDefaultsConfirmation.Name = "checkUseDefaultsConfirmation";
 			this.checkUseDefaultsConfirmation.Size = new System.Drawing.Size(105, 19);
 			this.checkUseDefaultsConfirmation.TabIndex = 273;
@@ -394,7 +424,7 @@ namespace OpenDental{
 			// 
 			// checkUseDefaultsReminder
 			// 
-			this.checkUseDefaultsReminder.Location = new System.Drawing.Point(6, 23);
+			this.checkUseDefaultsReminder.Location = new System.Drawing.Point(6, 21);
 			this.checkUseDefaultsReminder.Name = "checkUseDefaultsReminder";
 			this.checkUseDefaultsReminder.Size = new System.Drawing.Size(105, 19);
 			this.checkUseDefaultsReminder.TabIndex = 272;
@@ -406,16 +436,16 @@ namespace OpenDental{
 			// 
 			this.groupBox2.Controls.Add(this.checkUseDefaultsArrival);
 			this.groupBox2.Controls.Add(this.butAddArrival);
-			this.groupBox2.Location = new System.Drawing.Point(12, 370);
+			this.groupBox2.Location = new System.Drawing.Point(12, 421);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(299, 55);
+			this.groupBox2.Size = new System.Drawing.Size(347, 48);
 			this.groupBox2.TabIndex = 513;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "At Appointment";
 			// 
 			// checkUseDefaultsArrival
 			// 
-			this.checkUseDefaultsArrival.Location = new System.Drawing.Point(6, 23);
+			this.checkUseDefaultsArrival.Location = new System.Drawing.Point(6, 21);
 			this.checkUseDefaultsArrival.Name = "checkUseDefaultsArrival";
 			this.checkUseDefaultsArrival.Size = new System.Drawing.Size(105, 19);
 			this.checkUseDefaultsArrival.TabIndex = 503;
@@ -425,18 +455,42 @@ namespace OpenDental{
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this.checkUseDefaultsGeneralMessage);
+			this.groupBox3.Controls.Add(this.butAddGeneralMessage);
 			this.groupBox3.Controls.Add(this.checkUseDefaultsInvite);
-			this.groupBox3.Controls.Add(this.butAddPPInviteRule);
-			this.groupBox3.Location = new System.Drawing.Point(12, 431);
+			this.groupBox3.Controls.Add(this.butAddPatientPortalInvite);
+			this.groupBox3.Location = new System.Drawing.Point(12, 475);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(299, 55);
+			this.groupBox3.Size = new System.Drawing.Size(347, 77);
 			this.groupBox3.TabIndex = 514;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "After Appointment";
 			// 
+			// checkUseDefaultsGeneralMessage
+			// 
+			this.checkUseDefaultsGeneralMessage.Location = new System.Drawing.Point(6, 50);
+			this.checkUseDefaultsGeneralMessage.Name = "checkUseDefaultsGeneralMessage";
+			this.checkUseDefaultsGeneralMessage.Size = new System.Drawing.Size(105, 19);
+			this.checkUseDefaultsGeneralMessage.TabIndex = 511;
+			this.checkUseDefaultsGeneralMessage.Text = "Use Defaults";
+			this.checkUseDefaultsGeneralMessage.UseVisualStyleBackColor = true;
+			this.checkUseDefaultsGeneralMessage.Click += new System.EventHandler(this.checkUseDefaultsGeneralMessage_Click);
+			// 
+			// butAddGeneralMessage
+			// 
+			this.butAddGeneralMessage.Icon = OpenDental.UI.EnumIcons.Add;
+			this.butAddGeneralMessage.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butAddGeneralMessage.Location = new System.Drawing.Point(156, 46);
+			this.butAddGeneralMessage.Name = "butAddGeneralMessage";
+			this.butAddGeneralMessage.Size = new System.Drawing.Size(185, 24);
+			this.butAddGeneralMessage.TabIndex = 512;
+			this.butAddGeneralMessage.Text = "Add General Message";
+			this.butAddGeneralMessage.UseVisualStyleBackColor = true;
+			this.butAddGeneralMessage.Click += new System.EventHandler(this.butAddGeneralMessage_Click);
+			// 
 			// checkUseDefaultsInvite
 			// 
-			this.checkUseDefaultsInvite.Location = new System.Drawing.Point(6, 23);
+			this.checkUseDefaultsInvite.Location = new System.Drawing.Point(6, 21);
 			this.checkUseDefaultsInvite.Name = "checkUseDefaultsInvite";
 			this.checkUseDefaultsInvite.Size = new System.Drawing.Size(105, 19);
 			this.checkUseDefaultsInvite.TabIndex = 504;
@@ -446,6 +500,8 @@ namespace OpenDental{
 			// 
 			// groupBox4
 			// 
+			this.groupBox4.Controls.Add(this.textStatusGeneralMessage);
+			this.groupBox4.Controls.Add(this.butActivateGeneralMessages);
 			this.groupBox4.Controls.Add(this.butActivateReminder);
 			this.groupBox4.Controls.Add(this.butActivateConfirm);
 			this.groupBox4.Controls.Add(this.butActivateThanks);
@@ -458,10 +514,29 @@ namespace OpenDental{
 			this.groupBox4.Controls.Add(this.textStatusArrivals);
 			this.groupBox4.Location = new System.Drawing.Point(12, 59);
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(299, 165);
+			this.groupBox4.Size = new System.Drawing.Size(347, 193);
 			this.groupBox4.TabIndex = 515;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Activate for Practice";
+			// 
+			// textStatusGeneralMessage
+			// 
+			this.textStatusGeneralMessage.Location = new System.Drawing.Point(6, 164);
+			this.textStatusGeneralMessage.Name = "textStatusGeneralMessage";
+			this.textStatusGeneralMessage.ReadOnly = true;
+			this.textStatusGeneralMessage.Size = new System.Drawing.Size(152, 20);
+			this.textStatusGeneralMessage.TabIndex = 509;
+			this.textStatusGeneralMessage.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+			// 
+			// butActivateGeneralMessages
+			// 
+			this.butActivateGeneralMessages.Location = new System.Drawing.Point(164, 162);
+			this.butActivateGeneralMessages.Name = "butActivateGeneralMessages";
+			this.butActivateGeneralMessages.Size = new System.Drawing.Size(177, 23);
+			this.butActivateGeneralMessages.TabIndex = 508;
+			this.butActivateGeneralMessages.Text = "Activate General Messages";
+			this.butActivateGeneralMessages.UseVisualStyleBackColor = true;
+			this.butActivateGeneralMessages.Click += new System.EventHandler(this.butActivateGeneralMessages_Click);
 			// 
 			// FormEServicesAutoMsging
 			// 
@@ -521,7 +596,7 @@ namespace OpenDental{
 		private System.Windows.Forms.TextBox textStatusNotifications;
 		private UI.Button butActivateInvites;
 		private UI.MenuOD menuMain;
-		private UI.Button butAddPPInviteRule;
+		private UI.Button butAddPatientPortalInvite;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.GroupBox groupBox3;
@@ -531,5 +606,11 @@ namespace OpenDental{
 		private System.Windows.Forms.CheckBox checkUseDefaultsArrival;
 		private System.Windows.Forms.CheckBox checkUseDefaultsInvite;
 		private System.Windows.Forms.GroupBox groupBox4;
+		private System.Windows.Forms.TextBox textStatusGeneralMessage;
+		private UI.Button butActivateGeneralMessages;
+		private System.Windows.Forms.CheckBox checkUseDefaultsInviteBefore;
+		private UI.Button butAddPatientPortalInviteBefore;
+		private System.Windows.Forms.CheckBox checkUseDefaultsGeneralMessage;
+		private UI.Button butAddGeneralMessage;
 	}
 }
