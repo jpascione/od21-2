@@ -287,6 +287,8 @@ namespace OpenDentBusiness {
 		WebSchedASAP,
 		///<summary>Auto websched recall messages.</summary>
 		WebSchedRecall,
+		///<summary>Appointment General Message.</summary>
+		GeneralMessage,
 	}
 
 }

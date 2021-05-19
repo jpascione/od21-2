@@ -20,7 +20,7 @@ namespace OpenDental {
 		private List<ApptReminderRule> _listApptReminderRulesAll;
 		private ApptReminderType[] _arrayApptReminderTypes=new ApptReminderType[] { ApptReminderType.Reminder
 			,ApptReminderType.ConfirmationFutureDay,ApptReminderType.ScheduleThankYou,ApptReminderType.Arrival
-			,ApptReminderType.PatientPortalInvite };
+			,ApptReminderType.PatientPortalInvite,ApptReminderType.GeneralMessage };
 		WebServiceMainHQProxy.EServiceSetup.SignupOut _signupOut;
 
 		public FormEServicesAutoMsging(WebServiceMainHQProxy.EServiceSetup.SignupOut signupOut=null) {
@@ -36,7 +36,8 @@ namespace OpenDental {
 				_signupOut=FormEServicesSetup.GetSignupOut();
 			}
 			_listClinicPrefsUseDefaults=ClinicPrefs.GetWhere(x => ListTools.In(x.PrefName,new List<PrefName>() { PrefName.ApptArrivalUseDefaults,PrefName.ApptConfirmUseDefaults,
-				PrefName.ApptThankYouUseDefaults,PrefName.PatientPortalInviteUseDefaults,PrefName.ApptReminderUseDefaults }));
+				PrefName.ApptThankYouUseDefaults,PrefName.PatientPortalInviteUseDefaults,PrefName.ApptReminderUseDefaults,
+				PrefName.ApptGeneralMessageUseDefaults }));
 			FillActivationButtons();
 			SetListClinicsAndRulesHelper();
 			FillRemindConfirmData();
@@ -45,17 +46,22 @@ namespace OpenDental {
 			butActivateConfirm.Enabled=allowEdit;
 			butActivateThanks.Enabled=allowEdit;
 			butActivateArrivals.Enabled=allowEdit;
+			butActivateGeneralMessages.Enabled=allowEdit;
 			butAddArrival.Enabled=allowEdit;
 			butAddReminder.Enabled=allowEdit;
 			butAddConfirmation.Enabled=allowEdit;
-			butAddPPInviteRule.Enabled=allowEdit;
+			butAddPatientPortalInviteBefore.Enabled=allowEdit;
+			butAddPatientPortalInvite.Enabled=allowEdit;
 			butAddThankYouVerify.Enabled=allowEdit;
+			butAddGeneralMessage.Enabled=allowEdit;
 			checkIsConfirmEnabled.Enabled=allowEdit;
 			checkUseDefaultsArrival.Enabled=allowEdit;
 			checkUseDefaultsConfirmation.Enabled=allowEdit;
+			checkUseDefaultsInviteBefore.Enabled=allowEdit;
 			checkUseDefaultsInvite.Enabled=allowEdit;
 			checkUseDefaultsReminder.Enabled=allowEdit;
 			checkUseDefaultThanks.Enabled=allowEdit;
+			checkUseDefaultsGeneralMessage.Enabled=allowEdit;
 		}
 
 		private void LayoutMenu() {
@@ -182,15 +188,19 @@ namespace OpenDental {
 			bool isVisible=_clinicCurEConfirm.ClinicNum!=0;
 			checkUseDefaultsArrival.Visible=isVisible;
 			checkUseDefaultsConfirmation.Visible=isVisible;
+			checkUseDefaultsInviteBefore.Visible=isVisible;
 			checkUseDefaultsInvite.Visible=isVisible;
 			checkUseDefaultsReminder.Visible=isVisible;
 			checkUseDefaultThanks.Visible=isVisible;
+			checkUseDefaultsGeneralMessage.Visible=isVisible;
 			checkIsConfirmEnabled.Visible=isVisible;
 			checkUseDefaultsArrival.Checked=GetIsClinicPrefEnabled(PrefName.ApptArrivalUseDefaults,_clinicCurEConfirm.ClinicNum);
 			checkUseDefaultsConfirmation.Checked=GetIsClinicPrefEnabled(PrefName.ApptConfirmUseDefaults,_clinicCurEConfirm.ClinicNum);
+			checkUseDefaultsInviteBefore.Checked=GetIsClinicPrefEnabled(PrefName.PatientPortalInviteUseDefaults,_clinicCurEConfirm.ClinicNum);
 			checkUseDefaultsInvite.Checked=GetIsClinicPrefEnabled(PrefName.PatientPortalInviteUseDefaults,_clinicCurEConfirm.ClinicNum);
 			checkUseDefaultsReminder.Checked=GetIsClinicPrefEnabled(PrefName.ApptReminderUseDefaults,_clinicCurEConfirm.ClinicNum);
 			checkUseDefaultThanks.Checked=GetIsClinicPrefEnabled(PrefName.ApptThankYouUseDefaults,_clinicCurEConfirm.ClinicNum);
+			checkUseDefaultsGeneralMessage.Checked=GetIsClinicPrefEnabled(PrefName.ApptGeneralMessageUseDefaults,_clinicCurEConfirm.ClinicNum);
 			checkIsConfirmEnabled.Checked=_clinicCurEConfirm.IsConfirmEnabled;
 			#endregion
 		}
@@ -205,7 +215,9 @@ namespace OpenDental {
 			//Arrivals Activation Status
 			FillActivateButton(PrefName.ApptArrivalAutoEnabled,Lan.g(this,ApptReminderType.Arrival.GetDescription()),butActivateArrivals,textStatusArrivals);
 			//Patient Portal Invite Activation Status
-			FillActivateButton(PrefName.PatientPortalInviteEnabled,Lan.g(this,"Invites"),butActivateInvites,textStatusNotifications);
+			FillActivateButton(PrefName.PatientPortalInviteEnabled,Lan.g(this,"Patient Portal Invites"),butActivateInvites,textStatusNotifications);
+			//General Message Activation Status
+			FillActivateButton(PrefName.ApptGeneralMessageAutoEnabled,Lan.g(this,"General Messages"),butActivateGeneralMessages,textStatusGeneralMessage);
 		}
 
 		private void FillActivateButton(PrefName prefEnabled,string serviceName,UI.Button button,TextBox textBoxStatus) {
@@ -293,11 +305,19 @@ namespace OpenDental {
 			AddRule(ApptReminderType.Arrival);
 		}
 
-		private void butAddPPInviteRule_Click(object sender,EventArgs e) {
+		private void butAddPatientPortalInvite_Click(object sender,EventArgs e) {
+			AddRule(ApptReminderType.PatientPortalInvite,false);
+		}
+
+		private void butAddPatientPortalInviteBefore_Click(object sender,EventArgs e) {
 			AddRule(ApptReminderType.PatientPortalInvite);
 		}
 
-		private void AddRule(ApptReminderType apptReminderType) {
+		private void butAddGeneralMessage_Click(object sender,EventArgs e) {
+			AddRule(ApptReminderType.GeneralMessage);
+		}
+
+		private void AddRule(ApptReminderType apptReminderType,bool isBeforeAppointment=true) {
 			bool useDefaultForApptType=GetUseDefaultForApptType(apptReminderType,_clinicCurEConfirm.ClinicNum);
 			if(_clinicCurEConfirm.ClinicNum>0 && useDefaultForApptType) {
 				if(SwitchFromDefaults(apptReminderType)) {
@@ -307,7 +327,7 @@ namespace OpenDental {
 					return;
 				}
 			}
-			ApptReminderRule apptReminderRule=ApptReminderRules.CreateDefaultReminderRule(apptReminderType,_clinicCurEConfirm.ClinicNum);
+			ApptReminderRule apptReminderRule=ApptReminderRules.CreateDefaultReminderRule(apptReminderType,_clinicCurEConfirm.ClinicNum,isBeforeAppointment);
 			List<ApptReminderRule> listApptReminderRulesClin=_listApptReminderRulesAll.FindAll(x => x.ClinicNum==apptReminderRule.ClinicNum);
 			using FormApptReminderRuleEdit formApptReminderRuleEdit=new FormApptReminderRuleEdit(apptReminderRule,listApptReminderRulesClin);
 			formApptReminderRuleEdit.ShowDialog();
@@ -352,8 +372,16 @@ namespace OpenDental {
 			ChangeUseDefaults((CheckBox)sender,ApptReminderType.Arrival);
 		}
 
+		private void checkUseDefaultsInviteBefore_Click(object sender,EventArgs e) {
+			ChangeUseDefaults((CheckBox)sender,ApptReminderType.PatientPortalInvite);
+		}
+
 		private void checkUseDefaultsInvite_Click(object sender,EventArgs e) {
 			ChangeUseDefaults((CheckBox)sender,ApptReminderType.PatientPortalInvite);
+		}
+
+		private void checkUseDefaultsGeneralMessage_Click(object sender,EventArgs e) {
+			ChangeUseDefaults((CheckBox)sender,ApptReminderType.GeneralMessage);
 		}
 
 		private void comboClinicEConfirm_SelectionChangeCommitted(object sender,EventArgs e) {
@@ -462,6 +490,12 @@ namespace OpenDental {
 			}
 		}
 
+		private void butActivateGeneralMessages_Click(object sender,EventArgs e) {
+			if(ActivateEService(PrefName.ApptGeneralMessageAutoEnabled,ApptReminderType.GeneralMessage)) {
+				AddDefaults(ApptReminderType.GeneralMessage);
+			}
+		}
+
 		private bool ActivateEService(PrefName prefEnabled,ApptReminderType appointmentReminderType,eServiceCode? codeToValidate=null) {		
 			bool isAutoEnabled=PrefC.GetBool(prefEnabled);	
 			if(!isAutoEnabled && codeToValidate!=null) { //Not yet activated with HQ.
@@ -524,6 +558,8 @@ namespace OpenDental {
 					return PrefName.ApptArrivalUseDefaults;
 				case ApptReminderType.PatientPortalInvite:
 					return PrefName.PatientPortalInviteUseDefaults;
+				case ApptReminderType.GeneralMessage:
+					return PrefName.ApptGeneralMessageUseDefaults;
 			}
 			return PrefName.NotApplicable; //Should probably throw an exception.
 		}

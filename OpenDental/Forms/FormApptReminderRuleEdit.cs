@@ -55,26 +55,7 @@ namespace OpenDental {
 		}
 
 		private void FormApptReminderRuleEdit_Load(object sender,EventArgs e) {
-			switch(ApptReminderRuleCur.TypeCur) {
-				case ApptReminderType.Reminder:
-					Text=Lan.g(this,"Edit eReminder Rule");
-					break;
-				case ApptReminderType.ConfirmationFutureDay:
-					Text=Lan.g(this,"Edit eConfirmation Rule");
-					break;
-				case ApptReminderType.PatientPortalInvite:
-					Text=Lan.g(this,"Edit Patient Portal Invite Rule");
-					break;
-				case ApptReminderType.ScheduleThankYou:
-					Text=Lan.g(this,"Edit Automated Thank-You Rule");
-					break;
-				case ApptReminderType.Arrival:
-					Text=Lan.g(this,"Edit Arrival Rule");
-					break;
-				default:
-					Text=Lan.g(this,"Edit Rule");
-					break;
-			}
+			Text=Lan.g(this,"Edit")+" "+ApptReminderRuleCur.TypeCur.GetDescription(true)+" "+Lan.g(this,"Rule");
 			checkEnabled.Checked=ApptReminderRuleCur.IsEnabled;
 			checkEConfirmationAutoReplies.Checked=ApptReminderRuleCur.IsAutoReplyEnabled;
 			labelRuleType.Text=ApptReminderRuleCur.TypeCur.GetDescription();
@@ -437,7 +418,7 @@ namespace OpenDental {
 					errors.AddRange(((UserControlReminderMessage)page.Controls[0]).ValidateTemplates());
 				}
 			}
-			if(PIn.Int(textDays.Text,false)>366) {
+			if(PIn.Int(textDays.Text,false)>=366) {
 				errors.Add(Lan.g(this,"Lead time must 365 days or less."));
 			}
 			if(checkEnabled.Checked && PIn.Int(textHours.Text,false)==0 

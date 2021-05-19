@@ -188,6 +188,11 @@ namespace OpenDentBusiness {
 		ApptExclamationShowForUnsentIns,
 		///<summary>Float. Default 8. Valid between 1 and 40.</summary>
 		ApptFontSize,
+		///<summary>True if the office has actived Appointment General Messages in the UI.</summary>
+		ApptGeneralMessageAutoEnabled,
+		///<summary>Boolean.  Defaults to false. Only used for the clinicpref table, not the preference table. When true, this clinic will use the 
+		///Appointment General Message rules for ClinicNum 0.</summary>
+		ApptGeneralMessageUseDefaults,
 		///<summary>Boolean defaults to 0.  If true, adds the adjustment total to the net production in appointment module.</summary>
 		ApptModuleAdjustmentsInProd,
 		///<summary>Boolean defaults to 0, when true appt module will default to week view</summary>
