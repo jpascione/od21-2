@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -478,7 +478,7 @@
     <Compile Include="MiddleTier\WebServiceT.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared Projects Subversion\OpenDentalHelp\head\OpenDentalHelp\OpenDentalHelp.csproj">
+    <ProjectReference Include="..\..\..\Shared Projects Subversion\OpenDentalHelp\OpenDentalHelp_21_2\OpenDentalHelp\OpenDentalHelp.csproj">
       <Project>{98b2999c-8a9f-4795-b452-7f6231ed56b4}</Project>
       <Name>OpenDentalHelp</Name>
     </ProjectReference>

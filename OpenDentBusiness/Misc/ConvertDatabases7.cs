@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -786,7 +786,7 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 		}//End of 21_1_28() method
 
-		private static void To21_2_0() {
+		private static void To21_2_1() {
 			string command;
 			DataTable table;
 			command="INSERT INTO preference(PrefName,ValueString) VALUES('EmailDefaultSendPlatform','Secure')";//Defaults to SecureEmail(EmailHosting)
@@ -1224,6 +1224,6 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 			command="UPDATE userodpref SET ValueString='' WHERE FkeyType=0";//Expanded imaging categories were full of meaningless junk strings. No ValueString needed.
 			Db.NonQ(command);
-		}//End of 21_2_0() method
+		}//End of 21_2_1() method
 	}
 }
