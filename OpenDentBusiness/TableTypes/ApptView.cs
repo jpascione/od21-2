@@ -39,7 +39,7 @@ namespace OpenDentBusiness{
 		public bool IsApptBubblesDisabled;
 		///<summary>Zero is default and old behavior.  For any larger number, appointments won't shrink past that number but they may be wider.  Instead of getting narrower, a horizontal scrollbar shows up.</summary>
 		public int WidthOpMinimum;
-		///<summary>Enum:EnumWaitingRoomName - Shows how patient name is displayed in the waiting room. Defaults to Last, First.</summary>
+		///<summary>Enum:EnumWaitingRmName - Shows how patient name is displayed in the waiting room. Defaults to Last, First.</summary>
 		public EnumWaitingRmName WaitingRmName;
 
 		///<summary>Returns a copy of this ApptView.</summary>
@@ -100,10 +100,13 @@ namespace OpenDentBusiness{
 
 	///<summary>How the patient's name is displayed in the waiting room in the appointment module.</summary>
 	public enum EnumWaitingRmName {
+		///<summary>0</summary>
 		[System.ComponentModel.DescriptionAttribute("Last, First")]
 		LastFirst,
+		///<summary>1</summary>
 		[System.ComponentModel.DescriptionAttribute("First, Last Initial")]
 		FirstLastI,
+		///<summary>2</summary>
 		[System.ComponentModel.DescriptionAttribute("First")]
 		First
 	}
