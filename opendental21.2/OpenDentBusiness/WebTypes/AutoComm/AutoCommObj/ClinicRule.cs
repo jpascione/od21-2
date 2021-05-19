@@ -6,6 +6,8 @@ using System.Linq;
 namespace OpenDentBusiness.AutoComm {
 	///<summary>Combines all necessary fields for a given clinic needed for AutoComm.</summary>
 	public class ClinicRule{
+		///<summary>The number of days out we need to query to account for send windows.</summary>
+		public const int QUERY_DATE_BUFFER=1;
 		///<summary>True by default. Each implementer can set this from InitClinicRules(). Value of false will skip ProcessRosters().
 		///Implementers may want to make use of PreProcessClinicRule() for disabled ClinicRules.</summary>
 		public bool IsEnabledByHQ=true;
@@ -53,7 +55,7 @@ namespace OpenDentBusiness.AutoComm {
 			if(DefaultRule.IsSameDay && DefaultRule.IsValidDuration) { 
 				QueryDates.Add(DateToday);
 				if(IsAfterAppt || doesSameDayIncludeYesterday) {
-					QueryDates.Add(DateToday.AddDays(-1));//Include yesterday to catch appointments that were after the end of the send window.
+					QueryDates.Add(DateToday.AddDays(-QUERY_DATE_BUFFER));//Include yesterday to catch appointments that were after the end of the send window.
 				}
 			}
 			if(DefaultRule.IsFutureDay && DefaultRule.IsValidDuration) {
@@ -65,8 +67,8 @@ namespace OpenDentBusiness.AutoComm {
 				}
 			}
 			if(DefaultRule.IsPastDay && DefaultRule.IsValidDuration) {
-				//Add every day from yesterday back until the NumDaysInPast.
-				for(int i=1;i<=DefaultRule.NumDaysInPast;i++) {
+				//Add every day from yesterday back until the NumDaysInPast. Add one more day to catch appointments that were after the end of the send window.
+				for(int i=1;i<=DefaultRule.NumDaysInPast+QUERY_DATE_BUFFER;i++) {
 					QueryDates.Add(DateToday.AddDays(-i));
 				}
 			}
