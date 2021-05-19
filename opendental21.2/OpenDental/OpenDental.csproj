@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -11586,15 +11586,15 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared Projects Subversion\ImagingDeviceManager\ImagingDeviceManager_head\xImagingDeviceManager.csproj">
+    <ProjectReference Include="..\..\..\Shared Projects Subversion\ImagingDeviceManager\ImagingDeviceManager_21_2\xImagingDeviceManager.csproj">
       <Project>{783079e6-a13f-4f43-a28d-9d7731f945d1}</Project>
       <Name>xImagingDeviceManager</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Shared Projects Subversion\OpenDentalHelp\head\OpenDentalHelp\OpenDentalHelp.csproj">
+    <ProjectReference Include="..\..\..\Shared Projects Subversion\OpenDentalHelp\OpenDentalHelp_21_2\OpenDentalHelp\OpenDentalHelp.csproj">
       <Project>{98b2999c-8a9f-4795-b452-7f6231ed56b4}</Project>
       <Name>OpenDentalHelp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Shared Projects Subversion\VirtualWeb\VirtualWeb_head\VirtualWeb.csproj">
+    <ProjectReference Include="..\..\..\Shared Projects Subversion\VirtualWeb\VirtualWeb_21_2\VirtualWeb.csproj">
       <Project>{4ed3df2f-e97e-4bc3-ae5f-aa31a11af57f}</Project>
       <Name>VirtualWeb</Name>
     </ProjectReference>
