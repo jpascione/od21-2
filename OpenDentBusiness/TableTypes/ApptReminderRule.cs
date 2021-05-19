@@ -182,8 +182,10 @@ namespace OpenDentBusiness {
 				if(!IsFutureDay) {
 					return 0;
 				}
-				//Rounds 1.1 to 1. So anything less than exactly n days will be n days.
-				return TSPrior.Days;
+				//Rounds 1.1 to 2. Anything with n days + x hours will be n+1 days.
+				//This is necessary because we can have a case of 1 day and 23 hours (essentially 2 days), and don't want to skip sending for that rule.
+				//Write a unit test around this for reminders.
+				return (int)Math.Ceiling(TSPrior.TotalDays);
 			}
 		}
 
@@ -203,8 +205,9 @@ namespace OpenDentBusiness {
 				if(!IsPastDay) {
 					return 0;
 				}
-				//Rounds 1.1 to 1. So anything less than exactly n days will be n days.
-				return Math.Abs(TSPrior.Days);
+				//Rounds 1.1 to 2. Anything with n days + x hours will be n+1 days.
+				//This is necessary because we can have a case of 1 day and 23 hours (essentially 2 days), and don't want to skip sending for that rule.
+				return (int)Math.Ceiling(Math.Abs(TSPrior.TotalDays));
 			}
 		}
 
