@@ -44,7 +44,7 @@ namespace OpenDentBusiness {
 				query+="AND procedurelog.ClinicNum IN ("+String.Join(",",listClinicNums)+") ";
 			}
 			if(!string.IsNullOrEmpty(procCode)) {//don't include ProcCode condition if blank, it changes the execution plan and is much slower
-				query+="AND procedurecode.ProcCode LIKE '%"+POut.String(procCode)+"%' ";
+				query+="AND UPPER(procedurecode.ProcCode) LIKE '%"+POut.String(procCode.ToUpper())+"%' ";
 			}
 			query+="AND procedurelog.ProcDate >= " +POut.Date(dateFrom)+" "
 				+"AND procedurelog.ProcDate <= " +POut.Date(dateTo)+" "
@@ -73,7 +73,7 @@ namespace OpenDentBusiness {
 				query+="AND procedurelog.ClinicNum IN ("+String.Join(",",listClinicNums)+") ";
 			}
 			if(!string.IsNullOrEmpty(procCode)) {//don't include ProcCode condition if blank, it changes the execution plan and is much slower
-				query+="AND procedurecode.ProcCode LIKE '%"+POut.String(procCode)+"%' ";
+				query+="AND UPPER(procedurecode.ProcCode) LIKE '%"+POut.String(procCode.ToUpper())+"%' ";
 			}
 			query+="AND procedurelog.ProcDate >= " +POut.Date(dateFrom)+" "
 				+"AND procedurelog.ProcDate <= " +POut.Date(dateTo)+" "
