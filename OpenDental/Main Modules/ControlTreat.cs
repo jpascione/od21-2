@@ -1774,7 +1774,10 @@ namespace OpenDental{
         }
       }
 			OpenDental.UI.GridRow row;
-      for(int i=0;i<ALPreAuth.Count;i++){
+      for(int i=0;i<ALPreAuth.Count;i++) {
+				if(ALPreAuth[i]==null) {
+					continue;
+				}
 				InsPlan PlanCur=InsPlans.GetPlan(((Claim)ALPreAuth[i]).PlanNum,InsPlanList);
 				row=new GridRow();
 				if(((Claim)ALPreAuth[i]).DateSent.Year<1880){
@@ -1783,7 +1786,12 @@ namespace OpenDental{
 				else{
 					row.Cells.Add(((Claim)ALPreAuth[i]).DateSent.ToShortDateString());
 				}
-				row.Cells.Add(Carriers.GetName(PlanCur.CarrierNum));
+				if(PlanCur==null) {
+					row.Cells.Add(Lan.g(this,"Unknown"));
+				}
+				else {
+					row.Cells.Add(Carriers.GetName(PlanCur.CarrierNum));
+				}
 				row.Cells.Add(((Claim)ALPreAuth[i]).ClaimStatus.ToString());
 				gridPreAuth.ListGridRows.Add(row);
       }
