@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Net.Mail;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace OpenDentBusiness{
+namespace OpenDentBusiness {
 	///<summary></summary>
 	public class EmailAddresses{
 		#region CachePattern
@@ -162,13 +163,13 @@ namespace OpenDentBusiness{
 			return Regex.IsMatch(email??"",@".+@.+\..+");
 		}
 
-		///<summary>Does complex email validation. Returns if the given email address is a valid email address. If it is, returns the domain portion of the email address.
-		///Comes from Microsoft itself.</summary>
-		public static bool IsValidEmail(string emailAddress,out string domain) {
-			domain="";
+		///<summary>Returns if the given email address is a valid email address. If it is, returns the email address as a MailAddress.</summary>
+		public static bool IsValidEmail(string emailAddress,out MailAddress mailAddress) {
+			mailAddress=null;
 			if(string.IsNullOrWhiteSpace(emailAddress)) {
 				return false;
 			}
+			//Per a previous summary comment, the following DomainMapper and RegularExpresion "Comes from Microsoft itself".
 			try {
 				string domainNormalized="";
 				//Examines the domain part of the email and normalizes it.
@@ -181,7 +182,6 @@ namespace OpenDentBusiness{
 				}
 				//Normalize the domain
 				emailAddress=Regex.Replace(emailAddress,@"(@)(.+)$",DomainMapper,RegexOptions.None,TimeSpan.FromMilliseconds(100));
-				domain=domainNormalized;
 				//Trim and LowerCase the email address
 				emailAddress=emailAddress.Trim().ToLower();
 			}
@@ -189,12 +189,14 @@ namespace OpenDentBusiness{
 				return false;
 			}
 			try {
-				return Regex.IsMatch(emailAddress,
+				//We only want to look at the actual email address, and exclude any aliases.
+				mailAddress=new MailAddress(emailAddress);
+				return Regex.IsMatch(mailAddress.Address,
 					@"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
 					@"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
 					RegexOptions.IgnoreCase,TimeSpan.FromMilliseconds(100));
 			}
-			catch(Exception) {
+			catch(Exception ex) {
 				return false;
 			}
 		}

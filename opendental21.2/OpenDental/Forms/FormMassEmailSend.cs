@@ -362,7 +362,7 @@ namespace OpenDental {
 			progressOD.ActionMain=() => {
 				error=Promotions.SendEmails(_templateCur,
 					listDestinations,//This is just one email, the sender.
-					alias,replyToAddress.Address,promotionName,PromotionType.Manual,_templateCur.ClinicNum,senderAddress);
+					alias,replyToAddress.Address,promotionName,PromotionType.Manual,_templateCur.ClinicNum,senderAddress,isVerificationBatch:true);
 			};
 			progressOD.StartingMessage=Lan.g(this,"Sending verification email...");
 			progressOD.ShowDialogProgress();

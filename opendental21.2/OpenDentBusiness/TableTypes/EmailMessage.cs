@@ -120,7 +120,7 @@ namespace OpenDentBusiness {
 		public static List<EmailMessageSource> GetMsgTypesForEmailClient(bool isAutomated=false) {
 			if(isAutomated) {
 				//Promotion email messages get created with HideIn=HideInFlags.EmailInbox | HideInFlags.ApptEdit. Exclude the promotion EmailMessageSource
-				return GetAutomatedTypes().FindAll(x => x!=EmailMessageSource.Promotion);
+				return GetAutomatedTypes();//.FindAll(x => x!=EmailMessageSource.Promotion);
 			}
 			//Manual message sources
 			List<EmailMessageSource> listSourcesToExclude=GetAutomatedTypes();//Exclude automated message sources
