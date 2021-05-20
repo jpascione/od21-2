@@ -10,5 +10,8 @@ namespace OpenDentBusiness {
 		///<summary>The email address.</summary>
 		public string Address { get; set; }
 
+		///<summary>The email address alias.</summary>
+		public string Alias { get; set; }
+
 	}
 }

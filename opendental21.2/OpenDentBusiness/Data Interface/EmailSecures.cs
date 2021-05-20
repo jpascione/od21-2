@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Reflection;
 using System.Text;
 using CodeBase;
@@ -188,10 +189,15 @@ namespace OpenDentBusiness{
 		
 		private static List<EmailAddressResource> ToEmailAddressResources(string emailAddressStr) {
 			return (emailAddressStr??"").Split(_arrEmailAddressDelimiters,StringSplitOptions.RemoveEmptyEntries)
-				.Select(x => 
-					new EmailAddressResource {
-						Address=EmailMessages.ProcessInlineEncodedText(x.Trim().ToLower()),
-					})
+				.Select(x => {
+					string emailAddressDecoded=EmailMessages.ProcessInlineEncodedText(x.Trim().ToLower());
+					if(!EmailAddresses.IsValidEmail(emailAddressDecoded,out MailAddress mailAddress)) {
+						throw new ArgumentException(Lans.g("EmailSecure","Invalid email address: ")+x);
+					}
+					return new EmailAddressResource {
+						Address=mailAddress.Address,
+						Alias=mailAddress.DisplayName,
+					};})
 				.ToList();
 		}
 
