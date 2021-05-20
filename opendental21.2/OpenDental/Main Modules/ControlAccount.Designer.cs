@@ -1291,8 +1291,9 @@
 			// 
 			this.contextMenuAcctGrid.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemAddAdj,
-            this.menuItemAddRefundOverpayment,
-            this.menuItemAddRefundWorkNotPerformed});
+            this.menuItemAddRefundOverpayment});
+				//Disabled until debugged
+ //           this.menuItemAddRefundWorkNotPerformed});
 			this.contextMenuAcctGrid.Popup += new System.EventHandler(this.contextMenuAcctGrid_Popup);
 			// 
 			// menuItemAddAdj
