@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
+using System.Net.Mail;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using CodeBase;
 using OpenDental.UI;
 using OpenDentBusiness;
-using System.IO;
-using System.Text.RegularExpressions;
 
 namespace OpenDental {
 	public partial class FormMassEmailList:FormODBase {
@@ -533,12 +532,15 @@ namespace OpenDental {
 				if(!string.IsNullOrEmpty(patient.Email)) {
 					string[] emails=patient.Email.Split(',',';');
 					foreach(string email in emails) {
+						if(!EmailAddresses.IsValidEmail(email,out MailAddress mailAddress)) {
+							continue;
+						}
 						PatientInfo patEmail=GenericTools.DeepCopy<PatientInfo,PatientInfo>(patient);
-						patEmail.Email=email;
+						patEmail.Email=mailAddress.Address;
 						listPatInfoForEmails.Add(patEmail);
 					}
 				}
-				return listPatInfoForEmails;
+				return listPatInfoForEmails.DistinctBy(x => x.Email).ToList();
 			}
 		}
 	}

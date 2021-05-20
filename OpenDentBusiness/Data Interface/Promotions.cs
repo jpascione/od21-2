@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Mail;
 using System.Reflection;
 using System.Text;
 using CodeBase;
@@ -65,10 +66,10 @@ namespace OpenDentBusiness{
 					.Select(x => x.Trim().ToLower())
 					.ToArray();
 				foreach(string email in arrEmails) {
-					if(!EmailAddresses.IsValidEmail(email,out string domain)) {
+					if(!EmailAddresses.IsValidEmail(email,out MailAddress mailAddress)) {
 						continue;
 					}
-					MassEmailDestination separatedDestination=new MassEmailDestination{PatNum=destination.PatNum,AptNum=destination.AptNum,ToAddress=email};
+					MassEmailDestination separatedDestination=new MassEmailDestination{PatNum=destination.PatNum,AptNum=destination.AptNum,ToAddress=mailAddress.Address};
 					listSeparatedDestinations.Add(separatedDestination);
 					hashSetPat.Add(separatedDestination.PatNum);
 					if(type==PromotionType.Birthday) {
@@ -82,7 +83,7 @@ namespace OpenDentBusiness{
 		///<summary>Takes an email hosting template and a list of patients and sends the given email to them. If something goes wrong, returns false and
 		///returns an error message. This potentially could take a long time. Handles filling replacements as well.</summary>
 		public static string SendEmails(EmailHostingTemplate templateCur,List<MassEmailDestination> listDestinations,string senderName,string replyToAddress,
-			string promotionName,PromotionType type,long clinicNum=-1,string senderAddress="") 
+			string promotionName,PromotionType type,long clinicNum=-1,string senderAddress="",bool isVerificationBatch=false) 
 		{
 			if(string.IsNullOrWhiteSpace(promotionName)) {
 				return "A promotion name is required.";
@@ -94,7 +95,7 @@ namespace OpenDentBusiness{
 				clinicNum=Clinics.ClinicNum;
 			}
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetString(MethodBase.GetCurrentMethod(),templateCur,listDestinations,senderName,replyToAddress,promotionName,type,clinicNum,senderAddress);
+				return Meth.GetString(MethodBase.GetCurrentMethod(),templateCur,listDestinations,senderName,replyToAddress,promotionName,type,clinicNum,senderAddress,isVerificationBatch);
 			}
 			List<long> listPatNums=new List<long>();
 			List<long> listAptNums=new List<long>();
@@ -213,6 +214,9 @@ namespace OpenDentBusiness{
 			catch(Exception e) {
 				return e.Message;
 			}
+			if(isVerificationBatch) {
+				promotionName=Lans.g("Promotions","VERIFICATION")+'-'+promotionName;
+			}
 			Promotion promotion=new Promotion {
 				ClinicNum=clinicNum,
 				DateTimeCreated=DateTime_.Now,
@@ -225,15 +229,19 @@ namespace OpenDentBusiness{
 				string guid=uniqueIdPair.Key;
 				long patNum=dictUniquePatEmail[guid].PatNum;
 				(string subject,string body)=dictReplaced[patNum];
+				if(isVerificationBatch) {
+					patNum=0;//Don't assign a test email to a patient since it isn't sent to the patient's email address.
+				}
 				EmailMessage message=new EmailMessage {
 					BodyText=body,
-					HideIn=HideInFlags.EmailInbox | HideInFlags.ApptEdit,
+					HideIn=HideInFlags.ApptEdit,
 					HtmlType=templateCur.EmailTemplateType,
 					MsgDateTime=DateTime_.Now,
 					PatNum=patNum,
 					PatNumSubj=patNum,
 					RecipientAddress=dictUniquePatEmail[guid].ToAddress,
 					SentOrReceived=EmailSentOrReceived.Sent,
+					FromAddress=replyToAddress,
 					ToAddress=dictUniquePatEmail[guid].ToAddress,
 					UserNum=Security.CurUser?.UserNum??0,
 					Subject=subject,
