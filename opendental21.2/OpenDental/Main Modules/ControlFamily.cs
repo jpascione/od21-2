@@ -2702,8 +2702,6 @@ namespace OpenDental{
 					return;
 				}
 				_discountPlanSubCur=formDiscountPlanSubEdit.DiscountPlanSubCur;
-				string logText=Lan.g(this,"The discount plan")+" "+formDiscountPlanSubEdit.DiscountPlanCur.Description+" "+Lans.g(this,"was added.");
-				SecurityLogs.MakeLogEntry(Permissions.DiscountPlanAddDrop,_patCur.PatNum,logText);
 				TreatPlans.UpdateTreatmentPlanType(_patCur);
 			}
 			FillInsData();
