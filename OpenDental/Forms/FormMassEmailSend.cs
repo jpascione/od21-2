@@ -373,7 +373,9 @@ namespace OpenDental {
 				MsgBox.Show(error);
 				return;
 			}
-			message="Have you received the email? If so, did it look appropriate?";
+			message=$"A test email was sent to {replyToAddress.Address}.\r\n"
+				+$"Choose Yes if the test email was received, looked appropriate, and you want to send {_listPatientsSelected.Count} patient email(s).\r\n"
+				+"Choose No if the test email was not received or if the email did not look appropriate. No patient emails will be sent.";
 			if(!MsgBox.Show(this,MsgBoxButtons.YesNo,message)) {
 				return;
 			}
