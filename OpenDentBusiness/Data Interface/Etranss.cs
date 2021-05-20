@@ -52,6 +52,7 @@ namespace OpenDentBusiness{
 			tHist.Columns.Add("Etype");
 			tHist.Columns.Add("ClaimNum");
 			tHist.Columns.Add("EtransNum");
+			tHist.Columns.Add("AckCode");
 			tHist.Columns.Add("ack");
 			tHist.Columns.Add("Note");
 			tHist.Columns.Add("EtransMessageTextNum");
@@ -76,6 +77,7 @@ namespace OpenDentBusiness{
 				row["etype"]=etype;
 				row["ClaimNum"]=table.Rows[i]["ClaimNum"].ToString();
 				row["EtransNum"]=table.Rows[i]["EtransNum"].ToString();
+				row["AckCode"]=table.Rows[i]["AckCode"].ToString();
 				if(table.Rows[i]["AckCode"].ToString()=="A"){
 					row["ack"]=Lans.g("Etrans","Accepted");
 				}

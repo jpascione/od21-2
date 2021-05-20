@@ -14,8 +14,6 @@ namespace OpenDental {
 		private DateTime _reportDateFrom=DateTime.MaxValue;
 		///<summary>End date used to populate _listEtranss.</summary>
 		private DateTime _reportDateTo=DateTime.MaxValue;
-		///<summary>List of clinics user has access to.</summary>
-		private List<Clinic> _listUserClinics;
 		///<summary>List of every 835 Etrans in date range for etype of EtransType.ERA_835.</summary>
 		private List<Etrans> _listAllEtrans=new List<Etrans>();
 		///<summary>Dictionary such that they key is an etrans.EtransNum and value is a list of paid claims associated to it from the database.
@@ -29,6 +27,7 @@ namespace OpenDental {
 		private List<Etrans835Attach> _listAllAttaches;
 		///<summary>List of all claimProcs associated to all claims for ever 835.</summary>
 		private List<Hx835_ShortClaimProc> _listAllClaimProcs;
+		private List<X835Status> _listStatuses=new List<X835Status>();
 
 		public FormEtrans835s() {
 			InitializeComponent();
@@ -39,7 +38,7 @@ namespace OpenDental {
 		private void FormEtrans835s_Load(object sender,EventArgs e) {
 			base.SetFilterControlsAndAction((() => FilterAndFillGrid())
 				,dateRangePicker,textRangeMin,textRangeMax,textControlId,textCarrier,
-				textCheckTrace,comboClinics,listStatus,checkAutomatableCarriersOnly
+				textCheckTrace,comboClinics,checkAutomatableCarriersOnly
 			);
 			dateRangePicker.SetDateTimeFrom(DateTime.Today.AddDays(-7));
 			dateRangePicker.SetDateTimeTo(DateTime.Today);
@@ -55,6 +54,7 @@ namespace OpenDental {
 					continue;
 				}
 				listStatus.Items.Add(Lan.g(this,status.GetDescription()));
+				_listStatuses.Add(status);
 				bool isSelected=true;
 				if(status==X835Status.Finalized) {
 					isSelected=false;
@@ -93,6 +93,8 @@ namespace OpenDental {
 			Cursor=Cursors.WaitCursor;
 			labelControlId.Visible=PrefC.GetBool(PrefName.EraShowControlIdFilter);
 			textControlId.Visible=PrefC.GetBool(PrefName.EraShowControlIdFilter);
+			List<Etrans> listEtransFiltered=new List<Etrans>();
+			List<X835Status> listEtransStatuses=new List<X835Status>();
 			if(isRefreshNeeded) {
 				//Clear the local cache so we don't double the memory, or run into issues with SetFilterControlsAndAction().
 				_listAllEtrans.Clear();
@@ -100,18 +102,25 @@ namespace OpenDental {
 				_dictEtransClaims.Clear();
 				List<Etrans> listEtrans=new List<Etrans>();
 				if(ValidateFields()) {
+					bool hasFinalizedStatus=listStatus.SelectedIndices.Contains(_listStatuses.IndexOf(X835Status.Finalized));//We only show 1 of the 3 finalized statuses in the listbox.
 					DataTable table=Etranss.RefreshHistory(_reportDateFrom,_reportDateTo,new List<EtransType>() { EtransType.ERA_835 });
 					foreach(DataRow row in table.Rows) {
 						Etrans etrans=new Etrans();
 						etrans.EtransNum=PIn.Long(row["EtransNum"].ToString());
 						etrans.ClaimNum=PIn.Long(row["ClaimNum"].ToString());
+						etrans.AckCode=PIn.String(row["AckCode"].ToString());
 						etrans.Note=row["Note"].ToString();
 						etrans.EtransMessageTextNum=PIn.Long(row["EtransMessageTextNum"].ToString());
 						etrans.TranSetId835=row["TranSetId835"].ToString();
 						etrans.UserNum=Security.CurUser.UserNum;
 						etrans.DateTimeTrans=PIn.DateT(row["dateTimeTrans"].ToString());
+						if(ListTools.In(etrans.AckCode,"Recd") && !hasFinalizedStatus) {//This ERA 835 etrans record is Received/Finalized but the user chose to hide finalized ERAs.
+							//We can exlcude this record from our class-wide list because changes to the listStatus selections causes a refresh from the database.
+							continue;
+						}
 						listEtrans.Add(etrans);
 					}
+					table.Dispose();
 				}
 				List <Etrans835Attach> listAttached=Etrans835Attaches.GetForEtrans(listEtrans.Select(x => x.EtransNum).ToArray());
 				Dictionary<long,string> dictEtransMessages=new Dictionary<long, string>();
@@ -165,23 +174,73 @@ namespace OpenDental {
 						}
 					}
 					GC.Collect();
+					_listAllEtrans=listEtrans;
+					_dictEtrans835s=dictEtransNumToX835s;
+					_dictEtransClaims=dictEtransNumToListClaims;
+					List<long> listEtransClaimNums=_dictEtransClaims.SelectMany(x => x.Value)
+						.Where(x => x!=null)
+						.Select(x => x.ClaimNum)
+						.Distinct()
+						.ToList();
+					//Every claim num is associated to a bool. True when there is an existing claimPayment.
+					_dictClaimPaymentsExist=ClaimPayments.HasClaimPayment(listEtransClaimNums);
+					_dictClaimPaymentsExist.Add(-1,false);//-1 for unmatched claims.
+					_dictClaimPaymentsExist.Add(0,false);//0 for manually detached claims.
+					for(int i=0;i<_listAllEtrans.Count;i++) {
+						Etrans etrans=_listAllEtrans[i];
+						ProgressBarEvent.Fire(ODEventType.ProgressBar,Lan.g(this,"Filtering ERAs "+(i+1)+"/"+_listAllEtrans.Count));
+						X835 x835=_dictEtrans835s[etrans.EtransNum];
+						#region Filter: Carrier Name
+						if(carrierName!="" && !x835.PayerName.ToLower().Contains(carrierName.ToLower().Trim())) {
+							continue;
+						}
+						#endregion
+						List<Hx835_ShortClaim> listValidClaims=_dictEtransClaims[etrans.EtransNum].FindAll(x => x!=null);
+						X835Status stat=_dictEtrans835s[etrans.EtransNum].GetStatus(listValidClaims,_listAllClaimProcs,_listAllAttaches,_dictClaimPaymentsExist);
+						#region Filter: Status
+						if(etrans.AckCode=="" && ListTools.In(stat,X835Status.Finalized,X835Status.FinalizedAllDetached,X835Status.FinalizedSomeDetached)) {
+							Etrans etransOld=etrans.Copy();
+							etrans.AckCode="Recd";
+							Etranss.Update(etrans,etransOld);
+						}
+						string status=Lan.g(this,stat.GetDescription());//Either description tag or enum.ToString().
+						if(!listSelectedStatuses.Contains(status.Replace("*",""))) {//The filter will ignore finalized with detached claims.
+							continue;
+						}
+						#endregion
+						//List of ClinicNums for the current etrans.ListClaimsPaid from the DB.
+						List<long> listClinicNums=_dictEtransClaims[etrans.EtransNum].Select(x => x==null? 0 :x.ClinicNum).Distinct().ToList();
+						#region Filter: Clinics
+						if(PrefC.HasClinicsEnabled && !listClinicNums.Exists(x => listSelectedClinicNums.Contains(x))) {
+							continue;//The ClinicNums associated to the 835 do not match any of the selected ClinicNums, so nothing to show in this 835.
+						}
+						#endregion
+						#region Filter: Check and Trace Value
+						if(checkTraceNum!="" && !x835.TransRefNum.ToLower().Contains(checkTraceNum.ToLower().Trim())) {//Trace Number does not match
+							continue;
+						}
+						#endregion
+						#region Filter: Insurance Check Range Min and Max
+						if(amountMin!="" && x835.InsPaid < PIn.Decimal(amountMin) || amountMax!="" && x835.InsPaid > PIn.Decimal(amountMax)) {
+							continue;//Either the InsPaid is below or above our range.
+						}
+						#endregion
+						#region Filter: ControlID
+						if(controlId!="" && !x835.ControlId.ToLower().Contains(controlId.ToLower())) {
+							continue;
+						}
+						#endregion
+						listEtransFiltered.Add(etrans);
+						listEtransStatuses.Add(stat);
+					}
+					if(checkAutomatableCarriersOnly.Checked) {
+						FilterAutomatableERAs(listEtransFiltered,listEtransStatuses);
+					}
 				};
 				progressOD.ShowDialogProgress();
 				if(progressOD.IsCancelled){
 					return;
 				}
-				_listAllEtrans=listEtrans;
-				_dictEtrans835s=dictEtransNumToX835s;
-				_dictEtransClaims=dictEtransNumToListClaims;
-				List<long> listClaimNums=_dictEtransClaims.SelectMany(x => x.Value)
-					.Where(x => x!=null)
-					.Select(x => x.ClaimNum)
-					.Distinct()
-					.ToList();
-				//Every claim num is associated to a bool. True when there is an existing claimPayment.
-				_dictClaimPaymentsExist=ClaimPayments.HasClaimPayment(listClaimNums);
-				_dictClaimPaymentsExist.Add(-1,false);//-1 for unmatched claims.
-				_dictClaimPaymentsExist.Add(0,false);//0 for manually detached claims.
 			}
 			gridMain.BeginUpdate();
 			#region Initilize columns
@@ -201,50 +260,6 @@ namespace OpenDental {
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Note"),250){ IsWidthDynamic=true,DynamicWeight=2 });
 			#endregion
 			gridMain.ListGridRows.Clear();
-			List<Etrans> listEtransFiltered=new List<Etrans>();
-			List<X835Status> listEtransStatuses=new List<X835Status>();
-			foreach(Etrans etrans in _listAllEtrans) {
-				X835 x835=_dictEtrans835s[etrans.EtransNum];
-				#region Filter: Carrier Name
-				if(carrierName!="" && !x835.PayerName.ToLower().Contains(carrierName.ToLower().Trim())) {
-					continue;
-				}
-				#endregion
-				X835Status stat=GetStringStatus(etrans.EtransNum);
-				string status=Lan.g(this,stat.GetDescription());
-				#region Filter: Status
-				if(!listSelectedStatuses.Contains(status.Replace("*",""))) {//The filter will ignore finalized with detached claims.
-					continue;
-				}
-				#endregion
-				//List of ClinicNums for the current etrans.ListClaimsPaid from the DB.
-				List<long> listClinicNums=_dictEtransClaims[etrans.EtransNum].Select(x => x==null? 0 :x.ClinicNum).Distinct().ToList();
-				#region Filter: Clinics
-				if(PrefC.HasClinicsEnabled && !listClinicNums.Exists(x => listSelectedClinicNums.Contains(x))) {
-					continue;//The ClinicNums associated to the 835 do not match any of the selected ClinicNums, so nothing to show in this 835.
-				}
-				#endregion
-				#region Filter: Check and Trace Value
-				if(checkTraceNum!="" && !x835.TransRefNum.ToLower().Contains(checkTraceNum.ToLower().Trim())) {//Trace Number does not match
-					continue;
-				}
-				#endregion
-				#region Filter: Insurance Check Range Min and Max
-				if(amountMin!="" && x835.InsPaid < PIn.Decimal(amountMin) || amountMax!="" && x835.InsPaid > PIn.Decimal(amountMax)) {
-					continue;//Either the InsPaid is below or above our range.
-				}
-				#endregion
-				#region Filter: ControlID
-				if(controlId!="" && !x835.ControlId.ToLower().Contains(controlId.ToLower())) {
-					continue;
-				}
-				#endregion
-				listEtransFiltered.Add(etrans);
-				listEtransStatuses.Add(stat);
-			}
-			if(checkAutomatableCarriersOnly.Checked) {
-				FilterAutomatableERAs(listEtransFiltered,listEtransStatuses);
-			}
 			for(int i=0;i<listEtransFiltered.Count;i++) {
 				X835 x835=_dictEtrans835s[listEtransFiltered[i].EtransNum];
 				string status=Lan.g(this,listEtransStatuses[i].GetDescription());
@@ -356,12 +371,6 @@ namespace OpenDental {
 			return listCarrierNameMatches.Any(x => x.GetEraAutomationMode()!=EraAutomationMode.ReviewAll);
 		}
 
-		private X835Status GetStringStatus(long etransNum) {
-			List<Hx835_ShortClaim> listValidClaims=_dictEtransClaims[etransNum].FindAll(x => x!=null);
-			//Either description tag or enum.ToString().
-			return _dictEtrans835s[etransNum].GetStatus(listValidClaims,_listAllClaimProcs,_listAllAttaches,_dictClaimPaymentsExist);
-		}
-
 		///<summary>Called when we need to filter the current in memory contents in _listEtrans. Calls FillGrid()</summary>
 		private void FilterAndFillGrid(bool isRefreshNeeded=false) {
 			List<string> listSelectedStatuses=new List<string>();
@@ -382,6 +391,11 @@ namespace OpenDental {
 				amountMax:							textRangeMax.Text,
 				controlId:							textControlId.Text
 			);
+		}
+
+		private void listStatus_SelectionChangeCommitted(object sender,EventArgs e) {
+			//We must refesh from the database because the cached data might not include Finalized statuses since they were initially unselected when the form loaded.
+			FilterAndFillGrid(isRefreshNeeded:true);
 		}
 
 		private void butRefresh_Click(object sender,EventArgs e) {
