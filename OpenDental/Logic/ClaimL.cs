@@ -534,11 +534,6 @@ namespace OpenDental {
 			Claims.Update(claim);
 			ClaimProcs.RemoveSupplementalTransfersForClaims(claim.ClaimNum);
 			InsBlueBooks.SynchForClaimNums(claim.ClaimNum);
-			//JM - If we ever decide to enable ERA automation this will need to be considered.
-			//Allen said that we won't do anything about secondary claims while autoprocessing and we will just document this in the manual.
-			if(!isAutomatic && PrefC.GetBool(PrefName.PromptForSecondaryClaim) && Security.IsAuthorized(Permissions.ClaimSend,true)) {
-				ClaimL.PromptForSecondaryClaim(listClaimProcsForClaim);
-			}
 		}
 
 		///<summary>Creates a security log entry indicating that a claim was recieved via ERA automation.</summary>

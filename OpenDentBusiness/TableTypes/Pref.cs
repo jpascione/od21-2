@@ -2506,8 +2506,8 @@ namespace OpenDentBusiness {
 		///<summary>2 - Allows ERAs to be processed with a single button click.</summary>
 		[Description("Semi-automatic")]
 		SemiAutomatic,
-		/////<summary>3 - When ERAs are imported, they are fully processed without any input from a user.</summary>
-		//[Description("Fully-automatic")]
-		//FullyAutomatic, //This will be added when the fully automatic ERA processing feature is completed. Don't forget to update the pref summary.
+		///<summary>3 - When ERAs are imported, they are fully processed without any input from a user.</summary>
+		[Description("Fully-automatic")]
+		FullyAutomatic,
 	}
 }

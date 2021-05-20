@@ -163,6 +163,31 @@ namespace OpenDentBusiness{
 			return Crud.PayPlanCrud.SelectMany(command);
 		}
 
+		///<summary>Gets all insurance payplans that aren't fully paid for patients associated to the claims passed in.
+		///Only returns payplans that have no claimprocs linked to them, or those that have claimprocs linked to them 
+		///that are also linked to one of the claims passed in.</summary>
+		public static List<PayPlan> GetAllValidInsPayPlansForClaims(List<Claim> listClaims) {
+			if(listClaims.IsNullOrEmpty()) {
+				return new List<PayPlan>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<PayPlan>>(MethodBase.GetCurrentMethod(),listClaims);
+			}
+			string command="SELECT payplan.* FROM payplan "
+				+"LEFT JOIN claimproc ON claimproc.PayPlanNum=payplan.PayPlanNum	"
+				//Only ins payplans
+				+"WHERE payplan.PlanNum!=0 "
+				//Only ones for patients from the list of claims.
+				+$"AND payplan.PatNum IN ({string.Join(",",listClaims.Select(x => POut.Long(x.PatNum)))}) "
+				//Only ones with no claimprocs attached or only claimprocs from the list of claims.
+				+$"AND (claimproc.ClaimNum IS NULL OR claimproc.ClaimNum IN ({string.Join(",",listClaims.Select(x => POut.Long(x.ClaimNum)))})) "
+				+"GROUP BY payplan.PayPlanNum "
+				//Only ones that are not fully paid off.
+				+"HAVING payplan.CompletedAmt>SUM(COALESCE(claimproc.InsPayAmt,0)) "
+				+"ORDER BY payplan.PayPlanDate";
+			return Crud.PayPlanCrud.SelectMany(command);
+		}
+
 		///<summary>Get all payment plans for this patient with the insurance plan identified by PlanNum and InsSubNum attached (marked used for tracking expected insurance payments) that have not been paid in full.  Only returns plans with no claimprocs currently attached or claimprocs from the claim identified by the claimNum sent in attached.  If claimNum is 0 all payment plans with planNum, insSubNum, and patNum not paid in full will be returned.</summary>
 		public static List<PayPlan> GetValidInsPayPlans(long patNum,long planNum,long insSubNum,long claimNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {

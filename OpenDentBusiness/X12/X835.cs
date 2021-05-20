@@ -564,6 +564,36 @@ namespace OpenDentBusiness {
 			return Claims.GetClaimsFromClaimNums(listClaimNums);
 		}
 
+		///<summary>Returns a list of claims from the Db that are attached to the ERA. Will filter an existing list if one is passed in.
+		///Detaches preauths from the ERA that aren't attached to a claim. Does not include entries for Preauths or Detatched claims.
+		///Replaces any nulls in the list with a new claim that has ClaimNum 0.</summary>
+		public List<Claim> GetClaimsForFinalization(List<Claim> listClaimsFor835=null) {
+			if(listClaimsFor835==null) {
+				listClaimsFor835=this.RefreshClaims();
+			}
+			List<Claim> listClaims=new List<Claim>();
+			List<Hx835_Claim> listSkippedPreauths=this.ListClaimsPaid.FindAll(x => x.IsPreauth && !x.IsAttachedToClaim);
+			for(int i=0;i<listSkippedPreauths.Count;i++) {
+				Etrans835Attaches.DetachEraClaim(listSkippedPreauths[i]);
+			}
+			for(int i=0;i<this.ListClaimsPaid.Count;i++) {
+				if((this.ListClaimsPaid[i].IsAttachedToClaim && this.ListClaimsPaid[i].ClaimNum==0) //User manually detached claim.
+					|| this.ListClaimsPaid[i].IsPreauth)
+				{
+					continue;
+				}
+				listClaims.Add(listClaimsFor835.FirstOrDefault(x => x.ClaimNum==this.ListClaimsPaid[i].ClaimNum));//Can add nulls
+				int index=listClaims.Count-1;
+				Claim claimCur=listClaims[index];
+				if(claimCur==null) {//Claim wasn't found in DB.
+					claimCur=new Claim();//ClaimNum will be 0, indicating that this is not a real claim.
+					listClaims[index]=claimCur;
+				}
+				claimCur.TagOD=this.ListClaimsPaid[i];
+			}
+			return listClaims;
+		}
+
 		#region Segment Processing
 
 		///<summary>AMT segments are found both at the claim and procedure levels.</summary>
@@ -4110,24 +4140,31 @@ namespace OpenDentBusiness {
 			return ListPatNamesWithoutClaimMatch.Count==0 && ListClaimErrors.Count==0;
 		}
 
-		///<summary>Returns false if the name on the ERA claim does not match the name on the claim from DB, the carrier does not allow ERA automation,
-		///the claim is processed already, the claimprocs are recieved, but the ERA should be providing initial payment, or the claimprocs aren't received
-		///and the ERA should be providing a supplemental payment or reversal. If any of these errors are present, an error message will be 
-		///added to the list for this EraAutomationResult.</summary>
-		public bool CanClaimBeAutoProcessed(Patient patient,InsPlan insPlan,Hx835_Claim claimPaid,
+		///<summary>Returns false if the user must choose an insurance payment plan, the name on the ERA claim does not match the name on the claim from DB, 
+		///the carrier does not allow ERA automation, the claim is processed already, the claimprocs are recieved but the ERA should be providing initial payment,
+		///or the claimprocs aren't received and the ERA should be providing a supplemental payment or reversal. 
+		///If any of these errors are present, an error message will be added to the list for this EraAutomationResult.</summary>
+		public bool CanClaimBeAutoProcessed(bool isFullyAutomatic,Patient patient,InsPlan insPlan,Hx835_Claim claimPaid,List<PayPlan> listPayPlans,
 			List<Hx835_ShortClaimProc> listClaimProcsAll,List<Hx835_ShortClaimProc> listClaimProcsForClaim,List<Etrans835Attach> listAttaches)
 		{
 			StringBuilder stringBuilderErrorMessage=new StringBuilder();
+			//Check if user must choose an insurance payment plan to apply the payment to.
+			if(listPayPlans.Count>1) {
+				stringBuilderErrorMessage.AppendLine(Lans.g("X835","There are multiple insurance payment plans that this payment could be associated to. " +
+					"The claim must be processed manually so that an insurance payment plan can be chosen."));
+			}
 			//Check if a name mismatch exists
 			bool isPatientNameMisMatched=claimPaid.IsPatientNameMisMatched(patient);
 			if(isPatientNameMisMatched) {
 				stringBuilderErrorMessage.AppendLine(Lans.g("X835","The patient name on the ERA does not match the patient on this claim."));
 			}
 			Carrier carrier=Carriers.GetCarrier(insPlan.CarrierNum);
-			bool doesCarrierAllowEraAutomation=(carrier.GetEraAutomationMode()!=EraAutomationMode.ReviewAll);
 			//Check if Carrier allows autoprocessing
-			if(!doesCarrierAllowEraAutomation) {
-				stringBuilderErrorMessage.AppendLine(Lans.g("X835","The carrier is not set to allow ERA automation."));
+			if(isFullyAutomatic && carrier.GetEraAutomationMode()!=EraAutomationMode.FullyAutomatic) {
+				stringBuilderErrorMessage.AppendLine(Lans.g("X835","The carrier is not set to allow fully automated ERA processing."));
+			}
+			else if(carrier.GetEraAutomationMode()==EraAutomationMode.ReviewAll) {
+				stringBuilderErrorMessage.AppendLine(Lans.g("X835","The carrier is not set to allow automated ERA processing."));
 			}
 			//Check if 835 claim is processed already
 			bool is835ClaimProcessed=claimPaid.IsProcessed(listClaimProcsAll,listAttaches);
