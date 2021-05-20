@@ -224,7 +224,7 @@ namespace OpenDental {
 			string command=textUserQuery.Text;
 			DataTable tableUserQuery=new DataTable();
 			//Validate that the user query is only making a SELECT query
-			Regex rgxSchema=new Regex(@"SELECT.*[PatNum|\*].*FROM.*",RegexOptions.Singleline);
+			Regex rgxSchema=new Regex(@"SELECT.*[PatNum|\*].*FROM.*",RegexOptions.Singleline|RegexOptions.IgnoreCase);
 			Regex rgxBlacklist=new Regex(@"\b(INSERT|DELETE|ALTER|DROP|ADD|BACKUP|COLUMN|CREATE|SET|UPDATE|TRUNCATE)",RegexOptions.IgnoreCase);
 			if(!rgxSchema.IsMatch(command)) {
 				MsgBox.Show("Query must be a SELECT and include a PatNum column.");
