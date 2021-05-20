@@ -315,7 +315,7 @@ namespace OpenDental {
 			}
 			else if(Security.IsAuthorized(Permissions.InsPayCreate)) {//Claim found and is not received.  Date not checked here, but it will be checked when actually creating the check.
 				List<ClaimProc> listClaimProcsForClaim=ClaimProcs.RefreshForClaim(claim.ClaimNum);
-				EtransL.TryImportEraClaimData(_x835,claimPaid,claim,false,listClaimProcsForClaim);
+				EtransL.ImportEraClaimData(_x835,claimPaid,claim,pat,listClaimProcsForClaim);
 				RefreshFromDb();//ClaimProcs could have been split, need to refresh both claimProc list and attaches.
 				isReadOnly=false;
 			}
@@ -528,7 +528,7 @@ namespace OpenDental {
 			}
 			try {
 				Cursor=Cursors.WaitCursor;
-				EraAutomationResult automationResult=automationResult=EtransL.TryAutoProcessEraEob(_x835,_listAttaches);
+				EraAutomationResult automationResult=automationResult=EtransL.TryAutoProcessEraEob(_x835,_listAttaches,isFullyAutomatic:false);
 				RefreshFromDb();
 				FillClaimDetails();
 				List<EraAutomationResult> listEraAutomationResults=new List<EraAutomationResult>(){automationResult};
@@ -558,7 +558,7 @@ namespace OpenDental {
 				return;
 			}
 			Cursor=Cursors.WaitCursor;
-			if(!EtransL.TryFinalizeBatchPayment(_x835)) {
+			if(!EtransL.FinalizeBatchPayment(_x835)) {
 				Cursor=Cursors.Default;
 				return;
 			}

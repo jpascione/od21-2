@@ -250,7 +250,10 @@ namespace UnitTests.Etrans_Tests {
 			_x835.ListClaimsPaid[2].ClaimNum=0;
 			//Returns if claim is recieved or payment already entered (no supplemental).
 			TryEnterPayment(_x835,_eraJustinSmithClaim,_claimPrimaryJustinSmith,true);
-			EtransL.TryFinalizeBatchPayment(_x835,isAutomatic:false,isUnitTest:true);
+			List<Claim> listClaimsForFinalization=_x835.GetClaimsForFinalization();
+			List<ClaimProc> listClaimProcsAll=ClaimProcs.RefreshForClaims(listClaimsForFinalization.Where(x => x.ClaimNum!=0).Select(x=>x.ClaimNum).ToList());
+			Patient pat=Patients.GetPat(listClaimsForFinalization[0].PatNum);
+			EtransL.TryFinalizeBatchPayment(_x835,listClaimsForFinalization,listClaimProcsAll,pat.ClinicNum,isAutomatic:false);
 			//jsalmon - No, you should not situationally return out of a unit test without an explanation.
 			//if(!EtransL.TryFinalizeBatchPayment(_x835,true,true)) {
 			//	return;
@@ -294,7 +297,10 @@ namespace UnitTests.Etrans_Tests {
 			TryEnterPayment(_x835,_eraJacobJonesClaim,_claimPrimaryJacobJones,true);
 			TryEnterPayment(_x835,_eraStephanieMayerClaim,_claimPrimaryStephanieMayer,true);
 			X835Status status;
-			if(!EtransL.TryFinalizeBatchPayment(_x835,isAutomatic:false,isUnitTest:true)) {
+			List<Claim> listClaimsForFinalization=_x835.GetClaimsForFinalization();
+			List<ClaimProc> listClaimProcsAll=ClaimProcs.RefreshForClaims(listClaimsForFinalization.Where(x => x.ClaimNum!=0).Select(x=>x.ClaimNum).ToList());
+			Patient pat=Patients.GetPat(listClaimsForFinalization[0].PatNum);
+			if(!EtransL.TryFinalizeBatchPayment(_x835,listClaimsForFinalization,listClaimProcsAll,pat.ClinicNum,isAutomatic:false)) {
 				status=X835Status.None;
 			}
 			else {
@@ -377,7 +383,8 @@ namespace UnitTests.Etrans_Tests {
 				return;
 			}
 			List<ClaimProc> listClaimProcsForClaim=ClaimProcs.RefreshForClaim(claim.ClaimNum);
-			EtransL.TryImportEraClaimData(x835,claimPaid,claim,isAutomatic,listClaimProcsForClaim);
+			Patient pat=Patients.GetPat(claim.PatNum);
+			EtransL.TryImportEraClaimData(x835,claimPaid,claim,pat,isAutomatic,listClaimProcsForClaim,insPayPlanNum:0);
 		}
 		#endregion
 

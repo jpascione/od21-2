@@ -104,7 +104,7 @@ namespace OpenDental {
 		}
 
 		///<summary>Attempts to automatically receive claims and finalize payments for multiple ERAs.</summary>
-		public static List<EraAutomationResult> TryAutoProcessEras(List<Etrans> listEtrans,List<Etrans835Attach> listAttaches) {
+		public static List<EraAutomationResult> TryAutoProcessEras(List<Etrans> listEtrans,List<Etrans835Attach> listAttaches,bool isFullyAutomatic) {
 			List<long> listEtransMessageTextNums=listEtrans.Select(x => x.EtransMessageTextNum).ToList();
 			Dictionary<long,string> dictMessagText835s=EtransMessageTexts.GetMessageTexts(listEtransMessageTextNums);
 			List<EraAutomationResult> listAutomationResults=new List<EraAutomationResult>();
@@ -118,7 +118,7 @@ namespace OpenDental {
 				//that represents multiple transactions from a single 835. We loop through the transactions and process each of them separately.
 				for(int j=0;j<listTranSetIds.Count;j++) {//There is always at least 1 transaction.
 					X835 x835=new X835(listEtrans[i],messageText835,listTranSetIds[j],listAttaches);
-					automationResult=TryAutoProcessEraEob(x835,listAttaches);
+					automationResult=TryAutoProcessEraEob(x835,listAttaches,isFullyAutomatic);
 					automationResult.TransactionNumber=j+1;
 					automationResult.TransactionCount=listTranSetIds.Count;
 					listAutomationResults.Add(automationResult);
@@ -141,7 +141,7 @@ namespace OpenDental {
 
 		///<summary>Attempts to automatically receive claims and finalize payment for one EOB on an 835.
 		///A deposit will be made if the ShowAutoDeposit pref is on.</summary>
-		public static EraAutomationResult TryAutoProcessEraEob(X835 x835,List<Etrans835Attach> listAttaches) {
+		public static EraAutomationResult TryAutoProcessEraEob(X835 x835,List<Etrans835Attach> listAttaches,bool isFullyAutomatic) {
 			//Find claims for manually detached 835 claims. Then, refresh claims.
 			List<Hx835_Claim>listDetachedPaidClaims=x835.ListClaimsPaid.FindAll(x => x.ClaimNum==0 && x.IsAttachedToClaim);
 			x835.SetClaimNumsForUnattached(null,listDetachedPaidClaims);
@@ -180,12 +180,13 @@ namespace OpenDental {
 			}
 			//At this point we know that the user is allowed to make ins payments, the ERA is unprocessed,
 			//and attaches are created for ERA claims and split claims. Now, we will try to process as many claims on the ERA as we can.
-			List<long> listPatNumsForClaims=listClaimsToProcess.Select(x => x.PatNum).ToList();
+			List<long> listPatNumsForClaims=listMatchedClaims.Select(x => x.PatNum).ToList();
 			List<long> listPlanNums=listClaimsToProcess.Select(x => x.PlanNum).ToList();
-			List<long> listClaimNums=listClaimsToProcess.Select(x => x.ClaimNum).ToList();
+			List<long> listClaimNums=listMatchedClaims.Select(x => x.ClaimNum).ToList();
 			List<Patient> listPatients=Patients.GetMultPats(listPatNumsForClaims).ToList();
 			List<InsPlan> listInsPlans=InsPlans.GetPlans(listPlanNums);
 			List<ClaimProc> listClaimProcsAll=ClaimProcs.RefreshForClaims(listClaimNums);
+			List<PayPlan> listValidInsPayPlansForClaims=PayPlans.GetAllValidInsPayPlansForClaims(listClaimsToProcess);
 			for(int i=0;i<listClaimsPaidToProcess.Count;i++) {
 				List<Hx835_ShortClaimProc>listShortClaimProcsAll=listClaimProcsAll.Select(x => new Hx835_ShortClaimProc(x)).ToList();
 				if(listClaimsPaidToProcess[i].IsProcessed(listShortClaimProcsAll,listAttaches)) {
@@ -199,20 +200,32 @@ namespace OpenDental {
 					.Where(x => x.ClaimNum==listClaimsToProcess[i].ClaimNum)
 					.Select(x => x.Copy())
 					.ToList();
-				bool canClaimBeAutoProcessed=automationResult.CanClaimBeAutoProcessed(patient,insPlan,listClaimsPaidToProcess[i],listShortClaimProcsAll,
+				List<PayPlan> listPayPlans=FilterValidInsPayPlansForClaimHelper(listValidInsPayPlansForClaims,listClaimProcsAll,listClaimsToProcess[i]);
+				bool canClaimBeAutoProcessed=automationResult.CanClaimBeAutoProcessed(isFullyAutomatic,patient,insPlan,listClaimsPaidToProcess[i],listPayPlans,listShortClaimProcsAll,
 					listClaimProcsForClaimCopy.Select(x => new Hx835_ShortClaimProc(x)).ToList(),
 					listAttaches);
 				if(!canClaimBeAutoProcessed) {
 					continue;
 				}
-				bool isClaimRecieved=EtransL.TryImportEraClaimData(x835,listClaimsPaidToProcess[i],listClaimsToProcess[i],true,listClaimProcsForClaimCopy,automationResult);
+				long payPlanNum=0;
+				if(listPayPlans.Count==1) {
+					//We won't get here if listPayPlans.Count is greater than 1 because canClaimBeAutoProcessed will be false,
+					//so it should be safe to choose the first PayPlanNum in the list.
+					payPlanNum=listPayPlans[0].PayPlanNum;
+				}
+				bool isClaimRecieved=EtransL.TryImportEraClaimData(x835,listClaimsPaidToProcess[i],listClaimsToProcess[i],
+					patient,isAutomatic:true,listClaimProcsForClaimCopy,payPlanNum,automationResult);
 				if(isClaimRecieved) {//If claim was received, claimprocs must have been modified and updated to DB, so update the claimprocs for the claim in our list.
 					listClaimProcsAll.RemoveAll(x => x.ClaimNum==listClaimsToProcess[i].ClaimNum);
 					listClaimProcsAll.AddRange(listClaimProcsForClaimCopy);
 				}
 			}
 			if(automationResult.AreAllClaimsReceived()) {//Only attempt to finalize the payment if automation has processed all of the claims.
-				automationResult.IsPaymentFinalized=EtransL.TryFinalizeBatchPayment(x835,isAutomatic:true,automationResult);
+				List<Claim> listClaimsForFinalization=x835.GetClaimsForFinalization(listMatchedClaims);
+				List<long> listClaimNumsForFinalization=listClaimsForFinalization.Select(x => x.ClaimNum).ToList();
+				List<ClaimProc> listClaimProcsForFinalization=listClaimProcsAll.FindAll(x => ListTools.In(x.ClaimNum,listClaimNumsForFinalization));
+				automationResult.IsPaymentFinalized=EtransL.TryFinalizeBatchPayment(x835,listClaimsForFinalization,listClaimProcsForFinalization,
+					listPatients[0].ClinicNum,isAutomatic:true,automationResult:automationResult);
 			}
 			else {//Some claims could not be processed.
 				automationResult.PaymentFinalizationError=Lan.g("X835","Payment could not be finalized because one or more claims could not be processed.");
@@ -221,24 +234,88 @@ namespace OpenDental {
 			return automationResult;
 		}
 
-		///<summary>Returns false if we are automatically processing an ERA but can't proceed, or the user chooses not to continue when prompted. 
+		///<summary>Must pass in the list of payplans returned by PayPlans.GetAllValidInsPayPlansForClaims(), a list of all claimprocs for claims being processed,
+		///and the current claim being processed. Returns a list of insurance payplans that are valid for the claim passed in.</summary>
+		public static List<PayPlan> FilterValidInsPayPlansForClaimHelper(List<PayPlan> listPayPlans,List<ClaimProc> listClaimProcsAll,Claim claim) {
+			List<ClaimProc> listClaimProcsForClaim=listClaimProcsAll.FindAll(x => x.ClaimNum==claim.ClaimNum);
+			List<long> listPayPlanNumsForClaimProcs=listClaimProcsForClaim.Select(x => x.PayPlanNum).ToList();
+			PayPlan payPlanForClaim=listPayPlans.FirstOrDefault(x => ListTools.In(x.PayPlanNum,listPayPlanNumsForClaimProcs));
+			if(payPlanForClaim!=null) {
+				//If we find an insurance payplan that has claimprocs from the claim attached to it,
+				//it is the only payplan we need because a claim can only be associated to one payplan.
+				return new List<PayPlan>(){payPlanForClaim};
+			}
+			//The claim is not associated to a payplan yet, so we will return a list of payplans that are valid for it to associate to.
+			List<PayPlan> listValidInsPayPlansForClaim=new List<PayPlan>();
+			List<long> listPayPlanNumsForAllClaimProcs=listClaimProcsAll.Select(x => x.PayPlanNum).ToList();
+			for(int i=0;i<listPayPlans.Count;i++) {
+				if(listPayPlans[i].PatNum!=claim.PatNum
+					|| listPayPlans[i].PlanNum!=claim.PlanNum
+					|| listPayPlans[i].InsSubNum!=claim.InsSubNum)
+				{
+					continue;//Exclude payplans that aren't for the pat, insplan, and inssub of the claim.
+				}
+				if(ListTools.In(listPayPlans[i].PayPlanNum,listPayPlanNumsForAllClaimProcs)) {
+					continue;//If the payplan is associated to any claimproc in the list, it must be for a different claim.
+				}
+				listValidInsPayPlansForClaim.Add(listPayPlans[i]);//We have a payplan that is valid for the claim and isn't attached to another claim.
+			}
+			return listValidInsPayPlansForClaim;
+		}
+
+		///<summary>This function creates the payment claimprocs and displays the payment entry window.
+		///Warns the user if a supplemental payment is going to be made. Prompts user to choose an insurance payment plan to associate the payment to
+		///if multiple plans are available.</summary>
+		public static void ImportEraClaimData(X835 x835,Hx835_Claim claimPaid,Claim claim,Patient pat,List<ClaimProc> listClaimProcsForClaim) {
+			bool isSupplementalPay=(claim.ClaimStatus=="R" || listClaimProcsForClaim.All(x => ListTools.In(x.Status,
+			ClaimProcStatus.Received,ClaimProcStatus.Supplemental)));
+			//Warn user if they selected a claim which is already received, so they do not accidentally enter a supplemental payment when they meant to enter a new payment.
+			if(isSupplementalPay && !MsgBox.Show("FormEtrans835Edit",MsgBoxButtons.YesNo,"You are about to post supplemental payments to this claim.\r\nContinue?")) {
+				return;
+			}
+			long insPayPlanNum=0;
+			if(claim.ClaimType!="PreAuth" && claim.ClaimType!="Cap") {//By definition, capitation insurance pays in one lump-sum, not over an extended period of time.
+				//By sending in ClaimNum, we ensure that we only get the payplan a claimproc from this claim was already attached to or payplans with no claimprocs attached.
+				List<PayPlan> listPayPlans=PayPlans.GetValidInsPayPlans(claim.PatNum,claim.PlanNum,claim.InsSubNum,claim.ClaimNum);
+				if(listPayPlans.Count==1) {
+					insPayPlanNum=listPayPlans[0].PayPlanNum;
+				}
+				else if(listPayPlans.Count>1) {
+					//More than one valid PayPlan.
+					using FormPayPlanSelect FormPPS=new FormPayPlanSelect(listPayPlans);
+					FormPPS.ShowDialog();//Modal because this form allows editing of information.
+					if(FormPPS.DialogResult==DialogResult.OK) {
+						insPayPlanNum=FormPPS.SelectedPayPlanNum;
+					}
+				}
+			}
+			List<ClaimProc> listClaimProcsForClaimModified=listClaimProcsForClaim.Select(x => x.Copy()).ToList();
+			TryImportEraClaimData(x835,claimPaid,claim,pat,isAutomatic:false,listClaimProcsForClaimModified,insPayPlanNum);
+			Family fam=Patients.GetFamily(claim.PatNum);
+			List<InsSub> listInsSubs=InsSubs.RefreshForFam(fam);
+			List<InsPlan> listInsPlans=InsPlans.RefreshForSubList(listInsSubs);
+			List<PatPlan> listPatPlans=PatPlans.Refresh(claim.PatNum);
+			using FormEtrans835ClaimPay formEtrans835ClaimPay=new FormEtrans835ClaimPay(x835,claimPaid,claim,pat,fam,listInsPlans,listPatPlans,listInsSubs,isSupplementalPay);
+			formEtrans835ClaimPay.ListClaimProcsForClaim=listClaimProcsForClaimModified;
+			if(formEtrans835ClaimPay.ShowDialog()!=DialogResult.OK) {//Modal because this window can edit information
+				//Supplemental Claimprocs are pre-inserted in TryImportEraClaimData, so we must delete any new claim procs if cancel was clicked.
+				List<long> listClaimProcNumsForClaim=listClaimProcsForClaim.Select(x => x.ClaimProcNum).ToList();
+				//Any claimprocs in the modified list that were not in the original list, were inserted by TryImportEraClaimData() above.
+				List<ClaimProc> listClaimProcsToDelete=listClaimProcsForClaimModified.FindAll(x => !ListTools.In(x.ClaimProcNum,listClaimProcNumsForClaim));
+				ClaimProcs.DeleteMany(listClaimProcsToDelete);
+			}
+		}
+
+		///<summary>Returns false if we are automatically processing an ERA but can't proceed. 
 		///Enter either by total and/or by procedure, depending on whether or not procedure detail was provided in the 835 for this claim.
 		///When isAutomatic is true, processing will not proceed if a by total payment would be made, or if we can't match all claimprocs to payments.
-		///This function creates the payment claimprocs and displays the payment entry window.</summary>
+		///This function creates the payment claimprocs.</summary>
 		public static bool TryImportEraClaimData(X835 x835,Hx835_Claim claimPaid,
-			Claim claim,bool isAutomatic,List<ClaimProc> listClaimProcsForClaim,EraAutomationResult automationResult=null)
+			Claim claim,Patient pat,bool isAutomatic,List<ClaimProc> listClaimProcsForClaim,long insPayPlanNum,EraAutomationResult automationResult=null)
 		{
 			List<ClaimProc>listClaimProcsOld=listClaimProcsForClaim.Select(x => x.Copy()).ToList();
 			//CapClaim status is not considered because there should not be supplemental payments for capitaiton claims.
-			bool isSupplementalPay=(claim.ClaimStatus=="R" || listClaimProcsForClaim.All(x => ListTools.In(x.Status,
-				ClaimProcStatus.Received,ClaimProcStatus.Supplemental)));
-			//Warn user if they selected a claim which is already received, so they do not accidentally enter a supplemental payment when they meant to enter a new payment.
-			if(isSupplementalPay
-				&& !isAutomatic
-				&& !MsgBox.Show("FormEtrans835Edit",MsgBoxButtons.YesNo,"You are about to post supplemental payments to this claim.\r\nContinue?"))
-			{
-				return false;
-			}
+			bool isSupplementalPay=(claim.ClaimStatus=="R" || listClaimProcsForClaim.All(x => ListTools.In(x.Status,ClaimProcStatus.Received,ClaimProcStatus.Supplemental)));
 			List<Hx835_Claim> listNotDetachedPaidClaims=new List<Hx835_Claim>();
 			listNotDetachedPaidClaims.Add(claimPaid);
 			if(claimPaid.IsSplitClaim) {
@@ -255,29 +332,13 @@ namespace OpenDental {
 			}
 			List<ClaimProc> listClaimProcsToEdit=new List<ClaimProc>();
 			//Automatically set PayPlanNum if there is a payplan with matching PatNum, PlanNum, and InsSubNum that has not been paid in full.
-			long insPayPlanNum=0;
-			if(claim.ClaimType!="PreAuth" && claim.ClaimType!="Cap") {//By definition, capitation insurance pays in one lump-sum, not over an extended period of time.
-				//By sending in ClaimNum, we ensure that we only get the payplan a claimproc from this claim was already attached to or payplans with no claimprocs attached.
-				List<PayPlan> listPayPlans=PayPlans.GetValidInsPayPlans(claim.PatNum,claim.PlanNum,claim.InsSubNum,claim.ClaimNum);
-				if(listPayPlans.Count==1) {
-					insPayPlanNum=listPayPlans[0].PayPlanNum;
-				}
-				else if(listPayPlans.Count>1 && !isAutomatic) {
-					//More than one valid PayPlan.  Cannot show this prompt when entering automatically, because it would disrupt workflow.
-					using FormPayPlanSelect FormPPS=new FormPayPlanSelect(listPayPlans);
-					FormPPS.ShowDialog();//Modal because this form allows editing of information.
-					if(FormPPS.DialogResult==DialogResult.OK) {
-						insPayPlanNum=FormPPS.SelectedPayPlanNum;
-					}
-				}
-			}
 			if(isSupplementalPay) {
 				List<ClaimProc> listClaimCopyProcs=listClaimProcsForClaim.Select(x => x.Copy()).ToList();
 				if(claimPaid.IsSplitClaim) {
 					//Split supplemental payment, only CreateSuppClaimProcs for the sub set of split claim procs.
 					foreach(Hx835_Claim splitClaim in listNotDetachedPaidClaims) {
 						foreach(Hx835_Proc proc in splitClaim.ListProcs) {
-							ClaimProc claimProcForClaim=listClaimCopyProcs.FirstOrDefault(x => 
+							ClaimProc claimProcForClaim=listClaimCopyProcs.FirstOrDefault(x =>
 								x.ProcNum!=0 && ((x.ProcNum==proc.ProcNum)//Consider using Hx835_Proc.TryGetMatchedClaimProc(...)
 								|| x.CodeSent==proc.ProcCodeBilled
 								&& (decimal)x.FeeBilled==proc.ProcFee
@@ -303,7 +364,7 @@ namespace OpenDental {
 					ClaimProc claimProcFromClaim=listClaimProcsForClaim.FirstOrDefault(x => 
 						//Mimics proc matching in claimPaid.GetPaymentsForClaimProcs(...)
 						x.ProcNum!=0 && ((x.ProcNum==proc.ProcNum)//Consider using Hx835_Proc.TryGetMatchedClaimProc(...)
-						|| (x.CodeSent==proc.ProcCodeBilled 
+						|| (x.CodeSent==proc.ProcCodeBilled
 						&& (decimal)x.FeeBilled==proc.ProcFee
 						&& x.Status==ClaimProcStatus.NotReceived
 						&& x.TagOD==null))
@@ -340,7 +401,6 @@ namespace OpenDental {
 					}
 				}
 			}
-			Patient pat=Patients.GetPat(claim.PatNum);
 			List<Hx835_Proc> listProcsUnassigned=listNotDetachedPaidClaims.SelectMany(x => x.ListProcs).ToList();
 			//For each NotReceived/unpaid procedure on the claim where the procedure information can be successfully located on the EOB, enter the payment information.
 			List <List <Hx835_Proc>> listProcsForClaimProcs=Hx835_Claim.GetPaymentsForClaimProcs(listClaimProcsToEdit,listProcsUnassigned);
@@ -353,7 +413,7 @@ namespace OpenDental {
 					string errorMessage=Lans.g("X835","One or more payments from the ERA could not be matched to a procedure on the claim.");
 					automationResult.AddClaimError(pat,errorMessage);
 				}
-				return false; 
+				return false;
 			}
 			for(int i=0;i<listClaimProcsToEdit.Count;i++) {
 				ClaimProc claimProc=listClaimProcsToEdit[i];
@@ -410,7 +470,7 @@ namespace OpenDental {
 					if(claimProc.Status==ClaimProcStatus.Preauth) {
 						claimProc.InsPayEst+=(double)procPaidPartial.InsPaid;
 					}
-					else { 
+					else {
 						claimProc.InsPayAmt+=(double)procPaidPartial.InsPaid;
 					}
 					if(!isSupplementalPay) {
@@ -526,126 +586,72 @@ namespace OpenDental {
 					}
 				}
 			}
-			else {
-				Family fam=Patients.GetFamily(claim.PatNum);
-				List<InsSub> listInsSubs=InsSubs.RefreshForFam(fam);
-				List<InsPlan> listInsPlans=InsPlans.RefreshForSubList(listInsSubs);
-				List<PatPlan> listPatPlans=PatPlans.Refresh(claim.PatNum);
-				using FormEtrans835ClaimPay FormP=new FormEtrans835ClaimPay(x835,claimPaid,claim,pat,fam,listInsPlans,listPatPlans,listInsSubs,isSupplementalPay);
-				FormP.ListClaimProcsForClaim=listClaimProcsForClaim;
-				if(FormP.ShowDialog()!=DialogResult.OK) {//Modal because this window can edit information
-					if(cpByTotal.ClaimProcNum!=0) {
-						ClaimProcs.Delete(cpByTotal);
-					}
-					if(isSupplementalPay) {	
-						ClaimProcs.DeleteMany(listClaimProcsToEdit);//Supplemental claimProcs are pre inserted, delete if we do not post payment information.
-					}
-					return false;
-				}
-			}
-			InsBlueBooks.SynchForClaimNums(claim.ClaimNum);
 			return true;
 		}
-                                                                                                                                                                                    
+
 		///<summary>Returns false if an error is encountered and payment is not finalized.
-		///Attempts to finalize the batch insurance payment for an ERA. If isAutomatic is false, the user will complete the process
-		///using FormClaimPayBatch. If isAutomatic is true, the batch payment is created without user input. A deposit will be automatically made
-		///for the payment if the ShowAutoDeposit pref is on.</summary>
-		public static bool TryFinalizeBatchPayment(X835 x835,bool isAutomatic=false,EraAutomationResult automationResult=null,bool isUnitTest=false) {
-			//Date not considered here, but it will be considered when saving the check to prevent backdating.
-			//When isAutomatic is true this check should be done in the forms that lead to this method being called.
-			if(!isAutomatic && !Security.IsAuthorized(Permissions.InsPayCreate)) {
-				return false;
-			}
-			//List of claims from _x835.ListClaimsPaid[X].GetClaimFromDB(), can be null.
-			List<Claim> listClaimsFor835=x835.RefreshClaims();
-			List<Claim> listClaims=new List<Claim>();
-			#region Populate listClaims
+		///Attempts to finalize the batch insurance payment for an ERA. The user will finish this process in FormClaimPayBatch.
+		///Warns the user if there are preauths that need to be detached, there are unreceived claims,
+		///there are claimprocs that are not recieved, or all claims are detached and no payment can be created.</summary>
+		public static bool FinalizeBatchPayment(X835 x835) {
 			List<Hx835_Claim> listSkippedPreauths=x835.ListClaimsPaid.FindAll(x => x.IsPreauth && !x.IsAttachedToClaim);
-			if(!isAutomatic && listSkippedPreauths.Count>0
+			if(listSkippedPreauths.Count>0
 				&& !MsgBox.Show("X835",MsgBoxButtons.YesNo,
 				"There are preauths that have not been attached to an internal claim or have not been detached from the ERA.  "
 				+"Would you like to automatically detach and ignore these preauths?")) {
 				return false;
 			}
-			listSkippedPreauths.ForEach(x => Etrans835Attaches.DetachEraClaim(x));
-			foreach(Hx835_Claim claim in x835.ListClaimsPaid) {
-				if((claim.IsAttachedToClaim && claim.ClaimNum==0) //User manually detached claim.
-					|| claim.IsPreauth) 
-				{
-					continue;
-				}
-				listClaims.Add(listClaimsFor835.FirstOrDefault(x => x.ClaimNum==claim.ClaimNum));//Can add nulls
-				int index=listClaims.Count-1;
-				Claim claimCur=listClaims[index];
-				if(claimCur==null) {//Claim wasn't found in DB.
-					claimCur=new Claim();//ClaimNum will be 0, indicating that this is not a real claim.
-					listClaims[index]=claimCur;
-				}
-				claimCur.TagOD=claim;
-			}
-			#endregion
+			List<Claim> listClaims=x835.GetClaimsForFinalization();
 			if(listClaims.Count==0) {
-				if(isAutomatic && automationResult!=null) {
-					automationResult.PaymentFinalizationError=Lan.g("X835","Payment could not be finalized because all "
-						+"claims have been detached from this ERA or are preauths (there is no payment).");
-				}
-				else if(!isAutomatic){
-					MsgBox.Show("X835","All claims have been detached from this ERA or are preauths (there is no payment).  Click OK to close the ERA instead.");
-				}
+				MsgBox.Show("X835","All claims have been detached from this ERA or are preauths (there is no payment).  Click OK to close the ERA instead.");
 				return false;
 			}
 			if(listClaims.Exists(x => x.ClaimNum==0 || x.ClaimStatus!="R")) {
-				if(!isAutomatic) {
-					#region Column width: PatNum
-					int patNumColumnLength=6;//Minimum of 6 because that is the width of the column name "PatNum"
-					if(listClaims.Exists(x => x.ClaimNum!=0)) {//There are claims that were found in DB, need to consider claim.PatNum.ToString() lengths.
-						patNumColumnLength=Math.Min(8,Math.Max(patNumColumnLength,listClaims.Max(x => x.PatNum.ToString().Length)));
-					}
-					#endregion
-					#region Column width: Patient
-					Dictionary<long,string> dictPatNames=Claims.GetAllUniquePatNamesForClaims(listClaims);
-					int maxNamesLength=Math.Max(7,dictPatNames.Values.Max(x => x.Length));//Minimum of 7 to account for column title width "Patient".
-					int maxX835NameLength=0;
-					if(listClaims.Exists(x => x.ClaimNum==0)) {//There is a claim that could not be found in the DB. Must consider Hx835_Claims.PatientName lengths.
-						maxX835NameLength=listClaims
-						.Where(x => x.ClaimNum==0)
-						.Max(x => ((Hx835_Claim)x.TagOD).PatientName.ToString().Length);
-					}
-					int maxColumnLength=Math.Max(maxNamesLength,maxX835NameLength);
-					#endregion
-					#region Construct msg
-					string msg="One or more claims are not recieved.\r\n"
-					+"You must receive all of the following claims before finializing payment:\r\n";
-					msg+="-------------------------------------------------------------------\r\n";
-					msg+="PatNum".PadRight(patNumColumnLength)+"\t"+"Patient".PadRight(maxColumnLength)+"\tDOS       \tTotal Fee\r\n";
-					msg+="-------------------------------------------------------------------\r\n";
-					for(int i = 0;i<listClaims.Count;i++) {
-						if(listClaims[i].ClaimNum==0) {//Current claim was not found in DB and was not detached, so we will use the Hx835_Claim object to get name.
-							Hx835_Claim xClaimCur=(Hx835_Claim)listClaims[i].TagOD;
-							msg+="".PadRight(patNumColumnLength)+"\t"//Blank PatNum because unknown.
-								+xClaimCur.PatientName.ToString().PadRight(maxColumnLength)+"\t"
-								+xClaimCur.DateServiceStart.ToShortDateString()+"\t"
-								+POut.Decimal(xClaimCur.ClaimFee)+"\r\n";
-							continue;
-						}
-						//Current claim was found in DB, so we will use Claim object
-						Claim claim=listClaims[i];
-						if(claim.ClaimStatus=="R") {
-							continue;
-						}
-						msg+=claim.PatNum.ToString().PadRight(patNumColumnLength).Substring(0,patNumColumnLength)+"\t"
-							+dictPatNames[claim.PatNum].PadRight(maxColumnLength).Substring(0,maxColumnLength)+"\t"
-							+claim.DateService.ToShortDateString()+"\t"
-							+POut.Double(claim.ClaimFee)+"\r\n";
-					}
-					#endregion
-					using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(msg);
-					msgBoxCopyPaste.ShowDialog();
+				#region Column width: PatNum
+				int patNumColumnLength=6;//Minimum of 6 because that is the width of the column name "PatNum"
+				if(listClaims.Exists(x => x.ClaimNum!=0)) {//There are claims that were found in DB, need to consider claim.PatNum.ToString() lengths.
+					patNumColumnLength=Math.Min(8,Math.Max(patNumColumnLength,listClaims.Max(x => x.PatNum.ToString().Length)));
 				}
-				else if(isAutomatic && automationResult!=null) {
-					automationResult.PaymentFinalizationError=Lan.g("X835","Payment could not be finalized because one or more claims are not marked recieved.");
+				#endregion
+				#region Column width: Patient
+				Dictionary<long,string> dictPatNames=Claims.GetAllUniquePatNamesForClaims(listClaims);
+				int maxNamesLength=Math.Max(7,dictPatNames.Values.Max(x => x.Length));//Minimum of 7 to account for column title width "Patient".
+				int maxX835NameLength=0;
+				if(listClaims.Exists(x => x.ClaimNum==0)) {//There is a claim that could not be found in the DB. Must consider Hx835_Claims.PatientName lengths.
+					maxX835NameLength=listClaims
+					.Where(x => x.ClaimNum==0)
+					.Max(x => ((Hx835_Claim)x.TagOD).PatientName.ToString().Length);
 				}
+				int maxColumnLength=Math.Max(maxNamesLength,maxX835NameLength);
+				#endregion
+				#region Construct msg
+				string msg="One or more claims are not recieved.\r\n"
+				+"You must receive all of the following claims before finializing payment:\r\n";
+				msg+="-------------------------------------------------------------------\r\n";
+				msg+="PatNum".PadRight(patNumColumnLength)+"\t"+"Patient".PadRight(maxColumnLength)+"\tDOS       \tTotal Fee\r\n";
+				msg+="-------------------------------------------------------------------\r\n";
+				for(int i = 0;i<listClaims.Count;i++) {
+					if(listClaims[i].ClaimNum==0) {//Current claim was not found in DB and was not detached, so we will use the Hx835_Claim object to get name.
+						Hx835_Claim xClaimCur=(Hx835_Claim)listClaims[i].TagOD;
+						msg+="".PadRight(patNumColumnLength)+"\t"//Blank PatNum because unknown.
+							+xClaimCur.PatientName.ToString().PadRight(maxColumnLength)+"\t"
+							+xClaimCur.DateServiceStart.ToShortDateString()+"\t"
+							+POut.Decimal(xClaimCur.ClaimFee)+"\r\n";
+						continue;
+					}
+					//Current claim was found in DB, so we will use Claim object
+					Claim claim=listClaims[i];
+					if(claim.ClaimStatus=="R") {
+						continue;
+					}
+					msg+=claim.PatNum.ToString().PadRight(patNumColumnLength).Substring(0,patNumColumnLength)+"\t"
+						+dictPatNames[claim.PatNum].PadRight(maxColumnLength).Substring(0,maxColumnLength)+"\t"
+						+claim.DateService.ToShortDateString()+"\t"
+						+POut.Double(claim.ClaimFee)+"\r\n";
+				}
+				#endregion
+				using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(msg);
+				msgBoxCopyPaste.ShowDialog();
 				return false;
 			}
 			List<ClaimProc> listClaimProcsAll=ClaimProcs.RefreshForClaims(listClaims.Where(x => x.ClaimNum!=0).Select(x=>x.ClaimNum).ToList());
@@ -656,43 +662,80 @@ namespace OpenDental {
 					x=>listClaimProcsAll.FindAll(y => y.ClaimNum==x.Key)//List of claimprocs associated to current claimNum
 			);
 			if(listClaimProcsAll.Exists(x => !ListTools.In(x.Status,ClaimProcStatus.Received,ClaimProcStatus.Supplemental,ClaimProcStatus.CapClaim))) {
-				if(!isAutomatic) {
-					int patNumColumnLength=Math.Max(6,listClaimProcsAll.Max(x => x.PatNum.ToString().Length));//PatNum column length
-					SerializableDictionary<long,string> dictPatNames=Claims.GetAllUniquePatNamesForClaims(listClaims);
-					int maxNamesLength=dictPatNames.Values.Max(x => x.Length);
-					#region Construct msg
-					string msg="One or more claim procedures are set to the wrong status and are not ready to be finalized.\r\n"
-					+"The acceptable claim procedure statuses are Received, Supplemental and CapClaim.\r\n"
-					+"The following claims have claim procedures which need to be modified before finalizing:\r\n";
-					msg+="-------------------------------------------------------------------\r\n";
-					msg+="PatNum".PadRight(patNumColumnLength)+"\t"+"Patient".PadRight(maxNamesLength)+"\tDOS       \tTotal Fee\r\n";
-					msg+="-------------------------------------------------------------------\r\n";
-					foreach(Claim claim in listClaims) {
-						List <ClaimProc> listClaimProcs=dictClaimProcs[claim.ClaimNum];
-						if(listClaimProcs.All(x => ListTools.In(x.Status,ClaimProcStatus.Received,ClaimProcStatus.Supplemental,ClaimProcStatus.CapClaim))) {
-							continue;
-						}
-						msg+=claim.PatNum.ToString().PadRight(patNumColumnLength).Substring(0,patNumColumnLength)+"\t"
-							+dictPatNames[claim.PatNum].PadRight(maxNamesLength).Substring(0,maxNamesLength)+"\t"
-							+claim.DateService.ToShortDateString()+"\t"
-							+POut.Double(claim.ClaimFee)+"\r\n";
+				int patNumColumnLength=Math.Max(6,listClaimProcsAll.Max(x => x.PatNum.ToString().Length));//PatNum column length
+				SerializableDictionary<long,string> dictPatNames=Claims.GetAllUniquePatNamesForClaims(listClaims);
+				int maxNamesLength=dictPatNames.Values.Max(x => x.Length);
+				#region Construct msg
+				string msg="One or more claim procedures are set to the wrong status and are not ready to be finalized.\r\n"
+				+"The acceptable claim procedure statuses are Received, Supplemental and CapClaim.\r\n"
+				+"The following claims have claim procedures which need to be modified before finalizing:\r\n";
+				msg+="-------------------------------------------------------------------\r\n";
+				msg+="PatNum".PadRight(patNumColumnLength)+"\t"+"Patient".PadRight(maxNamesLength)+"\tDOS       \tTotal Fee\r\n";
+				msg+="-------------------------------------------------------------------\r\n";
+				foreach(Claim claim in listClaims) {
+					List <ClaimProc> listClaimProcs=dictClaimProcs[claim.ClaimNum];
+					if(listClaimProcs.All(x => ListTools.In(x.Status,ClaimProcStatus.Received,ClaimProcStatus.Supplemental,ClaimProcStatus.CapClaim))) {
+						continue;
 					}
-					#endregion
-					using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(msg);
-					msgBoxCopyPaste.ShowDialog();
+					msg+=claim.PatNum.ToString().PadRight(patNumColumnLength).Substring(0,patNumColumnLength)+"\t"
+						+dictPatNames[claim.PatNum].PadRight(maxNamesLength).Substring(0,maxNamesLength)+"\t"
+						+claim.DateService.ToShortDateString()+"\t"
+						+POut.Double(claim.ClaimFee)+"\r\n";
 				}
-				else if(isAutomatic && automationResult!=null) {
-					automationResult.PaymentFinalizationError=Lan.g("X835","Payment could not be finalized because not all "
+				#endregion
+				using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(msg);
+				msgBoxCopyPaste.ShowDialog();
+				return false;
+			}
+			ClaimPayment claimPay=new ClaimPayment();
+			Patient pat=Patients.GetPat(listClaims[0].PatNum);
+			if(!TryFinalizeBatchPayment(x835,listClaims,listClaimProcsAll,pat.ClinicNum,claimPay)) {
+				return false;
+			}
+			Family fam=Patients.GetFamily(pat.PatNum);
+			FormClaimEdit.FormFinalizePaymentHelper(claimPay,listClaims[0],pat,Patients.GetFamily(pat.PatNum));
+			return true;
+		}
+                                                                                                                                                                                    
+		///<summary>Returns false if an error is encountered and payment is not finalized.
+		///Attempts to finalize the batch insurance payment for an ERA.
+		///If isAutomatic is true, the batch payment is created without user input.
+		///A deposit will be automatically madef or the payment if the ShowAutoDeposit pref is on.</summary>
+		public static bool TryFinalizeBatchPayment(X835 x835,List<Claim> listClaims,List<ClaimProc> listClaimProcsAll,long clinicNum,
+			ClaimPayment claimPay=null,bool isAutomatic=false,EraAutomationResult automationResult=null)
+		{
+			//Date not considered here, but it will be considered when saving the claimpayment to prevent backdating.
+			//When isAutomatic is true this check should be done in the forms that lead to this method being called.
+			if(!isAutomatic && !Security.IsAuthorized(Permissions.InsPayCreate)) { 
+				return false;
+			}
+			if(listClaims.Count==0) {
+				if(isAutomatic && automationResult!=null) {
+					automationResult.PaymentFinalizationError=Lans.g("X835","Payment could not be finalized because all "
+						+"claims have been detached from this ERA or are preauths (there is no payment).");
+				}
+				return false;
+			}
+			if(listClaims.Exists(x => x.ClaimNum==0 || x.ClaimStatus!="R")) {
+				if(isAutomatic && automationResult!=null) {
+					automationResult.PaymentFinalizationError=Lans.g("X835","Payment could not be finalized because one or more claims are not marked recieved.");
+				}
+				return false;
+			}
+			if(listClaimProcsAll.Exists(x => !ListTools.In(x.Status,ClaimProcStatus.Received,ClaimProcStatus.Supplemental,ClaimProcStatus.CapClaim))) {
+				if(isAutomatic && automationResult!=null) {
+					automationResult.PaymentFinalizationError=Lans.g("X835","Payment could not be finalized because not all "
 						+"claim procedures have a status of Received, Supplemental, or CapClaim.");
 				}
 				return false;
 			}
 			#region ClaimPayment creation
-			ClaimPayment claimPay=new ClaimPayment();
+			if(claimPay==null) {
+				claimPay=new ClaimPayment();
+			}
 			//Mimics FormClaimEdit.butBatch_Click(...)
 			claimPay.CheckDate=MiscData.GetNowDateTime().Date;//Today's date for easier tracking by the office and to avoid backdating before accounting lock dates.
-			Patient pat=Patients.GetPat(listClaims[0].PatNum);
-			claimPay.ClinicNum=pat.ClinicNum;
+			claimPay.ClinicNum=clinicNum;
 			claimPay.CarrierName=x835.PayerName;
 			claimPay.CheckAmt=listClaimProcsAll.Where(x => x.ClaimPaymentNum==0).Sum(x => x.InsPayAmt);//Ignore claimprocs associated to previously finalized payments.
 			claimPay.CheckNum=x835.TransRefNum;
@@ -722,18 +765,10 @@ namespace OpenDental {
 			}
 			else {
 				ClaimPayments.Insert(claimPay);
-				foreach(List<ClaimProc> listClaimProcs in dictClaimProcs.Values) {
-					listClaimProcs.ForEach(x => {
-						if(x.ClaimPaymentNum==0 && x.IsTransfer==false) {
-							//Only update claimprocs that are not already associated to another claim payment.
-							//This will happen when this ERA contains claim reversals or corrections, both are entered as supplemental payments.
-							x.ClaimPaymentNum=claimPay.ClaimPaymentNum;
-							ClaimProcs.Update(x);
-						}
-					});
-				}
-				if(!isUnitTest) {
-					FormClaimEdit.FormFinalizePaymentHelper(claimPay,listClaims[0],pat,Patients.GetFamily(pat.PatNum));
+				List<ClaimProc> listClaimProcsToUpdate=listClaimProcsAll.FindAll(x => x.ClaimPaymentNum==0 && x.IsTransfer==false);
+				for(int i=0;i<listClaimProcsToUpdate.Count;i++) {
+					listClaimProcsToUpdate[i].ClaimPaymentNum=claimPay.ClaimPaymentNum;
+					ClaimProcs.Update(listClaimProcsToUpdate[i]);
 				}
 			}
 			#endregion
