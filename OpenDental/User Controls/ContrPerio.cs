@@ -885,20 +885,15 @@ namespace OpenDental
 			if(doSelectCell) {
 				CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
 				OnDirectionChangedLeft();//Always start looping to the left.
-				if(!PrefC.GetBool(PrefName.PerioTreatImplantsAsNotMissing) && skippedTeeth.Count==32) {
+				if(skippedTeeth.Count==32) {
 					return;
 				}
-				int curTooth = GetToothNumCur(GetSection(CurCell.Y));
+				int curTooth=GetToothNumCur(GetSection(CurCell.Y));
 				while(skippedTeeth.Contains(curTooth)) {
 					AdvanceCell();//Advance forward 3 times, since there are 3 measurements per tooth.
 					AdvanceCell();
 					AdvanceCell();
 					curTooth=GetToothNumCur(GetSection(CurCell.Y));
-					if(curTooth==32 && skippedTeeth.Count==32 && GetSection(CurCell.Y)==2) {//all teeth missing and new exam added or exisiting 
-						CurCell=new Point(1,GetTableRow(selectedExam,0,PerioSequenceType.Probing));
-						OnDirectionChangedLeft();
-						return;
-					}
 				}
 			}
 		}
