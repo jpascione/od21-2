@@ -81,6 +81,14 @@ namespace OpenDentBusiness{
 			return Crud.TreatPlanCrud.SelectOne(command);
 		}
 
+		public static List<TreatPlan> GetAllWithMobileAppDeviceNum(long mobileAppDeviceNum) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<TreatPlan>>(MethodBase.GetCurrentMethod(),mobileAppDeviceNum);
+			}
+			string command="SELECT * FROM treatplan WHERE MobileAppDeviceNum="+POut.Long(mobileAppDeviceNum)+";";
+			return Crud.TreatPlanCrud.SelectMany(command);
+		}
+
 		///<summary></summary>
 		public static void Update(TreatPlan tp){
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
