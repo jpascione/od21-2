@@ -338,7 +338,7 @@ namespace OpenDentBusiness{
 			if(prov==null) {
 				return Color.White;
 			}
-			if(prov.ProvColor.ToArgb()==Color.Transparent.ToArgb()) {
+			if(prov.ProvColor.ToArgb()==Color.Transparent.ToArgb() || prov.ProvColor.ToArgb() == 0) {
 				return Color.White;
 			}
 			return prov.ProvColor;
@@ -351,7 +351,7 @@ namespace OpenDentBusiness{
 			if(prov==null) {
 				return Color.Black;
 			}
-			if(prov.OutlineColor.ToArgb()==Color.Transparent.ToArgb()) {
+			if(prov.OutlineColor.ToArgb()==Color.Transparent.ToArgb() || prov.OutlineColor.ToArgb() == 0) {
 				return Color.Black;
 			}
 			return prov.OutlineColor;
