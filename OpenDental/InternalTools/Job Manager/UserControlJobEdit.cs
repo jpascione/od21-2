@@ -1843,6 +1843,9 @@ namespace OpenDental.InternalTools.Job_Manager {
 					isExpert=JobPermissions.IsAuthorized(JobPerm.Writeup,true)&&(_jobCur.UserNumExpert==0||_jobCur.UserNumExpert==Security.CurUser.UserNum);
 					//If the user is an engineer and they are the currently assigned engineer
 					isEngineer=JobPermissions.IsAuthorized(JobPerm.Engineer,true)&&(_jobCur.UserNumEngineer==Security.CurUser.UserNum);
+					//If the user is the expert or engineer and there is at least one review that is in the SaveCommit status, the user may Save Commit the job
+					hasPermission=(isExpert||isEngineer)&&_jobCur.UserNumEngineer>0&&_jobCur.ListJobReviews.Count>0&&_jobCur.ListJobReviews.Exists(x => x.ReviewStatus==JobReviewStatus.SaveCommit);
+					actionMenu.MenuItems.Add(new MenuItem("Save Commit",actionMenu_SaveCommitClick) { Enabled=hasPermission });
 					//If the user is an expert or engineer, there is an engineer set, there is at least one review for the job, and the job has at least one review marked Done
 					hasPermission=(isExpert||isEngineer)&&_jobCur.UserNumEngineer>0&&_jobCur.ListJobReviews.Count>0&&_jobCur.ListJobReviews.Exists(x => x.ReviewStatus==JobReviewStatus.Done);
 					actionMenu.MenuItems.Add(new MenuItem("Mark As Implemented",actionMenu_ImplementedClick) { Enabled=hasPermission });
