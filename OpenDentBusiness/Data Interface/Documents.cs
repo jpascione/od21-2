@@ -39,6 +39,25 @@ namespace OpenDentBusiness {
 			return Crud.DocumentCrud.TableToList(table).ToArray();
 		}
 
+		///<summary>Gets all documents for a patient, returning a list of documents with the server's current DateTime. </summary>
+		public static List<DocumentForApi> GetAllWithPatForApi(long patNum) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<DocumentForApi>>(MethodBase.GetCurrentMethod(),patNum);
+			}
+			string command="SELECT * FROM document WHERE PatNum="+POut.Long(patNum)+" ORDER BY DateCreated";
+			string commandDateTime="SELECT "+DbHelper.Now();
+			DateTime dateTimeServer=PIn.DateT(OpenDentBusiness.Db.GetScalar(commandDateTime));//run before appts for rigorous inclusion of appts
+			List<Document> listDocuments=Crud.DocumentCrud.TableToList(Db.GetTable(command));
+			List<DocumentForApi> listDocumentForApis=new List<DocumentForApi>();
+			for(int i=0;i<listDocuments.Count;i++) {
+				DocumentForApi documentForApi=new DocumentForApi();
+				documentForApi.DocumentCur=listDocuments[i];
+				documentForApi.DateTimeServer=dateTimeServer;
+				listDocumentForApis.Add(documentForApi);
+			}
+			return listDocumentForApis;
+		}
+
 		///<summary>Gets the document with the specified document number.</summary>
 		///<param name="doReturnNullIfNotFound">If false and there is no document with that docNum, will return a new Document.</param>
 		public static Document GetByNum(long docNum,bool doReturnNullIfNotFound=false) {
@@ -857,6 +876,10 @@ namespace OpenDentBusiness {
 			}
 			Crud.DocumentCrud.ClearFkey(listDocNums);
 		}
-	}	
-  
+	}
+
+	public class DocumentForApi {
+		public Document DocumentCur;
+		public DateTime DateTimeServer;
+	}
 }
