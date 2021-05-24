@@ -66,12 +66,13 @@ namespace OpenDentBusiness.AutoComm {
 			if(sms.MsgTotal!=1 || sms.MsgText.ToLower().Trim()!=ArrivalsTagReplacer.ARRIVED_CODE.ToLower().Trim()) {//Not an "Arrived" sms.
 				return;
 			}
-			//Get all patients in the family from here.  It's possible an appointment for a dependent triggered an arrival message but the sms was sent to 
-			//the guarantor.  The response will be sent to the number that texted 'A', but will apply to any appointments in the family (at the same clinic)
-			//for today.  All these appointments will be marked 'Arrived' as well.
-			List<long> listFam=Patients.GetAllFamilyPatNums(ListTools.FromSingle(sms.PatNum));
-			List<Appointment> listAppts=Appointments.GetAppointmentsForPat(listFam.ToArray());
-			ProcessArrivalAsync(sms.PatNum,sms.ClinicNum,sms.MobilePhoneNumber,listAppts,true);
+			//It's possible a dependent and guarantor both have appointments on the same day, but have different wireless phone numbers.
+			//We don't want the dependent to mark the guarantor appointment as 'Arrived' as well.
+			List<Patient> listPatients=Patients.GetFamily(sms.PatNum).ListPats.ToList();
+			listPatients.RemoveAll(x => PhoneNumbers.RemoveNonDigitsAndTrimStart(x.WirelessPhone)!=PhoneNumbers.RemoveNonDigitsAndTrimStart(sms.MobilePhoneNumber));
+			long[] arrayPatNums=listPatients.Select(x => x.PatNum).ToArray();
+			List<Appointment> listAppointments=Appointments.GetAppointmentsForPat(arrayPatNums);
+			ProcessArrivalAsync(sms.PatNum,sms.ClinicNum,sms.MobilePhoneNumber,listAppointments,true);
 		}
 
 		///<summary>Determines if office is setup to send an automatic Arrival Response for the given patient.</summary>
