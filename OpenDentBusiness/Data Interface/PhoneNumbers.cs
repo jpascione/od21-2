@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using CodeBase;
 
-namespace OpenDentBusiness{
+namespace OpenDentBusiness {
 	///<summary></summary>
 	public class PhoneNumbers{
+		public static int SyncBatchSize=5000;
 		public static List<PhoneNumber> GetPhoneNumbers(long patNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<PhoneNumber>>(MethodBase.GetCurrentMethod(),patNum);
@@ -48,20 +48,73 @@ namespace OpenDentBusiness{
 				Meth.GetVoid(MethodBase.GetCurrentMethod());
 				return;
 			}
-			string command=$@"SELECT 0 PhoneNumberNum,PatNum,PhoneNumberVal,'' PhoneNumberDigits,PhoneType
-				FROM phonenumber WHERE PhoneType={(int)PhoneType.Other} AND PhoneNumberVal!=''
-				UNION ALL
-				SELECT 0,PatNum,HmPhone,'',{(int)PhoneType.HmPhone} FROM patient WHERE HmPhone!=''
-				UNION ALL
-				SELECT 0,PatNum,WkPhone,'',{(int)PhoneType.WkPhone} FROM patient WHERE WkPhone!=''
-				UNION ALL
-				SELECT 0,PatNum,WirelessPhone,'',{(int)PhoneType.WirelessPhone} FROM patient WHERE WirelessPhone!=''";
-			List<PhoneNumber> listPhNums=Crud.PhoneNumberCrud.SelectMany(command);
-			command="TRUNCATE TABLE phonenumber";
-			Db.NonQ(command);
-			listPhNums.ForEach(x => x.PhoneNumberDigits=RemoveNonDigitsAndTrimStart(x.PhoneNumberVal));
-			listPhNums.RemoveAll(x => x.PhoneType!=PhoneType.Other && string.IsNullOrEmpty(x.PhoneNumberDigits));
-			Crud.PhoneNumberCrud.InsertMany(listPhNums);
+			//Get all PhoneNumbers we will delete later, anything except 'Other' that has a PhoneNumberVal.
+			ProgressBarEvent.Fire(ODEventType.ProgressBar,Lans.g("PhoneNumber","Initializing..."));
+			string command=$"SELECT PhoneNumberNum FROM phonenumber WHERE PhoneType!={(int)PhoneType.Other} OR PhoneNumberVal=''";
+			List<long> listPhoneNumberNumsToDelete=Db.GetListLong(command);
+			//Per clinic, including 0 clinic.
+			List<Clinic> listClinics=Clinics.GetWhere(x => true).Concat(new List<Clinic> { Clinics.GetPracticeAsClinicZero() }).ToList();
+			for(int i=0;i<listClinics.Count;i++) {
+				Clinic clinic=listClinics[i];
+				long clinicNum=clinic.ClinicNum;
+				//Per Patient table phone number field.
+				foreach(PhoneType phoneType in new List<PhoneType> { PhoneType.HmPhone,PhoneType.WkPhone,PhoneType.WirelessPhone }) {
+					AddPhoneNumbers(clinic,i,listClinics.Count,phoneType);
+				}
+			}
+			//Remove old PhoneNumbers in batches of 5000
+			ProgressBarEvent.Fire(ODEventType.ProgressBar,Lans.g("PhoneNumber","Cleaning up..."));
+			while(listPhoneNumberNumsToDelete.Count>0) {
+				command=$"DELETE FROM phonenumber WHERE PhoneNumberNum IN ({string.Join(",",listPhoneNumberNumsToDelete.Take(SyncBatchSize).Select(x => POut.Long(x)))})";
+				Db.NonQ(command);
+				listPhoneNumberNumsToDelete.RemoveRange(0,Math.Min(listPhoneNumberNumsToDelete.Count,SyncBatchSize));
+			}
+		}
+
+		///<summary>Adds entries to PhoneNumber table based on Patient table for given clinicNum and PhoneType.</summary>
+		private static void AddPhoneNumbers(Clinic clinic,int clinicIndex,int countClinics,PhoneType phoneType) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),clinic,clinicIndex,countClinics,phoneType);
+				return;
+			}
+			//Map PhoneType to Patient phone number field.
+			string field=phoneType switch {
+				PhoneType.HmPhone => nameof(Patient.HmPhone),
+				PhoneType.WkPhone => nameof(Patient.WkPhone),
+				PhoneType.WirelessPhone => nameof(Patient.WirelessPhone),
+				_ => "",
+			};
+			if(string.IsNullOrWhiteSpace(field)) {
+				return;//Skip on unknown field.
+			}
+			//Get PatNums for all the patients with any value in this phone number field.
+			string command=$"SELECT PatNum FROM patient WHERE {POut.String(field)}!='' AND clinicNum={POut.Long(clinic.ClinicNum)}";
+			List<long> listPatNums=Db.GetListLong(command);
+			int countPatNums=listPatNums.Count;
+			int countPatsProcessed=0;
+			while(listPatNums.Count>0) {
+				//Process in batches.
+				List<long> listPatNumsBatch=listPatNums.Take(SyncBatchSize).ToList();
+				countPatsProcessed+=listPatNumsBatch.Count;
+				ProgressBarEvent.Fire(ODEventType.ProgressBar,Lans.g("PhoneNumber","Processing")
+					+$" ({clinicIndex+1}/{countClinics}): {clinic.Abbr} {phoneType.GetDescription()} {countPatsProcessed}/{countPatNums}");
+				//PhoneNumberNum,PatNum,PhoneNumberVal,PhoneNumberDigits,PhoneType
+				command=$@"SELECT 
+					0 PhoneNumberNum,
+					PatNum,
+					{POut.String(field)} PhoneNumberVal,
+					'' PhoneNumberDigits,
+					{(int)phoneType} PhoneType
+				FROM patient
+				WHERE PatNum IN ({string.Join(",",listPatNumsBatch.Select(x => POut.Long(x)))})";
+				List<PhoneNumber> listPhoneNumbers=Crud.PhoneNumberCrud.SelectMany(command);
+				//Normalize PhoneNumberDigits field.
+				listPhoneNumbers.ForEach(x => x.PhoneNumberDigits=RemoveNonDigitsAndTrimStart(x.PhoneNumberVal));
+				//Ignore empty phone numbers.
+				listPhoneNumbers.RemoveAll(x => x.PhoneType!=PhoneType.Other && string.IsNullOrEmpty(x.PhoneNumberDigits));
+				Crud.PhoneNumberCrud.InsertMany(listPhoneNumbers);
+				listPatNums.RemoveRange(0,Math.Min(listPatNums.Count,SyncBatchSize));
+			}
 		}
 
 		///<summary>Syncs patient HmPhone, WkPhone, and WirelessPhone to the PhoneNumber table.  Will delete extra PhoneNumber table rows of each type
