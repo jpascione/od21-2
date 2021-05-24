@@ -51,7 +51,7 @@ namespace OpenDentBusiness {
 			//Get all PhoneNumbers we will delete later, anything except 'Other' that has a PhoneNumberVal.
 			ProgressBarEvent.Fire(ODEventType.ProgressBar,Lans.g("PhoneNumber","Initializing..."));
 			string command=$"SELECT PhoneNumberNum FROM phonenumber WHERE PhoneType!={(int)PhoneType.Other} OR PhoneNumberVal=''";
-			List<long> listPhoneNumberNumsToDelete=Db.GetListLong(command);
+			List<long> listPhoneNumberNumsToDelete=Db.GetList(command,x => PIn.Long(x["PhoneNumberNum"].ToString()));
 			//Per clinic, including 0 clinic.
 			List<Clinic> listClinics=Clinics.GetWhere(x => true).Concat(new List<Clinic> { Clinics.GetPracticeAsClinicZero() }).ToList();
 			for(int i=0;i<listClinics.Count;i++) {
