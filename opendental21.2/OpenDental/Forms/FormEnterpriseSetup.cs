@@ -460,6 +460,7 @@ namespace OpenDental {
 
 		private bool SyncPhoneNums() {
 			UI.ProgressOD progressOD=new UI.ProgressOD();
+			progressOD.ShowCancelButton=false;
 			progressOD.ActionMain=PhoneNumbers.SyncAllPats;
 			progressOD.StartingMessage=Lan.g(this,"Syncing all patient phone numbers to the phonenumber table")+"...";
 			try{
