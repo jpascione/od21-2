@@ -140,10 +140,16 @@ namespace OpenDental.UI{
 			base.OnMouseMove(e);
 		}
 
-		protected override void OnSizeChanged(EventArgs e){
+		protected override void OnFontChanged(EventArgs e){
+			base.OnFontChanged(e);
 			CalculateRectangles();
 			Invalidate();
+		}
+
+		protected override void OnSizeChanged(EventArgs e){
 			base.OnSizeChanged(e);
+			CalculateRectangles();
+			Invalidate();
 		}
 		#endregion Methods Overide
 
