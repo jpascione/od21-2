@@ -3973,14 +3973,13 @@ namespace OpenDental {
 		}
 
 		public void LayoutControls(){
-			LayoutManager.MoveLocation(monthCalendarOD,new Point(0,labelDate.Bottom+LayoutManager.Scale(3)));
-			LayoutManager.MoveWidth(panelCalendar,monthCalendarOD.Width);
-			LayoutManager.MoveLocation(panelCalendarLower,new Point(0,monthCalendarOD.Bottom+1));
-			LayoutManager.MoveWidth(panelCalendarLower,panelCalendar.Width);
-			LayoutManager.MoveLocation(panelCalendar,new Point(Width-panelCalendar.Width,toolBarMain.Bottom));
-			LayoutManager.MoveHeight(panelCalendar,panelCalendarLower.Bottom);
-			LayoutManager.MoveLocation(tabControl,new Point(panelCalendar.Left,panelCalendar.Bottom));
-			LayoutManager.MoveSize(tabControl,new Size(Width-tabControl.Left,Height-tabControl.Top));
+			Size sizeMonthCalendar=monthCalendarOD.GetDefaultSize();
+			LayoutManager.Move(monthCalendarOD,new Rectangle(0,labelDate.Bottom+LayoutManager.Scale(3),
+				LayoutManager.Scale(sizeMonthCalendar.Width),LayoutManager.Scale(sizeMonthCalendar.Height)));
+			int w=monthCalendarOD.Width;//a number of things will be set to this width
+			LayoutManager.Move(panelCalendarLower,new Rectangle(0,monthCalendarOD.Bottom+1,w,panelCalendarLower.Height));
+			LayoutManager.Move(panelCalendar,new Rectangle(Width-w,toolBarMain.Bottom,w,panelCalendarLower.Bottom));
+			LayoutManager.Move(tabControl,new Rectangle(panelCalendar.Left,panelCalendar.Bottom,Width-tabControl.Left,Height-tabControl.Top));
 			LayoutManager.Move(contrApptPanel,new Rectangle(0,toolBarMain.Height,panelCalendar.Left,Height-toolBarMain.Height));
 		}
 
