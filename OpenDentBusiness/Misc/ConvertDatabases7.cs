@@ -1052,7 +1052,7 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 			command="SELECT ValueString FROM preference WHERE PrefName='CloudAllowedIpAddresses'";
 			string str=Db.GetScalar(command);
-			string[] addresses=str.Split(',');
+			string[] addresses=str.Split(",",StringSplitOptions.RemoveEmptyEntries);
 			if(addresses.Length>0) {//If the database has no allowed addresses then we don't need to insert any into the new table.
 				command=$"INSERT INTO cloudaddress (IpAddress) Values {string.Join(",",addresses.Select(x => "('"+POut.String(x)+"')"))}";
 				Db.NonQ(command);
