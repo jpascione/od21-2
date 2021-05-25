@@ -71,13 +71,14 @@ namespace OpenDental {
 			// 
 			// linkLabel1
 			// 
-			this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(27, 40);
-			this.linkLabel1.Location = new System.Drawing.Point(24, 13);
+			this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(27, 64);
+			this.linkLabel1.Location = new System.Drawing.Point(1, 13);
 			this.linkLabel1.Name = "linkLabel1";
-			this.linkLabel1.Size = new System.Drawing.Size(436, 29);
+			this.linkLabel1.Size = new System.Drawing.Size(482, 29);
 			this.linkLabel1.TabIndex = 1;
 			this.linkLabel1.TabStop = true;
-			this.linkLabel1.Text = "The X-Charge website is at https://openedgepayments.com/opendental/";
+			this.linkLabel1.Text = "The X-Charge website is at https://opendental.com/resources/redirects/redirectope" +
+    "nedge.html";
 			this.linkLabel1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
 			this.linkLabel1.UseCompatibleTextRendering = true;
 			this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
