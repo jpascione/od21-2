@@ -10,9 +10,6 @@ using OpenDental.UI;
 
 namespace OpenDental {
 	public partial class FormSecurityCentralUserEdit:FormODBase {
-
-		private List<Userod> _listCEMTUsers;
-
 		public FormSecurityCentralUserEdit() {
 			InitializeComponent();
 			InitializeLayoutManager();
@@ -20,19 +17,19 @@ namespace OpenDental {
 		}
 
 		private void FormSecurityCentralUserEdit_Load(object sender,EventArgs e) {
-			_listCEMTUsers=Userods.GetUsersForCEMT();
 			FillGrid();
 		}
 
 		private void FillGrid() {
+			List<Userod> listCEMTUsers=Userods.GetUsersForCEMT();
 			gridCentralUsers.BeginUpdate();
 			gridCentralUsers.ListGridColumns.Clear();
 			gridCentralUsers.ListGridColumns.Add(new GridColumn());//Only one column, so title is used as the header.
 			gridCentralUsers.ListGridRows.Clear();
-			for(int i = 0;i<_listCEMTUsers.Count;i++) {
+			for(int i=0;i<listCEMTUsers.Count;i++) {
 				GridRow row=new GridRow();
-				row.Cells.Add(_listCEMTUsers[i].UserName);
-				row.Tag=_listCEMTUsers[i];
+				row.Cells.Add(listCEMTUsers[i].UserName);
+				row.Tag=listCEMTUsers[i];
 				gridCentralUsers.ListGridRows.Add(row);
 			}
 			gridCentralUsers.EndUpdate();
@@ -43,7 +40,9 @@ namespace OpenDental {
 				return;
       }
 			using FormUserEdit formUserEdit=new FormUserEdit(gridCentralUsers.SelectedTag<Userod>(),false,true);
-			formUserEdit.ShowDialog();
+			if(formUserEdit.ShowDialog()==DialogResult.OK) {//Refresh the list and grid to get the most recent user updates.
+				FillGrid();
+			}
 		}
 
 		private void gridCentralUsers_CellDoubleClick(object sender,ODGridClickEventArgs e) {
