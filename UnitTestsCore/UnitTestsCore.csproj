@@ -145,6 +145,7 @@
     <Compile Include="TableTypes\DiscountPlanT.cs" />
     <Compile Include="TableTypes\PayPlanChargeT.cs" />
     <Compile Include="TableTypes\PayPlanLinkT.cs" />
+    <Compile Include="TableTypes\PhoneNumberT.cs" />
     <Compile Include="TableTypes\ProgramPropertyT.cs" />
     <Compile Include="TableTypes\PromotionLogT.cs" />
     <Compile Include="TableTypes\ProviderClinicT.cs" />
