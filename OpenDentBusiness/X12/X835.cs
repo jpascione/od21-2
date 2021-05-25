@@ -3978,7 +3978,7 @@ namespace OpenDentBusiness {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<Hx835_ShortClaim>>(MethodBase.GetCurrentMethod(),listClaimNums);
 			}
-			string command=$"SELECT ClaimNum,ClinicNum,ClaimStatus FROM claim WHERE ClaimNum IN ({string.Join(",",listClaimNums)})";
+			string command=$"SELECT ClaimNum,ClinicNum,ClaimStatus,PlanNum FROM claim WHERE ClaimNum IN ({string.Join(",",listClaimNums)})";
 			return SelectMany(command);
 		}
 
@@ -4000,6 +4000,7 @@ namespace OpenDentBusiness {
 				claim.ClaimNum                      = PIn.Long  (row["ClaimNum"].ToString());
 				claim.ClaimStatus                   = PIn.String(row["ClaimStatus"].ToString());
 				claim.ClinicNum                     = PIn.Long  (row["ClinicNum"].ToString());
+				claim.PlanNum                       = PIn.Long(row["PlanNum"].ToString());
 				retVal.Add(claim);
 			}
 			return retVal;
@@ -4119,6 +4120,8 @@ namespace OpenDentBusiness {
 		public bool IsPaymentFinalized=false;
 		///<summary>The reason why we could not finalize the insurance payment.</summary>
 		public string PaymentFinalizationError="";
+		///<summary>Will be set true if the ERA was not in a Partial, Unprocessed, or NotFinalized state when automatic processing starts.</summary>
+		public bool DidEraStartAsFinalized=false;
 
 		public X835Status Status {
 			get {
@@ -4253,7 +4256,6 @@ namespace OpenDentBusiness {
 				string paymentsFinalized=Lans.g("X835","Payments Finalized:");
 				stringBuilderAutomationMessage.AppendLine(paymentsFinalized+$" {countPaymentsFinalized}");
 			}
-
 			for(int i=0;i<listAutomationResults.Count;i++) {
 				if(listAutomationResults[i].Status==X835Status.Finalized) {
 					continue;//No error data to show for ERA.
@@ -4273,6 +4275,10 @@ namespace OpenDentBusiness {
 						stringBuilderAutomationMessage
 							.AppendLine(transaction+$" {listAutomationResults[i].TransactionNumber} "+of+$" {listAutomationResults[i].TransactionCount}");
 					}
+				}
+				if(listAutomationResults[i].DidEraStartAsFinalized) {
+					stringBuilderAutomationMessage.AppendLine(Lans.g("X835","The ERA does not have an Unprocessed, Partial, or NotFinalized Status so it could not be processed."));
+					continue;
 				}
 				//If we have no claim errors, all claims were matched, but payment could not be finalized, show the payment finalization error.
 				if(listAutomationResults[i].ListClaimErrors.Count==0
@@ -4294,16 +4300,16 @@ namespace OpenDentBusiness {
 				note="";//Clear the existing note if it is only white space.
 			}
 			else {
-				note=note+"\r\n";//Add a new line to the note if it already has text.
+				note="\r\n"+note;//Prepend a new line to the note if it already has text.
 			}
 			string automationNote;
 			if(status==X835Status.Finalized) {
-				automationNote=Lans.g("X835","All claims automatically received on");
+				automationNote=Lans.g("X835","Automatically received on");
 			}
 			else {
 				automationNote=Lans.g("X835","Automatic processing attempted on");
 			}
-			return note+automationNote+" "+DateTime.Today.ToShortDateString();
+			return automationNote+" "+DateTime.Today.ToShortDateString()+note;
 		}
 	}
 	#endregion Helper Classes

@@ -84,6 +84,7 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.BackColor = System.Drawing.Color.White;
 			this.groupBox2.Controls.Add(this.textRangeMin);
 			this.groupBox2.Controls.Add(this.textRangeMax);
 			this.groupBox2.Controls.Add(this.labelDaysOldMax);
@@ -92,7 +93,6 @@
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(240, 40);
 			this.groupBox2.TabIndex = 104;
-			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Amount Range (leave both blank to show all)";
 			// 
 			// textRangeMin
@@ -264,6 +264,7 @@
 			this.checkAutomatableCarriersOnly.TabIndex = 270;
 			this.checkAutomatableCarriersOnly.Text = "Automatable Carriers Only";
 			this.checkAutomatableCarriersOnly.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkAutomatableCarriersOnly.Click += new System.EventHandler(this.checkAutomatableCarriersOnly_Click);
 			// 
 			// FormEtrans835s
 			// 

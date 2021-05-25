@@ -522,13 +522,13 @@ namespace OpenDental {
 			}
 			List<Hx835_ShortClaim> listAttachedClaims=_x835.RefreshClaims().Select(x => new Hx835_ShortClaim(x)).ToList();
 			X835Status status=_x835.GetStatus(listAttachedClaims,_listClaimProcs,_listAttaches);
-			if(!ListTools.In(status,X835Status.Unprocessed,X835Status.Partial)) {
-				MsgBox.Show(this,"Only ERAs with a status of Unprocessed or Partial can be processed automatically.");
+			if(!ListTools.In(status,X835Status.Unprocessed,X835Status.Partial,X835Status.NotFinalized)) {
+				MsgBox.Show(this,"Only ERAs with a status of Unprocessed, Partial, or NotFinalized can be processed automatically.");
 				return;
 			}
 			try {
 				Cursor=Cursors.WaitCursor;
-				EraAutomationResult automationResult=automationResult=EtransL.TryAutoProcessEraEob(_x835,_listAttaches,isFullyAutomatic:false);
+				EraAutomationResult automationResult=automationResult=Etranss.TryAutoProcessEraEob(_x835,_listAttaches,isFullyAutomatic:false);
 				RefreshFromDb();
 				FillClaimDetails();
 				List<EraAutomationResult> listEraAutomationResults=new List<EraAutomationResult>(){automationResult};

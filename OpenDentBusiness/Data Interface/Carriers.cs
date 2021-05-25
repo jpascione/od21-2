@@ -514,6 +514,16 @@ namespace OpenDentBusiness{
 			return GetWhere(x => ListTools.In(x.CarrierNum,carrierNums));
 		}
 
+		///<summary>If listInsPlans is empty, returns an empty list. Gets all carriers for InsPlans.</summary>
+		public static List<Carrier> GetForInsPlans(List<InsPlan> listInsPlans) {
+			//No need to check RemotingRole; no call to db.
+			if(listInsPlans.Count==0) {
+				return new List<Carrier>();
+			}
+			List<long> listCarrierNumsForClaims=listInsPlans.Select(x => x.CarrierNum).Distinct().ToList();
+			return Carriers.GetCarriers(listCarrierNumsForClaims);
+		}
+
 		///<summary>Queries the database for all carriers that are flagged as IsCDA that have at least one etrans request message present.</summary>
 		public static List<Carrier> GetCdaCarriersInUse() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {

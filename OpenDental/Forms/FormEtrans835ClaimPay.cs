@@ -818,7 +818,7 @@ namespace OpenDental {
 				return;
 			}
 			SaveAllowedFees();
-			ClaimL.ReceiveEraPayment(_claim,_claimPaid,ListClaimProcsForClaim,checkIncludeWOPercCoPay.Checked,_isSupplementalPay,_insPlan);
+			Etranss.ReceiveEraPayment(_claim,_claimPaid,ListClaimProcsForClaim,checkIncludeWOPercCoPay.Checked,_isSupplementalPay,_insPlan);
 			if(PrefC.GetBool(PrefName.PromptForSecondaryClaim) && Security.IsAuthorized(Permissions.ClaimSend,true)) {
 				ClaimL.PromptForSecondaryClaim(ListClaimProcsForClaim);
 			}
