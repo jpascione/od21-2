@@ -2418,6 +2418,9 @@ namespace OpenDental {
 					break;
 			}
 			ModuleSelected(_patCur.PatNum);
+			if(_patCur==null) {//Don't worry about running the Allocator if the patient is already deleted.
+				return;
+			}
 			Reporting.Allocators.MyAllocator1_ProviderPayment.AllocateWithToolCheck(this._patCur.Guarantor);
 		}
 
@@ -4890,6 +4893,12 @@ namespace OpenDental {
 			}
 			checkCommSuperFamily.Visible=PrefC.GetBool(PrefName.ShowFeatureSuperfamilies);
 			Logger.LogAction("RefreshModuleData",LogPath.ChartModule,() => RefreshModuleData(patNum,isFullRefresh));
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				RefreshModuleData(0,isFullRefresh);
+			}
 			if(PrefC.IsODHQ) {
 				odInternalCustomerGrids.Visible=true;
 				odInternalCustomerGrids.BringToFront();

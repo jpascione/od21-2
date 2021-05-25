@@ -2066,6 +2066,12 @@ namespace OpenDental {
 				checkShowCommAuto.Checked=PIn.Bool(userOdPrefShowAutoCommlog.ValueString);
 			}
 			Logger.LogAction("RefreshModuleData",LogPath.AccountModule,() => RefreshModuleData(patNum,isSelectingFamily));
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				RefreshModuleData(0,isSelectingFamily);
+			}
 			Logger.LogAction("RefreshModuleScreen",LogPath.AccountModule,() => RefreshModuleScreen(isSelectingFamily));
 			PatientDashboardDataEvent.Fire(ODEventType.ModuleSelected,_loadData);
 			Plugins.HookAddCode(this,"ContrAccount.ModuleSelected_end",patNum,isSelectingFamily);

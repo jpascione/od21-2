@@ -1428,6 +1428,17 @@ namespace OpenDental {
 			catch(Exception ex) {
 				FriendlyException.Show(Lan.g(this,"Error accessing images."),ex);
 			}
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				try {
+					RefreshModuleData(0);
+				}
+				catch(Exception ex) {//Exception should never throw because RefreshModuleData() will return when PatNum is zero.
+					FriendlyException.Show(Lan.g(this,"Error accessing images."),ex);
+				}
+			}
 			RefreshModuleScreen();
 			if(panelNote.Visible) {//Notes and sig box may have been visible previously, with info from another image/patient
 				panelNote.Visible=false;

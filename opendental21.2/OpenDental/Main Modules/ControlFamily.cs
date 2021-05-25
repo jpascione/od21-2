@@ -768,6 +768,12 @@ namespace OpenDental{
 		///<summary></summary>
 		public void ModuleSelected(long patNum) {
 			RefreshModuleData(patNum);
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				RefreshModuleData(0);
+			}
 			RefreshModuleScreen();
 			PatientDashboardDataEvent.Fire(ODEventType.ModuleSelected,_loadData);
 			Plugins.HookAddCode(this,"ContrFamily.ModuleSelected_end",patNum);
