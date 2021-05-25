@@ -38,7 +38,7 @@ namespace OpenDental {
 		private void FormEtrans835s_Load(object sender,EventArgs e) {
 			base.SetFilterControlsAndAction((() => FilterAndFillGrid())
 				,dateRangePicker,textRangeMin,textRangeMax,textControlId,textCarrier,
-				textCheckTrace,comboClinics,checkAutomatableCarriersOnly
+				textCheckTrace,comboClinics
 			);
 			dateRangePicker.SetDateTimeFrom(DateTime.Today.AddDays(-7));
 			dateRangePicker.SetDateTimeTo(DateTime.Today);
@@ -315,8 +315,10 @@ namespace OpenDental {
 			List<InsPlan> listInsPlansForAllClaims=GetInsPlansForClaimsHelper();
 			for(int i=listEtrans.Count-1;i>=0;i--) {
 				List<Hx835_ShortClaim> listClaims=_dictEtransClaims[listEtrans[i].EtransNum].FindAll(x => x!=null);
-				List<Carrier> listCarriersForClaims=GetCarriersForClaimsHelper(listClaims,listInsPlansForAllClaims);
-				bool isEtransAutomatable=IsEtransAutomatable(listCarriersForClaims,listEtrans[i]);
+				List<long> listPlanNumsForClaims=listClaims.Select(x => x.PlanNum).Distinct().ToList();
+				List<InsPlan> listInsPlansForClaims=listInsPlansForAllClaims.FindAll(x => ListTools.In(x.PlanNum,listPlanNumsForClaims));
+				List<Carrier> listCarriersForClaims=Carriers.GetForInsPlans(listInsPlansForClaims);
+				bool isEtransAutomatable=Etranss.IsEtransAutomatable(listCarriersForClaims,_dictEtrans835s[listEtrans[i].EtransNum],isFullyAutomatic:false);
 				if(isEtransAutomatable) {
 					continue;//Keep the etrans and its status in the lists.
 				}
@@ -334,41 +336,6 @@ namespace OpenDental {
 				.Select(x => x.PlanNum)
 				.ToList();
 			return InsPlans.GetPlans(listInsPlanNumsForAllClaims);
-		}
-
-		///<summary>If listClaims is empty, returns an empty list without visiting the DB. Otherwise, gets InsPlans for claims from DB, then returns a list of Carriers for the Insplans.</summary>
-		private List<Carrier> GetCarriersForClaimsHelper(List<Hx835_ShortClaim> listClaims,List<InsPlan> listInsPlans) {
-			if(listClaims.Count==0) {
-				return new List<Carrier>();
-			}
-			List<long> listPlanNumsForClaims=listClaims
-				.Select(x => x.PlanNum)
-				.Distinct()
-				.ToList();
-			List<InsPlan> listInsPlansForClaims=listInsPlans.FindAll(x => ListTools.In(x.PlanNum,listPlanNumsForClaims));
-			List<long> listCarrierNumsForClaims=listInsPlansForClaims
-				.Select(x => x.CarrierNum)
-				.Distinct()
-				.ToList();
-			return Carriers.GetCarriers(listCarrierNumsForClaims);
-		}
-
-		///<summary>Uses the attached claims, carriers with a matching name, or the global EraAutomationBehavior pref to determine if an ERA is automatable.</summary>
-		private bool IsEtransAutomatable(List<Carrier> listCarriersForClaims,Etrans etrans) {
-			if(listCarriersForClaims.Count>0) {
-				//The ERA is automatable if it has any claims attached to it that are for a Carrier that allows automation.
-				//The ERA is not automatable if it has one or more claims attached and all Carriers for all attached claims don't allow automation.
-				return listCarriersForClaims.Any(x => x.GetEraAutomationMode()!=EraAutomationMode.ReviewAll);
-			}
-			//If there are no attached claims, we see if the Carrier name from the ERA matches one or more Carriers in the DB.
-			string payerName=_dictEtrans835s[etrans.EtransNum].PayerName;
-			List<Carrier> listCarrierNameMatches=Carriers.GetExactNames(payerName);
-			if(listCarrierNameMatches.Count==0) {
-				//If no claims are attached and no carriers have a matching name, we use the global preference for ERA automation.
-				return PrefC.GetEnum<EraAutomationMode>(PrefName.EraAutomationBehavior)!=EraAutomationMode.ReviewAll;
-			}
-			//If we have no attached claims and one or more names match, we allow automation if any name-matched carriers allow it.
-			return listCarrierNameMatches.Any(x => x.GetEraAutomationMode()!=EraAutomationMode.ReviewAll);
 		}
 
 		///<summary>Called when we need to filter the current in memory contents in _listEtrans. Calls FillGrid()</summary>
@@ -395,6 +362,10 @@ namespace OpenDental {
 
 		private void listStatus_SelectionChangeCommitted(object sender,EventArgs e) {
 			//We must refesh from the database because the cached data might not include Finalized statuses since they were initially unselected when the form loaded.
+			FilterAndFillGrid(isRefreshNeeded:true);
+		}
+
+		private void checkAutomatableCarriersOnly_Click(object sender,EventArgs e) {
 			FilterAndFillGrid(isRefreshNeeded:true);
 		}
 
