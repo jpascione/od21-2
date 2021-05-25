@@ -25,6 +25,14 @@ namespace OpenDentBusiness{
 			string command="SELECT * FROM referralcliniclink WHERE ReferralNum="+POut.Long(referralNum);
 			return Crud.ReferralClinicLinkCrud.SelectMany(command);
 		}
+
+		public static List<long> GetReferralNumsWithLinks() {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<long>>(MethodBase.GetCurrentMethod());
+			}
+			string command="SELECT DISTINCT ReferralNum FROM referralcliniclink";
+			return Db.GetListLong(command);
+		}
 		#endregion Methods - Get
 
 		#region Methods - Modify

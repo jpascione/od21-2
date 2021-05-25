@@ -194,6 +194,7 @@ namespace OpenDental {
 			// comboClinicPicker
 			// 
 			this.comboClinicPicker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboClinicPicker.IncludeAll = true;
 			this.comboClinicPicker.IncludeUnassigned = true;
 			this.comboClinicPicker.Location = new System.Drawing.Point(815, 13);
 			this.comboClinicPicker.Name = "comboClinicPicker";

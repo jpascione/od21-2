@@ -42,7 +42,12 @@ namespace OpenDental {
 			checkShowDoctor.Checked=IsShowDoc;
 			checkShowOther.Checked=IsShowOther;
 			checkPreferred.Checked=PrefC.GetBool(PrefName.ShowPreferedReferrals);
-			comboClinicPicker.SelectedClinicNum=Clinics.ClinicNum;
+			if(Clinics.ClinicNum==0) {
+				comboClinicPicker.IsAllSelected=true;//All
+			}
+			else {
+				comboClinicPicker.SelectedClinicNum=Clinics.ClinicNum;
+			}
 			FillTable();
 			//labelResultCount.Text="";
 		}
@@ -65,10 +70,15 @@ namespace OpenDental {
 			if(checkPreferred.Checked) {
 				listRef.RemoveAll(x => !x.IsPreferred);
 			}
-			//If on a selected clinic, filter out any referrals not attached to the selected clinic number
-			if(comboClinicPicker.SelectedClinicNum!=0) {
-				List<ReferralClinicLink> listReferralClinicLink=ReferralClinicLinks.GetAllForClinic(comboClinicPicker.SelectedClinicNum);
-				listRef.RemoveAll(x => !ListTools.In(x.ReferralNum,listReferralClinicLink.Select(y => y.ReferralNum)));
+			if(!comboClinicPicker.IsAllSelected) {		
+				if(comboClinicPicker.IsUnassignedSelected) {//If unassigned is selected, filter out any referrals attached to a clinic.
+					List<long> listReferralNums=ReferralClinicLinks.GetReferralNumsWithLinks();
+					listRef.RemoveAll(x => ListTools.In(x.ReferralNum,listReferralNums));
+				}
+				else {//If on a selected clinic, filter out any referrals not attached to the selected clinic number.
+					List<ReferralClinicLink> listReferralClinicLink=ReferralClinicLinks.GetAllForClinic(comboClinicPicker.SelectedClinicNum);
+					listRef.RemoveAll(x => !ListTools.In(x.ReferralNum,listReferralClinicLink.Select(y => y.ReferralNum)));
+				}
 ;			}
 			if(!string.IsNullOrWhiteSpace(textSearch.Text)) {
 				string[] searchTokens=textSearch.Text.ToLower().Split(new[] { ' ' },StringSplitOptions.RemoveEmptyEntries);
