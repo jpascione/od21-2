@@ -708,6 +708,12 @@ namespace OpenDental{
 				dateTimeTP.Value=DateTime.Today;
 			}
 			RefreshModuleData(patNum);
+			if(PatCur!=null && PatCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(PatCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				RefreshModuleData(0);
+			}
 			RefreshModuleScreen(false);
 			PatientDashboardDataEvent.Fire(ODEventType.ModuleSelected,_tpData);
 			Plugins.HookAddCode(this,"ContrTreat.ModuleSelected_end",patNum);
@@ -733,36 +739,50 @@ namespace OpenDental{
 
 		private void RefreshModuleData(long patNum) {
 			UpdateTPNoteIfNeeded();
-			if(patNum!=0) {
-				bool doMakeSecLog=false;
-				if(_patNumLast!=patNum) {
-					doMakeSecLog=true;
-					_patNumLast=patNum;
-				}
-				try {
-					_tpData=TreatmentPlanModules.GetModuleData(patNum,doMakeSecLog);
-				}
-				catch(ApplicationException ex) {
-					if(ex.Message=="Missing codenum") {
-						MsgBox.Show(this,$"Missing codenum. Please run database maintenance method {nameof(DatabaseMaintenances.ProcedurelogCodeNumInvalid)}.");
-						PatCur=null;
-						return;
-					}
-					throw;
-				}
-				FamCur=_tpData.Fam;
-				PatCur=_tpData.Pat;
-				SubList=_tpData.SubList;
-				InsPlanList=_tpData.InsPlanList;
-				_listSubstLinks=_tpData.ListSubstLinks;
-				PatPlanList=_tpData.PatPlanList;
-				BenefitList=_tpData.BenefitList;
-				ClaimList=_tpData.ClaimList;
-				HistList=_tpData.HistList;
-				_listProcs=_tpData.ListProcedures;
-				_listTreatPlans=_tpData.ListTreatPlans;
-				ProcTPList=_tpData.ArrProcTPs;
+			if(patNum==0) {
+				FamCur=null;
+				PatCur=null;
+				SubList=null;
+				InsPlanList=null;
+				_listSubstLinks=null;
+				PatPlanList=null;
+				BenefitList=null;
+				ClaimList=null;
+				HistList=null;
+				_listProcs=null;
+				_listTreatPlans=null;
+				ProcTPList=null;
+				return;
 			}
+			//patNum is not zero.
+			bool doMakeSecLog=false;
+			if(_patNumLast!=patNum) {
+				doMakeSecLog=true;
+				_patNumLast=patNum;
+			}
+			try {
+				_tpData=TreatmentPlanModules.GetModuleData(patNum,doMakeSecLog);
+			}
+			catch(ApplicationException ex) {
+				if(ex.Message=="Missing codenum") {
+					MsgBox.Show(this,$"Missing codenum. Please run database maintenance method {nameof(DatabaseMaintenances.ProcedurelogCodeNumInvalid)}.");
+					PatCur=null;
+					return;
+				}
+				throw;
+			}
+			FamCur=_tpData.Fam;
+			PatCur=_tpData.Pat;
+			SubList=_tpData.SubList;
+			InsPlanList=_tpData.InsPlanList;
+			_listSubstLinks=_tpData.ListSubstLinks;
+			PatPlanList=_tpData.PatPlanList;
+			BenefitList=_tpData.BenefitList;
+			ClaimList=_tpData.ClaimList;
+			HistList=_tpData.HistList;
+			_listProcs=_tpData.ListProcedures;
+			_listTreatPlans=_tpData.ListTreatPlans;
+			ProcTPList=_tpData.ArrProcTPs;
 		}
 
 		private void RefreshModuleScreen(bool doRefreshData=true){

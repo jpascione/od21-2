@@ -2810,6 +2810,12 @@ namespace OpenDental {
 			contrApptPanel.SizeFont=float.Parse(PrefC.GetString(PrefName.ApptFontSize));
 			contrApptPanel.WidthProvOnAppt=float.Parse(PrefC.GetString(PrefName.ApptProvbarWidth));
 			RefreshModuleDataPatient(patNum);
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				RefreshModuleDataPatient(0);
+			}
 			RefreshModuleDataPeriod(listPinApptNums,listOpNums,listProvNums,forceRefreshSchedules:true);
 			RefreshModuleScreenButtonsRight();
 			RefreshModuleScreenPeriod();

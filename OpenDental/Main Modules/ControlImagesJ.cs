@@ -368,6 +368,17 @@ namespace OpenDental{
 			catch(Exception ex) {
 				FriendlyException.Show(Lan.g(this,"Error accessing images."),ex);
 			}
+			if(_patCur!=null && _patCur.PatStatus==PatientStatus.Deleted) {
+				MsgBox.Show("Selected patient has been deleted by another workstation.");
+				PatientL.RemoveFromMenu(_patCur.PatNum);
+				FormOpenDental.S_Contr_PatientSelected(new Patient(),false);
+				try {
+					RefreshModuleData(0);
+				}
+				catch(Exception ex) {//Exception should never throw because RefreshModuleData() will return when PatNum is zero.
+					FriendlyException.Show(Lan.g(this,"Error accessing images."),ex);
+				}
+			}
 			RefreshModuleScreen();
 			if(docNum!=0) {
 				SelectTreeNode(new TypeAndKey(EnumImageNodeType.Document,docNum));
