@@ -59,6 +59,40 @@ namespace OpenDentBusiness {
 			return listSignals;
 		}
 
+		///<summary></summary>
+		public static List<SignalodForApi> GetSignalOdsForApi(DateTime sinceDateT,List<InvalidType> listITypes=null){
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<SignalodForApi>>(MethodBase.GetCurrentMethod(),sinceDateT,listITypes);
+			}
+			//This command was written to take into account the fact that MySQL truncates seconds to the the whole second on DateTime columns. (newer versions support fractional seconds)
+			//By selecting signals less than Now() we avoid missing signals the next time this function is called. Without the addition of Now() it was possible
+			//to miss up to ((N-1)/N)% of the signals generated in the worst case scenario.
+			string command="SELECT * FROM signalod "
+				+"WHERE (SigDateTime>"+POut.DateT(sinceDateT)+" AND SigDateTime< "+DbHelper.Now()+") ";
+			if(!listITypes.IsNullOrEmpty()) {
+				command+="AND IType IN("+String.Join(",",listITypes.Select(x => (int)x))+") ";
+			}
+			command+="ORDER BY SigDateTime";
+			//note: this might return an occasional row that has both times newer.
+			List<Signalod> listSignalods=new List<Signalod>();
+			string commandDatetime="SELECT "+DbHelper.Now();
+			DateTime dateTimeServer=PIn.DateT(OpenDentBusiness.Db.GetScalar(commandDatetime));//run before signals for rigorous inclusion of signals
+			try {
+				listSignalods=Crud.SignalodCrud.SelectMany(command);
+			} 
+			catch {
+				//we don't want an error message to show, because that can cause a cascade of a large number of error messages.
+			}
+			List<SignalodForApi> listSignalodForApis=new List<SignalodForApi>();
+			for(int i=0;i<listSignalods.Count;i++) {//list can be empty
+				SignalodForApi signalodForApi=new SignalodForApi();
+				signalodForApi.SignalodCur=listSignalods[i];
+				signalodForApi.DateTimeServer=dateTimeServer;
+				listSignalodForApis.Add(signalodForApi);
+			}
+			return listSignalodForApis;
+		}
+
 		///<summary>Queries the database and returns true if we found a shutdown signal</summary>
 		public static bool DoesNeedToShutDown(DateTime dateTimeSinceLastChecked) {
 			//No need to check RemotingRole; no call to db.
@@ -533,7 +567,10 @@ namespace OpenDentBusiness {
 		}
 	}
 
-	
+	public class SignalodForApi {
+		public Signalod SignalodCur;
+		public DateTime DateTimeServer;
+	}
 
 	
 
