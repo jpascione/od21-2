@@ -958,6 +958,14 @@ namespace OpenDental{
 				Invoke(new MethodInvoker(()=>{_fileSystemWatcher_FileCreated(sender,e);}));
 				return;
 			}
+			if(!File.Exists(e.FullPath)) {
+				//When saving a file into the directory being watched, windows may perform multiple operations to save the file, resulting in _fileSystemWatcher detecting mulitple events.
+				//In this case, two create events are detected by _fileSystemWatcher when savings screenshots using 'Save As', so this method attempts to import one file twice.
+				//The first time passing through this method, this file will exist and if it fails to save in open dental, we will get an error message stating so later in the method.
+				//The second time, e.FullPath will not exist because we remove the file from the folder being watched later on in this method after we have saved the image in AtoZ and DB.
+				//By this logic we can assume that if e.FullPath no longer exists, we have successfully saved the file and can exit out of this method.
+				return;
+			}
 			if(IsMountShowing()){
 				if(IsMountItemSelected()){
 					//user must have clicked onto an occupied position in the middle of a series.
