@@ -914,15 +914,6 @@ namespace OpenDentBusiness {
 				INDEX(ClinicNum)
 				) DEFAULT CHARSET=utf8";
 			Db.NonQ(command);
-			//Set the eClipboardShowPHI 2FA prefs pref to defautl vals for all clinics
-			command="SELECT ClinicNum FROM clinic";
-			List<long> listClinicNums=Db.GetListLong(command);
-			if(listClinicNums.Count>0) {
-				foreach(long clinicNum in listClinicNums) {
-					command="INSERT INTO clinicpref(ClinicNum,PrefName,ValueString) VALUES("+clinicNum+",'EClipboardDoTwoFactorAuth','0')"; //Default to false
-					Db.NonQ(command);
-				}
-			}
 			command="INSERT INTO preference(PrefName,ValueString) VALUES('EClipboardDoTwoFactorAuth','0')"; //Default to false
 			Db.NonQ(command);
 			if(!IndexExists("fee","FeeSched,CodeNum,ClinicNum,ProvNum")) {//may have been added manually
