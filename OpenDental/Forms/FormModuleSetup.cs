@@ -906,6 +906,9 @@ namespace OpenDental{
 			textRecurringChargesTime.Text=PrefC.GetDateT(PrefName.RecurringChargesAutomatedTime).TimeOfDay.ToShortTimeString();
 			checkRecurPatBal0.Checked=PrefC.GetBool(PrefName.RecurringChargesAllowedWhenNoPatBal);
 			checkRecurringChargesInactivateDeclinedCards.CheckState=PrefC.GetYNCheckState(PrefName.RecurringChargesInactivateDeclinedCards);
+			if(PrefC.GetBool(PrefName.EasyHideRepeatCharges)) {
+				groupRepeatingCharges.Enabled=false;
+			}
 			checkRepeatingChargesRunAging.Checked=PrefC.GetBool(PrefName.RepeatingChargesRunAging);
 			checkRepeatingChargesAutomated.Checked=PrefC.GetBool(PrefName.RepeatingChargesAutomated);
 			textRepeatingChargesAutomatedTime.Text=PrefC.GetDateT(PrefName.RepeatingChargesAutomatedTime).TimeOfDay.ToShortTimeString();
