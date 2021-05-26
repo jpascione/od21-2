@@ -2658,7 +2658,7 @@ namespace OpenDental{
 			//string missingData=
 			listClaimSendQueueItemsCA[0]=Eclaims.GetMissingData(clearinghouseClin,listClaimSendQueueItemsCA[0]);
 			if(listClaimSendQueueItemsCA[0].MissingData!=""){
-				MessageBox.Show(Lan.g(this,"Cannot send claim until missing data is fixed:")+"\r\n"+listClaimSendQueueItemsCA[0].MissingData);
+				MessageBox.Show(Lan.g(this,"Cannot send claim until missing/invalid data is fixed:")+"\r\n"+listClaimSendQueueItemsCA[0].MissingData);
 				return;
 			}
 			else if(clearinghouseClin.IsAttachmentSendAllowed && clearinghouseClin.CommBridge==EclaimsCommBridge.ClaimConnect) {
