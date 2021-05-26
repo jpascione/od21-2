@@ -2015,16 +2015,16 @@ namespace OpenDental {
 					_text=procedure.ProcDate.ToShortDateString();//Field F09
 					_documentGenerator.DrawString(g,_text,procedureDateColumn,0);
 				}
-				_text=procedure.ProcFee.ToString("F");//Field F12
+				_text=claimProc.FeeBilled.ToString("F");//Field F12
 				_documentGenerator.DrawString(g,_text,procedureChargeColumn+amountWidth-g.MeasureString(_text,_documentGenerator.standardFont).Width,0);
-				decimal procTotalFee=(decimal)procedure.ProcFee;
+				decimal feeBilledTotal=(decimal)claimProc.FeeBilled;
 				List<Procedure> listProceduresLab=Procedures.GetCanadianLabFees(claimProc.ProcNum,listProcedures);
 				for(int j=0;j<listProceduresLab.Count;j++) {
-					procTotalFee+=(decimal)listProceduresLab[j].ProcFee;
+					feeBilledTotal+=(decimal)listProceduresLab[j].ProcFee;
 				}				
-				_text=procTotalFee.ToString("F");
+				_text=feeBilledTotal.ToString("F");
 				_documentGenerator.DrawString(g,_text,procedureTotalColumn+amountWidth-g.MeasureString(_text,_documentGenerator.standardFont).Width,0);
-				totalSubmitted+=procTotalFee;
+				totalSubmitted+=feeBilledTotal;
 				_x=_documentGenerator.StartElement();
 			}
 			_x=_documentGenerator.StartElement();
