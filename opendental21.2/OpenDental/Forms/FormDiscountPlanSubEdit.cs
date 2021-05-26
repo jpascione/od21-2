@@ -40,6 +40,10 @@ namespace OpenDental {
 				textFeeSched.Text=FeeScheds.GetFirstOrDefault(x => x.FeeSchedNum==DiscountPlanCur.FeeSchedNum,true)?.Description??"";
 				textAdjustmentType.Text=Defs.GetDef(DefCat.AdjTypes,DiscountPlanCur.DefNum).ItemName;
 				textPlanNote.Text=DiscountPlanCur.PlanNote;
+				//FormDiscountPlanEdit.cs also uses InsPlanEdit permission for access, DiscountPlanEdit permission is marked as audit trail only.
+				if(!Security.IsAuthorized(Permissions.InsPlanEdit,true)) {
+					textPlanNote.Enabled=false;
+				}
 				textPlanNum.Text=DiscountPlanCur.DiscountPlanNum.ToString();
 			}
 			if(DiscountPlanSubCur==null) {
@@ -107,8 +111,10 @@ namespace OpenDental {
 			}
 			DiscountPlanSubs.UpdateAssociatedDiscountPlanAmts(new List<DiscountPlanSub>{ DiscountPlanSubCur });
 			if(DiscountPlanCur!=null && DiscountPlanCur.PlanNote!=textPlanNote.Text) {
+				string logText=Lan.g(this, "Discount plan: ")+DiscountPlanCur.Description + Lan.g(this," plan note changed from \"") + DiscountPlanCur.PlanNote + Lan.g(this,"\" to \"") + textPlanNote.Text +"\"";
 				DiscountPlanCur.PlanNote=textPlanNote.Text;
 				DiscountPlans.Update(DiscountPlanCur);
+				SecurityLogs.MakeLogEntry(Permissions.DiscountPlanEdit,DiscountPlanSubCur.PatNum,logText);
 			}
 			DialogResult=DialogResult.OK;
 		}
