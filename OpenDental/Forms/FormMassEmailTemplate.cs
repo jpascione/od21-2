@@ -18,6 +18,8 @@ namespace OpenDental {
 		private EmailType _emailType;
 		///<summary>To save the changes that were made to the html body while in the email editor.</summary>
 		private string _htmlText;
+		///<summary>Set to false if the template currently being viewed should not be able to be deleted. Templates with TemplateType Birthday should never be deleted</summary>
+		private bool _canDeleteTemplate;
 
 
 		///<summary>True when a new template is being created off of a pre-existing file (import).</summary>
@@ -27,11 +29,12 @@ namespace OpenDental {
 			}
 		}
 
-		public FormMassEmailTemplate(EmailHostingTemplate template) {
+		public FormMassEmailTemplate(EmailHostingTemplate template,bool canDeleteTemplate=true) {
 			InitializeComponent();
 			InitializeLayoutManager();
 			Lan.F(this);
 			_templateCur=template;
+			_canDeleteTemplate=canDeleteTemplate;
 		}
 
 		private void FormMassEmailTemplate_Load(object sender,EventArgs e) {
@@ -44,7 +47,14 @@ namespace OpenDental {
 			textTemplateName.Text=_templateCur.TemplateName;
 			textSubject.Text=_templateCur.Subject;
 			textboxPlainText.Text=_templateCur.BodyPlainText;
-			butDeleteTemplate.Visible=!_templateCur.IsNew;
+			butDeleteTemplate.Visible=CanDeleteTemplate();
+		}
+
+		private bool CanDeleteTemplate() {
+			if(_templateCur.IsNew) {
+				return false;
+			}
+			return _canDeleteTemplate;
 		}
 
 		private void butBodyFieldsPlainText_Click(object sender,EventArgs e) {

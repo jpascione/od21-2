@@ -300,7 +300,9 @@ namespace OpenDental {
 			ApptReminderRule ruleCur=(ApptReminderRule)tabControlLanguages.SelectedTab.Tag;
 			MapUiToRules(ruleCur);//update anything about the rule that may have previously changed before editing.
 			EmailHostingTemplate template=_listTemplates.First(x => ruleCur.EmailHostingTemplateNum==x.EmailHostingTemplateNum);
-			using FormMassEmailTemplate formMassEmailTemplate=new FormMassEmailTemplate(template);
+			//We do not want offices to delete Automated Birthday templates.
+			//if a clinic decides they don't want their own Automated Birthday template, they don't delete the template, they should check the "Use Defaults" box to use the HQ rule.
+			using FormMassEmailTemplate formMassEmailTemplate=new FormMassEmailTemplate(template,canDeleteTemplate:false);
 			if(formMassEmailTemplate.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
