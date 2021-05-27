@@ -2385,13 +2385,13 @@ namespace OpenDentBusiness {
 	}
 
 	public enum RigorousAccounting {
-		///<summary>0 - Auto-splitting payments and enforcing paysplit validity is enforced.</summary>
+		///<summary>0 - Payments are automatically split and paysplit validity is enforced.</summary>
 		[Description("Enforce Fully")]
 		EnforceFully,
-		///<summary>1 - Auto-splitting payments is done, paysplit validity isn't enforced.</summary>
+		///<summary>1 - Payments are automatically split, but paysplit validity is not enforced.</summary>
 		[Description("Auto-Split Only")]
 		AutoSplitOnly,
-		///<summary>2 - Neither auto-splitting nor paysplit validity is enforced.</summary>
+		///<summary>2 - Payments are not automatically split, nor is paysplit validity enforced.</summary>
 		[Description("Don't Enforce")]
 		DontEnforce
 	}

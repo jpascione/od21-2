@@ -176,6 +176,7 @@ namespace OpenDental{
 			LayoutSubMenuAdvSetup(menuItemAdvSetup);
 			//Menus below have no submenus (name as shown)--------------------------------------------------------------------
 			menuItemSetup.Add("Alert Categories",menuItemAlertCategories_Click);
+			menuItemSetup.Add("Allocations",menuItemAllocations_Click);
 			menuItemSetup.Add("Auto Codes",menuItemAutoCodes_Click);
 			menuItemSetup.Add("Automation",menuItemAutomation_Click);
 			menuItemSetup.Add("Auto Notes",menuItemAutoNotes_Click);

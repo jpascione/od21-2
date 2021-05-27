@@ -132,17 +132,6 @@ namespace OpenDental{
 			this.checkSelectProv = new System.Windows.Forms.CheckBox();
 			this.checkGoogleAddress = new System.Windows.Forms.CheckBox();
 			this.tabAccount = new System.Windows.Forms.TabPage();
-			this.groupBoxOD2 = new OpenDental.UI.GroupBoxOD();
-			this.comboRigorousAccounting = new System.Windows.Forms.ComboBox();
-			this.checkClaimPayByTotalSplitsAuto = new System.Windows.Forms.CheckBox();
-			this.checkShowIncomeTransferManager = new System.Windows.Forms.CheckBox();
-			this.label40 = new System.Windows.Forms.Label();
-			this.butLineItem = new OpenDental.UI.Button();
-			this.butSimple = new OpenDental.UI.Button();
-			this.label39 = new System.Windows.Forms.Label();
-			this.comboRigorousAdjustments = new System.Windows.Forms.ComboBox();
-			this.label41 = new System.Windows.Forms.Label();
-			this.checkHidePaysplits = new System.Windows.Forms.CheckBox();
 			this.groupBox10 = new OpenDental.UI.GroupBoxOD();
 			this.comboRefundAdjustmentType = new OpenDental.UI.ComboBoxOD();
 			this.labelRefundAdjustmentType = new System.Windows.Forms.Label();
@@ -178,11 +167,6 @@ namespace OpenDental{
 			this.checkAllowFutureDebits = new System.Windows.Forms.CheckBox();
 			this.checkAllowEmailCCReceipt = new System.Windows.Forms.CheckBox();
 			this.checkAgingProcLifo = new System.Windows.Forms.CheckBox();
-			this.groupBox5 = new OpenDental.UI.GroupBoxOD();
-			this.checkAllowPrePayToTpProcs = new System.Windows.Forms.CheckBox();
-			this.checkIsRefundable = new System.Windows.Forms.CheckBox();
-			this.label57 = new System.Windows.Forms.Label();
-			this.comboTpUnearnedType = new OpenDental.UI.ComboBoxOD();
 			this.groupBox7 = new OpenDental.UI.GroupBoxOD();
 			this.checkShowClaimPayTracking = new System.Windows.Forms.CheckBox();
 			this.checkShowClaimPatResp = new System.Windows.Forms.CheckBox();
@@ -409,6 +393,7 @@ namespace OpenDental{
 			this.checkRxSendNewToQueue = new System.Windows.Forms.CheckBox();
 			this.butCancel = new OpenDental.UI.Button();
 			this.butOK = new OpenDental.UI.Button();
+			this.label62 = new System.Windows.Forms.Label();
 			this.tabControlMain.SuspendLayout();
 			this.tabAppts.SuspendLayout();
 			this.groupBox8.SuspendLayout();
@@ -419,12 +404,10 @@ namespace OpenDental{
 			this.groupBoxClaimSnapshot.SuspendLayout();
 			this.groupBoxSuperFamily.SuspendLayout();
 			this.tabAccount.SuspendLayout();
-			this.groupBoxOD2.SuspendLayout();
 			this.groupBox10.SuspendLayout();
 			this.groupBoxOD3.SuspendLayout();
 			this.groupBox4.SuspendLayout();
 			this.groupBox9.SuspendLayout();
-			this.groupBox5.SuspendLayout();
 			this.groupBox7.SuspendLayout();
 			this.groupBoxClaimIdPrefix.SuspendLayout();
 			this.groupRepeatingCharges.SuspendLayout();
@@ -1594,11 +1577,10 @@ namespace OpenDental{
 			// tabAccount
 			// 
 			this.tabAccount.BackColor = System.Drawing.SystemColors.Control;
-			this.tabAccount.Controls.Add(this.groupBoxOD2);
+			this.tabAccount.Controls.Add(this.label62);
 			this.tabAccount.Controls.Add(this.groupBox10);
 			this.tabAccount.Controls.Add(this.groupBox9);
 			this.tabAccount.Controls.Add(this.checkAgingProcLifo);
-			this.tabAccount.Controls.Add(this.groupBox5);
 			this.tabAccount.Controls.Add(this.groupBox7);
 			this.tabAccount.Controls.Add(this.groupRepeatingCharges);
 			this.tabAccount.Controls.Add(this.groupRecurringCharges);
@@ -1617,136 +1599,6 @@ namespace OpenDental{
 			this.tabAccount.Size = new System.Drawing.Size(1227, 640);
 			this.tabAccount.TabIndex = 2;
 			this.tabAccount.Text = "Account";
-			// 
-			// groupBoxOD2
-			// 
-			this.groupBoxOD2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
-			this.groupBoxOD2.Controls.Add(this.comboRigorousAccounting);
-			this.groupBoxOD2.Controls.Add(this.checkClaimPayByTotalSplitsAuto);
-			this.groupBoxOD2.Controls.Add(this.checkShowIncomeTransferManager);
-			this.groupBoxOD2.Controls.Add(this.label40);
-			this.groupBoxOD2.Controls.Add(this.butLineItem);
-			this.groupBoxOD2.Controls.Add(this.butSimple);
-			this.groupBoxOD2.Controls.Add(this.label39);
-			this.groupBoxOD2.Controls.Add(this.comboRigorousAdjustments);
-			this.groupBoxOD2.Controls.Add(this.label41);
-			this.groupBoxOD2.Controls.Add(this.checkHidePaysplits);
-			this.groupBoxOD2.Location = new System.Drawing.Point(7, 469);
-			this.groupBoxOD2.Name = "groupBoxOD2";
-			this.groupBoxOD2.Size = new System.Drawing.Size(399, 149);
-			this.groupBoxOD2.TabIndex = 301;
-			this.groupBoxOD2.TabStop = false;
-			this.groupBoxOD2.Text = "Line Item Accounting - See the manual before turning this on";
-			// 
-			// comboRigorousAccounting
-			// 
-			this.comboRigorousAccounting.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.comboRigorousAccounting.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboRigorousAccounting.FormattingEnabled = true;
-			this.comboRigorousAccounting.Location = new System.Drawing.Point(230, 48);
-			this.comboRigorousAccounting.MaxDropDownItems = 30;
-			this.comboRigorousAccounting.Name = "comboRigorousAccounting";
-			this.comboRigorousAccounting.Size = new System.Drawing.Size(163, 21);
-			this.comboRigorousAccounting.TabIndex = 294;
-			// 
-			// checkClaimPayByTotalSplitsAuto
-			// 
-			this.checkClaimPayByTotalSplitsAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkClaimPayByTotalSplitsAuto.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkClaimPayByTotalSplitsAuto.Location = new System.Drawing.Point(139, 129);
-			this.checkClaimPayByTotalSplitsAuto.Name = "checkClaimPayByTotalSplitsAuto";
-			this.checkClaimPayByTotalSplitsAuto.Size = new System.Drawing.Size(254, 17);
-			this.checkClaimPayByTotalSplitsAuto.TabIndex = 304;
-			this.checkClaimPayByTotalSplitsAuto.Text = "Claim Pay by Total splits automatically";
-			this.checkClaimPayByTotalSplitsAuto.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkClaimPayByTotalSplitsAuto.UseVisualStyleBackColor = true;
-			// 
-			// checkShowIncomeTransferManager
-			// 
-			this.checkShowIncomeTransferManager.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkShowIncomeTransferManager.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkShowIncomeTransferManager.Location = new System.Drawing.Point(139, 111);
-			this.checkShowIncomeTransferManager.Name = "checkShowIncomeTransferManager";
-			this.checkShowIncomeTransferManager.Size = new System.Drawing.Size(254, 17);
-			this.checkShowIncomeTransferManager.TabIndex = 303;
-			this.checkShowIncomeTransferManager.Text = "Show Income Transfer Manager";
-			this.checkShowIncomeTransferManager.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkShowIncomeTransferManager.UseVisualStyleBackColor = true;
-			// 
-			// label40
-			// 
-			this.label40.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label40.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label40.Location = new System.Drawing.Point(81, 18);
-			this.label40.Name = "label40";
-			this.label40.Size = new System.Drawing.Size(164, 33);
-			this.label40.TabIndex = 302;
-			this.label40.Text = "These buttons set all prefs within this group simultaneously";
-			this.label40.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// butLineItem
-			// 
-			this.butLineItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butLineItem.Location = new System.Drawing.Point(325, 21);
-			this.butLineItem.Name = "butLineItem";
-			this.butLineItem.Size = new System.Drawing.Size(68, 21);
-			this.butLineItem.TabIndex = 301;
-			this.butLineItem.Text = "Line Item";
-			this.butLineItem.Click += new System.EventHandler(this.butLineItem_Click);
-			// 
-			// butSimple
-			// 
-			this.butSimple.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.butSimple.Location = new System.Drawing.Point(252, 21);
-			this.butSimple.Name = "butSimple";
-			this.butSimple.Size = new System.Drawing.Size(68, 21);
-			this.butSimple.TabIndex = 300;
-			this.butSimple.Text = "Simple";
-			this.butSimple.Click += new System.EventHandler(this.butSimple_Click);
-			// 
-			// label39
-			// 
-			this.label39.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label39.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label39.Location = new System.Drawing.Point(117, 52);
-			this.label39.Name = "label39";
-			this.label39.Size = new System.Drawing.Size(108, 14);
-			this.label39.TabIndex = 293;
-			this.label39.Text = "Enforce Valid Paysplits";
-			this.label39.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// comboRigorousAdjustments
-			// 
-			this.comboRigorousAdjustments.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.comboRigorousAdjustments.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboRigorousAdjustments.Location = new System.Drawing.Point(230, 70);
-			this.comboRigorousAdjustments.MaxDropDownItems = 30;
-			this.comboRigorousAdjustments.Name = "comboRigorousAdjustments";
-			this.comboRigorousAdjustments.Size = new System.Drawing.Size(163, 21);
-			this.comboRigorousAdjustments.TabIndex = 299;
-			// 
-			// label41
-			// 
-			this.label41.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label41.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label41.Location = new System.Drawing.Point(63, 74);
-			this.label41.Name = "label41";
-			this.label41.Size = new System.Drawing.Size(162, 14);
-			this.label41.TabIndex = 298;
-			this.label41.Text = "Enforce Valid Adjustments";
-			this.label41.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// checkHidePaysplits
-			// 
-			this.checkHidePaysplits.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkHidePaysplits.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkHidePaysplits.Location = new System.Drawing.Point(138, 94);
-			this.checkHidePaysplits.Name = "checkHidePaysplits";
-			this.checkHidePaysplits.Size = new System.Drawing.Size(255, 17);
-			this.checkHidePaysplits.TabIndex = 297;
-			this.checkHidePaysplits.Text = "Hide paysplits from Payment window by default";
-			this.checkHidePaysplits.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkHidePaysplits.UseVisualStyleBackColor = true;
 			// 
 			// groupBox10
 			// 
@@ -2140,65 +1992,6 @@ namespace OpenDental{
 			this.checkAgingProcLifo.Text = "Transactions attached to a procedure offset each other before aging";
 			this.checkAgingProcLifo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkAgingProcLifo.ThreeState = true;
-			// 
-			// groupBox5
-			// 
-			this.groupBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
-			this.groupBox5.Controls.Add(this.checkAllowPrePayToTpProcs);
-			this.groupBox5.Controls.Add(this.checkIsRefundable);
-			this.groupBox5.Controls.Add(this.label57);
-			this.groupBox5.Controls.Add(this.comboTpUnearnedType);
-			this.groupBox5.Location = new System.Drawing.Point(412, 495);
-			this.groupBox5.Name = "groupBox5";
-			this.groupBox5.Size = new System.Drawing.Size(399, 87);
-			this.groupBox5.TabIndex = 300;
-			this.groupBox5.TabStop = false;
-			this.groupBox5.Text = "Treatment Planned Prepayments";
-			// 
-			// checkAllowPrePayToTpProcs
-			// 
-			this.checkAllowPrePayToTpProcs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkAllowPrePayToTpProcs.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkAllowPrePayToTpProcs.Location = new System.Drawing.Point(64, 16);
-			this.checkAllowPrePayToTpProcs.Name = "checkAllowPrePayToTpProcs";
-			this.checkAllowPrePayToTpProcs.Size = new System.Drawing.Size(330, 17);
-			this.checkAllowPrePayToTpProcs.TabIndex = 5;
-			this.checkAllowPrePayToTpProcs.Text = "Allow prepayments to allocate to treatment planned procedures";
-			this.checkAllowPrePayToTpProcs.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkAllowPrePayToTpProcs.UseVisualStyleBackColor = true;
-			this.checkAllowPrePayToTpProcs.Click += new System.EventHandler(this.checkAllowPrePayToTpProcs_Click);
-			// 
-			// checkIsRefundable
-			// 
-			this.checkIsRefundable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkIsRefundable.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkIsRefundable.Location = new System.Drawing.Point(181, 33);
-			this.checkIsRefundable.Name = "checkIsRefundable";
-			this.checkIsRefundable.Size = new System.Drawing.Size(213, 17);
-			this.checkIsRefundable.TabIndex = 10;
-			this.checkIsRefundable.Text = "TP prepayments are non-refundable";
-			this.checkIsRefundable.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.checkIsRefundable.UseVisualStyleBackColor = true;
-			this.checkIsRefundable.Visible = false;
-			// 
-			// label57
-			// 
-			this.label57.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label57.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label57.Location = new System.Drawing.Point(79, 50);
-			this.label57.Name = "label57";
-			this.label57.Size = new System.Drawing.Size(145, 27);
-			this.label57.TabIndex = 253;
-			this.label57.Text = "Default treatment planned procedure unearned type";
-			this.label57.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			// 
-			// comboTpUnearnedType
-			// 
-			this.comboTpUnearnedType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.comboTpUnearnedType.Location = new System.Drawing.Point(230, 55);
-			this.comboTpUnearnedType.Name = "comboTpUnearnedType";
-			this.comboTpUnearnedType.Size = new System.Drawing.Size(163, 21);
-			this.comboTpUnearnedType.TabIndex = 15;
 			// 
 			// groupBox7
 			// 
@@ -4725,6 +4518,17 @@ namespace OpenDental{
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
+			// label62
+			// 
+			this.label62.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label62.Location = new System.Drawing.Point(12, 478);
+			this.label62.Name = "label62";
+			this.label62.Size = new System.Drawing.Size(288, 48);
+			this.label62.TabIndex = 308;
+			this.label62.Text = "Allocation options for Line Item Accounting have been moved to a different window" +
+    ".\r\nSee Main Menu, Setup, Allocations.";
+			this.label62.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// FormModuleSetup
 			// 
 			this.ClientSize = new System.Drawing.Size(1230, 696);
@@ -4752,13 +4556,11 @@ namespace OpenDental{
 			this.groupBoxClaimSnapshot.PerformLayout();
 			this.groupBoxSuperFamily.ResumeLayout(false);
 			this.tabAccount.ResumeLayout(false);
-			this.groupBoxOD2.ResumeLayout(false);
 			this.groupBox10.ResumeLayout(false);
 			this.groupBoxOD3.ResumeLayout(false);
 			this.groupBoxOD3.PerformLayout();
 			this.groupBox4.ResumeLayout(false);
 			this.groupBox9.ResumeLayout(false);
-			this.groupBox5.ResumeLayout(false);
 			this.groupBox7.ResumeLayout(false);
 			this.groupBox7.PerformLayout();
 			this.groupBoxClaimIdPrefix.ResumeLayout(false);
@@ -5047,16 +4849,8 @@ namespace OpenDental{
 		private CheckBox checkInsPPOsecWriteoffs;
 		private CheckBox checkInsDefaultShowUCRonClaims;
 		private CheckBox checkCoPayFeeScheduleBlankLikeZero;
-		private UI.GroupBoxOD groupBox5;
-		private CheckBox checkAllowPrePayToTpProcs;
-		private CheckBox checkIsRefundable;
-		private Label label57;
-		private UI.ComboBoxOD comboTpUnearnedType;
 		private CheckBox checkAllowPrepayProvider;
 		private Label label42;
-		private Label label41;
-		private CheckBox checkHidePaysplits;
-		private Label label39;
 		private CheckBox checkAllowEmailCCReceipt;
 		private Label label38;
 		private CheckBox checkAllowFutureDebits;
@@ -5093,8 +4887,6 @@ namespace OpenDental{
 		private TextBox textInsWriteoffDescript;
 		private Label label17;
 		private UI.ComboBoxOD comboPayPlanAdj;
-		private ComboBox comboRigorousAdjustments;
-		private ComboBox comboRigorousAccounting;
 		private ComboBox comboPaymentClinicSetting;
 		private TextBox textTaxPercent;
 		private UI.ComboBoxOD comboSalesTaxAdjType;
@@ -5134,12 +4926,6 @@ namespace OpenDental{
 		private CheckBox checkIncTxfrTreatNegProdAsIncome;
 		private Label label15;
 		private TextBox textAutoImportFolder;
-		private GroupBoxOD groupBoxOD2;
-		private UI.Button butLineItem;
-		private UI.Button butSimple;
-		private Label label40;
-		private CheckBox checkShowIncomeTransferManager;
-		private CheckBox checkClaimPayByTotalSplitsAuto;
 		private Label label60;
 		private CheckBox checkAutomateSalesTax;
 		private ComboBoxOD comboSalesTaxDefaultProvider;
@@ -5173,5 +4959,6 @@ namespace OpenDental{
 		private CheckBox checkUsePhoneNumTable;
 		private ComboBoxOD comboRefundAdjustmentType;
 		private Label labelRefundAdjustmentType;
+		private Label label62;
 	}
 }
