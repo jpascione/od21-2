@@ -1334,12 +1334,12 @@ namespace OpenDental{
 						} 
 						break;
 					case "PatientAssignment":
-						if(_insSubCur.AssignBen) {
+						if(Claims.GetAssignmentOfBenefits(_claimCur,_insSubCur)) {
 							_stringArrayDisplay[i]="Signature on File";
 						}
 						break;
 					case "PatientAssignmentDate":
-						if(_insSubCur.AssignBen && _claimCur.DateSent.Year > 1860) {
+						if(Claims.GetAssignmentOfBenefits(_claimCur,_insSubCur) && _claimCur.DateSent.Year > 1860) {
 							if(ClaimFormCur.Items[i].FormatString=="") {
 								_stringArrayDisplay[i]=_claimCur.DateSent.ToShortDateString();
 							}
@@ -2044,7 +2044,7 @@ namespace OpenDental{
 						_stringArrayDisplay[i]=Claims.GetAssignmentOfBenefits(_claimCur,_insSubCur)?"X":"";
 						break;
 					case "AcceptAssignmentN":
-						_stringArrayDisplay[i]=_insSubCur.AssignBen?"":"X";
+						_stringArrayDisplay[i]=Claims.GetAssignmentOfBenefits(_claimCur,_insSubCur)?"":"X";
 						break;
 					case "ClaimIdentifier":
 						_stringArrayDisplay[i]=_claimCur.ClaimIdentifier;
