@@ -4465,6 +4465,12 @@ namespace OpenDental{
 			SecurityLogs.MakeLogEntry(Permissions.SecurityAdmin,0,"Alert Categories");
 		}
 
+		private void menuItemAllocations_Click(object sender, System.EventArgs e) {
+			//All security is inside the window
+			using FormAllocationsSetup formAllocationsSetup=new FormAllocationsSetup();
+			formAllocationsSetup.ShowDialog();
+		}
+
 		private void menuItemAutoCodes_Click(object sender, System.EventArgs e) {
 			if(!Security.IsAuthorized(Permissions.Setup)){
 				return;

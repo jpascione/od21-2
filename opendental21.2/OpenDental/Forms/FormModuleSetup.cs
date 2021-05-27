@@ -15,7 +15,6 @@ namespace OpenDental{
 		private bool _changed;
 		private ColorDialog _colorDialog;
 		private List<BrokenApptProcedure> _listBrokenApptProcedures=new List<BrokenApptProcedure>();
-		private YN _ynPrePayAllowedForTpProcs;
 		///<summary>Helps store and set the Prefs for desease, medications, and alergies in the Chart Module when clicking OK on those forms.</summary>
 		private long _diseaseDefNum;//DiseaseDef
 		private long _medicationNum;
@@ -195,14 +194,6 @@ namespace OpenDental{
 			}
 		}
 
-		private void butLineItem_Click(object sender, EventArgs e){
-			comboRigorousAccounting.SelectedIndex=0;
-			comboRigorousAdjustments.SelectedIndex=0;
-			checkHidePaysplits.Checked=false;
-			checkShowIncomeTransferManager.Checked=true;
-			checkClaimPayByTotalSplitsAuto.Checked=true;
-		}
-
 		private void butReplacements_Click(object sender,EventArgs e) {
 			using FormMessageReplacements form=new FormMessageReplacements(MessageReplaceType.Patient);
 			form.IsSelectionMode=true;
@@ -214,27 +205,6 @@ namespace OpenDental{
 			int cursorIndex=textClaimIdentifier.SelectionStart;
 			textClaimIdentifier.Text=textClaimIdentifier.Text.Insert(cursorIndex,form.Replacement);
 			textClaimIdentifier.SelectionStart=cursorIndex+form.Replacement.Length;
-		}
-
-		private void butSimple_Click(object sender, EventArgs e){
-			comboRigorousAccounting.SelectedIndex=1;
-			comboRigorousAdjustments.SelectedIndex=1;
-			checkHidePaysplits.Checked=true;
-			checkShowIncomeTransferManager.Checked=false;
-			checkClaimPayByTotalSplitsAuto.Checked=false;
-		}
-		
-		private void checkAllowPrePayToTpProcs_Click(object sender,EventArgs e) {
-			if(checkAllowPrePayToTpProcs.Checked) {
-				checkIsRefundable.Visible=true;
-				checkIsRefundable.Checked=PrefC.GetBool(PrefName.TpPrePayIsNonRefundable);
-				_ynPrePayAllowedForTpProcs=YN.Yes;
-			}
-			else {
-				checkIsRefundable.Visible=false;
-				checkIsRefundable.Checked=false;
-				_ynPrePayAllowedForTpProcs=YN.No;
-			}
 		}
 
 		private void checkRecurringChargesAutomated_CheckedChanged(object sender,EventArgs e) {
@@ -812,38 +782,17 @@ namespace OpenDental{
 			FillListboxBadDebt(Defs.GetDefs(DefCat.AdjTypes,listBadAdjDefNums));
 			checkAllowFutureDebits.Checked=PrefC.GetBool(PrefName.AccountAllowFutureDebits);
 			checkAllowEmailCCReceipt.Checked=PrefC.GetBool(PrefName.AllowEmailCCReceipt);
-			List<RigorousAccounting> listEnums=Enum.GetValues(typeof(RigorousAccounting)).OfType<RigorousAccounting>().ToList();
-			for(int i=0;i<listEnums.Count;i++) {
-				comboRigorousAccounting.Items.Add(listEnums[i].GetDescription());
-			}
-			comboRigorousAccounting.SelectedIndex=PrefC.GetInt(PrefName.RigorousAccounting);
-			List<RigorousAdjustments> listAdjEnums=Enum.GetValues(typeof(RigorousAdjustments)).OfType<RigorousAdjustments>().ToList();
-			for(int i=0;i<listAdjEnums.Count;i++) {
-				comboRigorousAdjustments.Items.Add(listAdjEnums[i].GetDescription());
-			}
-			comboRigorousAdjustments.SelectedIndex=PrefC.GetInt(PrefName.RigorousAdjustments);
-			checkHidePaysplits.Checked=PrefC.GetBool(PrefName.PaymentWindowDefaultHideSplits);
 			checkIncTxfrTreatNegProdAsIncome.Checked=PrefC.GetBool(PrefName.IncomeTransfersTreatNegativeProductionAsIncome);
 			checkAllowPrepayProvider.Checked=PrefC.GetBool(PrefName.AllowPrepayProvider);
 			comboRecurringChargePayType.Items.AddDefNone("("+Lan.g(this,"default")+")");
 			comboRecurringChargePayType.Items.AddDefs(Defs.GetDefsForCategory(DefCat.PaymentTypes,true));
 			comboRecurringChargePayType.SetSelectedDefNum(PrefC.GetLong(PrefName.RecurringChargesPayTypeCC)); 
-			_ynPrePayAllowedForTpProcs=PrefC.GetEnum<YN>(PrefName.PrePayAllowedForTpProcs);
-			checkAllowPrePayToTpProcs.Checked=PrefC.GetYN(PrefName.PrePayAllowedForTpProcs);
-			checkIsRefundable.Checked=PrefC.GetBool(PrefName.TpPrePayIsNonRefundable);
-			checkIsRefundable.Visible=checkAllowPrePayToTpProcs.Checked;//pref will be unchecked if parent gets turned off.
-			comboTpUnearnedType.Items.AddDefs(Defs.GetDefsForCategory(DefCat.PaySplitUnearnedType,true));
-			comboTpUnearnedType.SetSelectedDefNum(PrefC.GetLong(PrefName.TpUnearnedType));
 			//Fill the combobox with providers
 			comboSalesTaxDefaultProvider.Items.AddProvNone();
 			comboSalesTaxDefaultProvider.Items.AddProvsAbbr(Providers.GetDeepCopy(true));
 			comboSalesTaxDefaultProvider.SetSelectedProvNum(PrefC.GetLong(PrefName.SalesTaxDefaultProvider));
 			checkAutomateSalesTax.Checked=PrefC.GetBool(PrefName.SalesTaxDoAutomate);
 			#endregion Pay/Adj Group Boxes
-			#region Line Item Accounting
-			checkShowIncomeTransferManager.Checked=PrefC.GetBool(PrefName.ShowIncomeTransferManager);
-			checkClaimPayByTotalSplitsAuto.Checked=PrefC.GetBool(PrefName.ClaimPayByTotalSplitsAuto);
-			#endregion Line Item Accounting
 			#region Insurance Group Box
 			checkProviderIncomeShows.Checked=PrefC.GetBool(PrefName.ProviderIncomeTransferShows);
 			checkClaimMedTypeIsInstWhenInsPlanIsMedical.Checked=PrefC.GetBool(PrefName.ClaimMedTypeIsInstWhenInsPlanIsMedical);
@@ -984,24 +933,8 @@ namespace OpenDental{
 			_changed|=Prefs.UpdateInt(PrefName.ClaimProcAllowCreditsGreaterThanProcFee,comboClaimCredit.SelectedIndex);
 			_changed|=Prefs.UpdateBool(PrefName.AllowEmailCCReceipt,checkAllowEmailCCReceipt.Checked);
 			_changed|=Prefs.UpdateString(PrefName.ClaimIdPrefix,textClaimIdentifier.Text);
-			int prefRigorousAccounting=PrefC.GetInt(PrefName.RigorousAccounting);
-			if(Prefs.UpdateInt(PrefName.RigorousAccounting,comboRigorousAccounting.SelectedIndex)) {
-				_changed=true;
-				SecurityLogs.MakeLogEntry(Permissions.Setup,0,"Rigorous accounting changed from "+
-					((RigorousAccounting)prefRigorousAccounting).GetDescription()+" to "
-					+((RigorousAccounting)comboRigorousAccounting.SelectedIndex).GetDescription()+".");
-			}
-			int prefRigorousAdjustments=PrefC.GetInt(PrefName.RigorousAdjustments);
-			if(Prefs.UpdateInt(PrefName.RigorousAdjustments,comboRigorousAdjustments.SelectedIndex)) {
-				_changed=true;
-				SecurityLogs.MakeLogEntry(Permissions.Setup,0,"Rigorous adjustments changed from "+
-					((RigorousAdjustments)prefRigorousAdjustments).GetDescription()+" to "
-					+((RigorousAdjustments)comboRigorousAdjustments.SelectedIndex).GetDescription()+".");
-			}
-			//_changed|=Prefs.UpdateBool(PrefName.PayPlanHideDebitsFromAccountModule,checkHidePayPlanDebits.Checked)
 			_changed|=Prefs.UpdateString(PrefName.BadDebtAdjustmentTypes,strListBadDebtAdjTypes);
 			_changed|=Prefs.UpdateBool(PrefName.AllowFutureInsPayments,checkAllowFuturePayments.Checked);
-			_changed|=Prefs.UpdateBool(PrefName.PaymentWindowDefaultHideSplits,checkHidePaysplits.Checked);
 			_changed|=Prefs.UpdateBool(PrefName.IncomeTransfersTreatNegativeProductionAsIncome,checkIncTxfrTreatNegProdAsIncome.Checked);
 			_changed|=Prefs.UpdateBool(PrefName.ShowAllocateUnearnedPaymentPrompt,checkShowAllocateUnearnedPaymentPrompt.Checked);
 			_changed|=Prefs.UpdateBool(PrefName.FutureTransDatesAllowed,checkAllowFutureTrans.Checked);
@@ -1022,9 +955,6 @@ namespace OpenDental{
 			_changed|=Prefs.UpdateLong(PrefName.RecurringChargesPayTypeCC,comboRecurringChargePayType.GetSelectedDefNum());
 			_changed|=Prefs.UpdateBool(PrefName.RecurringChargesAllowedWhenNoPatBal,checkRecurPatBal0.Checked);
 			_changed|=Prefs.UpdateYN(PrefName.RecurringChargesInactivateDeclinedCards,checkRecurringChargesInactivateDeclinedCards.CheckState);
-			_changed|=Prefs.UpdateYN(PrefName.PrePayAllowedForTpProcs,_ynPrePayAllowedForTpProcs);
-			_changed|=Prefs.UpdateLong(PrefName.TpUnearnedType,comboTpUnearnedType.GetSelectedDefNum());
-			_changed|=Prefs.UpdateBool(PrefName.TpPrePayIsNonRefundable,checkIsRefundable.Checked);
 			_changed|=Prefs.UpdateDateT(PrefName.DynamicPayPlanRunTime,PIn.DateT(textDynamicPayPlan.Text));
 			_changed|=Prefs.UpdateBool(PrefName.PriClaimAllowSetToHoldUntilPriReceived,checkPriClaimAllowSetToHoldUntilPriReceived.Checked);
 			_changed|=Prefs.UpdateYN(PrefName.ClaimEditShowPayTracking,checkShowClaimPayTracking.CheckState);
@@ -1032,10 +962,6 @@ namespace OpenDental{
 			_changed|=Prefs.UpdateLong(PrefName.SalesTaxDefaultProvider,comboSalesTaxDefaultProvider.GetSelectedProvNum());
 			_changed|=Prefs.UpdateBool(PrefName.SalesTaxDoAutomate,checkAutomateSalesTax.Checked);
 			_changed|=Prefs.UpdateLong(PrefName.RefundAdjustmentType,comboRefundAdjustmentType.GetSelectedDefNum());
-			#region Line Item Accounting
-			_changed|=Prefs.UpdateBool(PrefName.ShowIncomeTransferManager,checkShowIncomeTransferManager.Checked);
-			_changed|=Prefs.UpdateBool(PrefName.ClaimPayByTotalSplitsAuto,checkClaimPayByTotalSplitsAuto.Checked);
-			#endregion Line Item Accounting
 			if(comboFinanceChargeAdjType.SelectedIndex!=-1) {
 				_changed|=Prefs.UpdateLong(PrefName.FinanceChargeAdjustmentType,comboFinanceChargeAdjType.GetSelectedDefNum());
 			}
