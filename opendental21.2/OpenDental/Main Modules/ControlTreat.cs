@@ -3599,7 +3599,7 @@ namespace OpenDental{
 					dictOrthoProcLinksForProcList,dictOrthoCases,dictOrthoSchedules,listOrthoProcLinksAll);
 				Procedures.ComputeEstimates(procCur,PatCur.PatNum,claimProcList,false,InsPlanList,PatPlanList,BenefitList,PatCur.Age,SubList,
 					orthoProcLink,orthoCase,orthoSchedule,listOrthoProcLinksForOrthoCase,listFees);
-				procCur.DiscountPlanAmt=listDiscountPlanProc.First(x=>x.ProcNum==procCur.ProcNum).DiscountPlanAmt;
+				procCur.DiscountPlanAmt=listDiscountPlanProc.FirstOrDefault(x=>x.ProcNum==procCur.ProcNum)?.DiscountPlanAmt??0;
 				if(AvaTax.DoSendProcToAvalara(procCur)) { //If needed, update the sales tax amount as well (checks HQ)
 					procCur.TaxAmt=(double)AvaTax.GetEstimate(procCur.CodeNum,procCur.PatNum,procCur.ProcFee);
 				}
