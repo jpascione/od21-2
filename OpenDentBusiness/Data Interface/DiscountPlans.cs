@@ -171,7 +171,7 @@ namespace OpenDentBusiness{
 		///no prior adjustments of the discountPlan.DefNum had been applied.</summary>
 		public static List<DiscountPlanProc> GetDiscountPlanProc(List<Procedure> listProcs,DiscountPlanSub discountPlanSub=null,DiscountPlan discountPlan=null,List<Adjustment> listAdjustments=null) {
 			//No remoting role check; No call to db.
-			if(listProcs.IsNullOrEmpty()) {
+			if(listProcs.IsNullOrEmpty() || discountPlanSub==null || discountPlan==null) {
 				return new List<DiscountPlanProc>();
 			}
 			List<DiscountPlanProc> listDiscountPlanProcs=new List<DiscountPlanProc>();
