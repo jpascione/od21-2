@@ -149,12 +149,22 @@ namespace OpenDental {
 						dateTimeStartPayPeriod= new DateTime(dateTimeStartPayPeriod.Year,dateTimeStartPayPeriod.Month,period1Day).AddDays(1);
 						dateTimeEndPayPeriod= new DateTime(dateTimeStartPayPeriod.Year,dateTimeStartPayPeriod.Month,period2Day);			
 					if(hasChosenEndDates) {//end days selected
-						payPeriod.DateStart=dateTimeStartPayPeriod;
+						if(_listPayPeriods.Count>0) {	//If we have already generated periods, start on the day after the last one ended
+							payPeriod.DateStart=_listPayPeriods.Last().DateStop.AddDays(1);
+						}
+						else {
+							payPeriod.DateStart=dateTimeStartPayPeriod;
+						}
 						payPeriod.DateStop=dateTimeEndPayPeriod;
 						payPeriod.DatePaycheck=dateTimeEndPayPeriod.AddDays(daysAfterPayPeriod);
 					}
 					else {//pay days selected
-						payPeriod.DateStart=dateTimeStartPayPeriod.AddDays(-daysAfterPayPeriod);
+						if(_listPayPeriods.Count>0) { //If we have already generated periods, start on the day after the last one ended
+							payPeriod.DateStart=_listPayPeriods.Last().DateStop.AddDays(1);
+						}
+						else {
+							payPeriod.DateStart=dateTimeStartPayPeriod.AddDays(-daysAfterPayPeriod);
+						}
 						payPeriod.DateStop=dateTimeEndPayPeriod.AddDays(-daysAfterPayPeriod);
 						payPeriod.DatePaycheck=dateTimeEndPayPeriod;						
 					}
@@ -182,12 +192,22 @@ namespace OpenDental {
 						}
 					}
 					if(hasChosenEndDates) {//end days selected		
-						payPeriod.DateStart=dateTimeStartPayPeriod;
+						if(_listPayPeriods.Count>0) { //If we have already generated periods, start on the day after the last one ended
+							payPeriod.DateStart=_listPayPeriods.Last().DateStop.AddDays(1);
+						}
+						else {
+							payPeriod.DateStart=dateTimeStartPayPeriod;
+						}
 						payPeriod.DateStop=dateTimeEndPayPeriod;
 						payPeriod.DatePaycheck=dateTimeEndPayPeriod.AddDays(daysAfterPayPeriod);
 					}
 					else {//pay days selected
-						payPeriod.DateStart=dateTimeStartPayPeriod.AddDays(-daysAfterPayPeriod);
+						if(_listPayPeriods.Count>0) { //If we have already generated periods, start on the day after the last one ended
+							payPeriod.DateStart=_listPayPeriods.Last().DateStop.AddDays(1);
+						}
+						else {
+							payPeriod.DateStart=dateTimeStartPayPeriod.AddDays(-daysAfterPayPeriod);
+						}
 						payPeriod.DateStop=dateTimeEndPayPeriod.AddDays(-daysAfterPayPeriod);
 						payPeriod.DatePaycheck=dateTimeEndPayPeriod;						
 					}
@@ -201,8 +221,11 @@ namespace OpenDental {
 				//check if last added was a weekend, adjust it if needed
 				if(_listPayPeriods.Count>0) {
 					if(_listPayPeriods.Last().DatePaycheck.DayOfWeek==DayOfWeek.Saturday && doExcludeWeekends) {
-						if(doPayBeforeWeekends) {						
+						if(doPayBeforeWeekends) {	//Paying before the weekend affects period end date. It is moved back until it is the specified num of days before payday.
 							_listPayPeriods.Last().DatePaycheck=_listPayPeriods.Last().DatePaycheck.AddDays(-1);//friday
+							while(_listPayPeriods.Last().DatePaycheck<_listPayPeriods.Last().DateStop.AddDays(textDaysAfterPayPeriod.Value)) {
+								_listPayPeriods.Last().DateStop=_listPayPeriods.Last().DateStop.AddDays(-1);
+							}
 						}
 						else {													
 							_listPayPeriods.Last().DatePaycheck=_listPayPeriods.Last().DatePaycheck.AddDays(2);//monday
@@ -211,6 +234,9 @@ namespace OpenDental {
 					else if(_listPayPeriods.Last().DatePaycheck.DayOfWeek==DayOfWeek.Sunday && doExcludeWeekends) {
 						if(doPayBeforeWeekends) {						
 							_listPayPeriods.Last().DatePaycheck=_listPayPeriods.Last().DatePaycheck.AddDays(-2);//friday
+							while(_listPayPeriods.Last().DatePaycheck<_listPayPeriods.Last().DateStop.AddDays(textDaysAfterPayPeriod.Value)) {
+								_listPayPeriods.Last().DateStop=_listPayPeriods.Last().DateStop.AddDays(-1);
+							}
 						}
 						else {													
 							_listPayPeriods.Last().DatePaycheck=_listPayPeriods.Last().DatePaycheck.AddDays(1);//monday
