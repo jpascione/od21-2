@@ -347,6 +347,19 @@ namespace OpenDental{
 						inputControl=listBox;
 						_curLocationY+=(listBox.Height)+2;
 						break;
+					case InputBoxType.RadioButton:
+						RadioButton radioButton=new RadioButton();
+						radioButton.Name="radioButton"+itemOrder;
+						radioButton.Location=new Point(posX+inputParam.Position.X,_curLocationY+inputParam.Position.Y);
+						radioButton.Size=inputParam.ParamSize==Size.Empty ? new Size(controlWidth,20) : inputParam.ParamSize;
+						radioButton.Text=inputParam.Text;
+						radioButton.FlatStyle=FlatStyle.System;
+						inputControl=radioButton;
+						if(inputParam.HasTimeout) {
+							_hasTimeout=true;
+						}
+						_curLocationY+=radioButton.Size.Height+2;
+						break;
 					default:
 						throw new NotImplementedException("InputBoxType: "+inputParam.ParamType+" not implemented.");
 				}
@@ -484,6 +497,7 @@ namespace OpenDental{
 		ValidPhone,
 		CheckBox,
 		ListBoxMulti,
+		RadioButton,
 	}
 	
 }
