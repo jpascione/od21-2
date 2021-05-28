@@ -447,17 +447,17 @@ namespace OpenDental {
 			msg+=Lan.g("ContrAccount","Would you like to:");
 			using InputBox inputBox=new InputBox(new List<InputBoxParam>()
 			{
-				new InputBoxParam(InputBoxType.CheckBox,msg,Lan.g("ContrAccount","Change the claim status to 'Waiting to send'"),Size.Empty),
-				new InputBoxParam(InputBoxType.CheckBox,"",Lan.g("ContrAccount","Send secondary claim(s) now"),Size.Empty),
-				new InputBoxParam(InputBoxType.CheckBox,"",Lan.g("ContrAccount","Do nothing"),Size.Empty)
+				new InputBoxParam(InputBoxType.RadioButton,msg,Lan.g("ContrAccount","Change the claim status to 'Waiting to send'"),Size.Empty),
+				new InputBoxParam(InputBoxType.RadioButton,"",Lan.g("ContrAccount","Send secondary claim(s) now"),Size.Empty),
+				new InputBoxParam(InputBoxType.RadioButton,"",Lan.g("ContrAccount","Do nothing"),Size.Empty)
 			});
 			inputBox.setTitle(Lan.g("ContrAccount","Outstanding secondary claims"));
 			inputBox.Size=new Size(450,200);
 			if(inputBox.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
-			CheckBox selectedCheckBox=inputBox.PanelClient.Controls.OfType<CheckBox>().Where(x=>x.Checked).First();
-			if(selectedCheckBox.Text.Contains("Do nothing")) {
+			RadioButton selectedRadioButton=inputBox.PanelClient.Controls.OfType<RadioButton>().Where(x=>x.Checked).First();
+			if(selectedRadioButton.Text.Contains("Do nothing")) {
 				return;
 			}
 			//We need to update claims status to 'Waiting to Send' regardless of what option they check. See Claims.GetQueueList(...) below.
@@ -465,7 +465,7 @@ namespace OpenDental {
 				claim.ClaimStatus="W";
 				Claims.Update(claim);
 			}
-			if(selectedCheckBox.Text.Contains("Send secondary claim")) {
+			if(selectedRadioButton.Text.Contains("Send secondary claim")) {
 				//Most likely all of the procedures on the primary claim will have all of the procedures on 1 secondary claim. Expecially since most of time the 
 				//claim will be created automatically. The only time they don't get created automatically is when the patient doesn't have a secondary claim 
 				//at the time the primary claim gets created. Even if the user created the claim manually, the chances that the procedures on the primary have more than
