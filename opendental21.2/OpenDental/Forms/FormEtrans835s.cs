@@ -65,8 +65,10 @@ namespace OpenDental {
 		}
 
 		private void FormEtrans835s_Shown(object sender,EventArgs e) {
-			//This must be in Shown due to the progress bar forcing this window behind other windows.
-			FilterAndFillGrid(isRefreshNeeded:true);
+			if(PrefC.GetBool(PrefName.EraRefreshOnLoad)) {
+				//This must be in Shown due to the progress bar forcing this window behind other windows.
+				FilterAndFillGrid(isRefreshNeeded:true);
+			}
 		}
 
 		///<summary>Returns false when either _reportDateFrom or _reportDateTo are invalid.</summary>

@@ -59,6 +59,7 @@ namespace OpenDental {
 			this.checkEnableEmailAddressAutoComplete = new System.Windows.Forms.CheckBox();
 			this.checkUpdateAlterLargeTablesDirectly = new System.Windows.Forms.CheckBox();
 			this.groupPatientSelect = new System.Windows.Forms.GroupBox();
+			this.checkEnterpriseAllowRefresh = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.textPhoneNumDigits = new OpenDental.ValidNum();
 			this.checkMatchExactPhoneNum = new System.Windows.Forms.CheckBox();
@@ -126,7 +127,8 @@ namespace OpenDental {
 			this.label11 = new System.Windows.Forms.Label();
 			this.label9 = new System.Windows.Forms.Label();
 			this.butOK = new OpenDental.UI.Button();
-			this.checkEnterpriseAllowRefresh = new System.Windows.Forms.CheckBox();
+			this.tabManage = new System.Windows.Forms.TabPage();
+			this.checkEra835sRefreshOnLoad = new System.Windows.Forms.CheckBox();
 			this.tabControlMain.SuspendLayout();
 			this.tabAccount.SuspendLayout();
 			this.groupBoxClaimIdPrefix.SuspendLayout();
@@ -139,6 +141,7 @@ namespace OpenDental {
 			this.tabReport.SuspendLayout();
 			this.groupConnectionSettings.SuspendLayout();
 			this.groupMiddleTier.SuspendLayout();
+			this.tabManage.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// butCancel
@@ -159,6 +162,7 @@ namespace OpenDental {
 			this.tabControlMain.Controls.Add(this.tabAppts);
 			this.tabControlMain.Controls.Add(this.tabFamily);
 			this.tabControlMain.Controls.Add(this.tabReport);
+			this.tabControlMain.Controls.Add(this.tabManage);
 			this.tabControlMain.Location = new System.Drawing.Point(6, 6);
 			this.tabControlMain.Name = "tabControlMain";
 			this.tabControlMain.SelectedIndex = 0;
@@ -556,6 +560,17 @@ namespace OpenDental {
 			this.groupPatientSelect.TabIndex = 289;
 			this.groupPatientSelect.TabStop = false;
 			this.groupPatientSelect.Text = "Patient Select";
+			// 
+			// checkEnterpriseAllowRefresh
+			// 
+			this.checkEnterpriseAllowRefresh.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkEnterpriseAllowRefresh.Location = new System.Drawing.Point(6, 166);
+			this.checkEnterpriseAllowRefresh.Name = "checkEnterpriseAllowRefresh";
+			this.checkEnterpriseAllowRefresh.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+			this.checkEnterpriseAllowRefresh.Size = new System.Drawing.Size(461, 18);
+			this.checkEnterpriseAllowRefresh.TabIndex = 292;
+			this.checkEnterpriseAllowRefresh.Text = "Allow Refresh While Typing in Select Patient Window";
+			this.checkEnterpriseAllowRefresh.UseVisualStyleBackColor = true;
 			// 
 			// label2
 			// 
@@ -1268,16 +1283,26 @@ namespace OpenDental {
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
-			// checkEnterpriseAllowRefresh
+			// tabManage
 			// 
-			this.checkEnterpriseAllowRefresh.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkEnterpriseAllowRefresh.Location = new System.Drawing.Point(6, 166);
-			this.checkEnterpriseAllowRefresh.Name = "checkEnterpriseAllowRefresh";
-			this.checkEnterpriseAllowRefresh.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-			this.checkEnterpriseAllowRefresh.Size = new System.Drawing.Size(461, 18);
-			this.checkEnterpriseAllowRefresh.TabIndex = 292;
-			this.checkEnterpriseAllowRefresh.Text = "Allow Refresh While Typing in Select Patient Window";
-			this.checkEnterpriseAllowRefresh.UseVisualStyleBackColor = true;
+			this.tabManage.Controls.Add(this.checkEra835sRefreshOnLoad);
+			this.tabManage.Location = new System.Drawing.Point(4, 22);
+			this.tabManage.Name = "tabManage";
+			this.tabManage.Size = new System.Drawing.Size(494, 593);
+			this.tabManage.TabIndex = 8;
+			this.tabManage.Text = "Manage";
+			this.tabManage.UseVisualStyleBackColor = true;
+			// 
+			// checkEra835sRefreshOnLoad
+			// 
+			this.checkEra835sRefreshOnLoad.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkEra835sRefreshOnLoad.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkEra835sRefreshOnLoad.Location = new System.Drawing.Point(154, 12);
+			this.checkEra835sRefreshOnLoad.Name = "checkEra835sRefreshOnLoad";
+			this.checkEra835sRefreshOnLoad.Size = new System.Drawing.Size(319, 18);
+			this.checkEra835sRefreshOnLoad.TabIndex = 273;
+			this.checkEra835sRefreshOnLoad.Text = "ERA 835s window refresh data on load";
+			this.checkEra835sRefreshOnLoad.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// FormEnterpriseSetup
 			// 
@@ -1310,6 +1335,7 @@ namespace OpenDental {
 			this.groupConnectionSettings.PerformLayout();
 			this.groupMiddleTier.ResumeLayout(false);
 			this.groupMiddleTier.PerformLayout();
+			this.tabManage.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -1419,5 +1445,7 @@ namespace OpenDental {
 		private ValidNum textPhoneNumDigits;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.CheckBox checkEnterpriseAllowRefresh;
+		private System.Windows.Forms.TabPage tabManage;
+		private System.Windows.Forms.CheckBox checkEra835sRefreshOnLoad;
 	}
 }

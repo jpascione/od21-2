@@ -913,6 +913,9 @@ namespace OpenDentBusiness {
 		///<summary>Boolean, true by default.  When true, the ERA 'Verify and Enter Payment' window will post WriteOffs for procedures covered by category percentage or 
 		///medicaid/flat copay insurance plans.  When false, WriteOffs will not be posted for these insurance plan types.</summary>
 		EraIncludeWOPercCoPay,
+		///<summary>Boolean, true by default.  When true loads database data for ERAs when loading the ERA 835s window.  Enterprise only for now.</summary>
+		[PrefName(ValueType=PrefValueType.BOOL)]
+		EraRefreshOnLoad,
 		///<summary>Boolean, false by default.  When true FormEtrans835 allows the user to filter by Control ID and shows the value in a grid column.
 		///Otherwise Control ID UI is not visable and can not be used.</summary>
 		[PrefName(ValueType=PrefValueType.BOOL)]
