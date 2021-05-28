@@ -179,8 +179,8 @@ namespace OpenDental {
 			StringBuilder stringBuilder=new StringBuilder();
 			string feeSchedDescriptionCur=FeeScheds.GetFirstOrDefault(x => x.FeeSchedNum==DiscountPlanCur.FeeSchedNum,true)?.Description??"";
 			string adjustmentTypeCur=_listDefsAdjTypes.FirstOrDefault(x => x.DefNum==DiscountPlanCur.DefNum)?.ItemName??"";
-			string feeSchedDescriptionOld=FeeScheds.GetFirstOrDefault(x => x.FeeSchedNum==DiscountPlanCur.FeeSchedNum,true)?.Description??"";
-			string adjustmentTypeOld=_listDefsAdjTypes.FirstOrDefault(x => x.DefNum==DiscountPlanCur.DefNum)?.ItemName??"";
+			string feeSchedDescriptionOld=FeeScheds.GetFirstOrDefault(x => x.FeeSchedNum==_discountPlanOld.FeeSchedNum,true)?.Description??"";
+			string adjustmentTypeOld=_listDefsAdjTypes.FirstOrDefault(x => x.DefNum==_discountPlanOld.DefNum)?.ItemName??"";
 			bool isNew=DiscountPlanCur.IsNew;
 			if(isNew) {
 				stringBuilder.AppendLine("New discount plan added:");
