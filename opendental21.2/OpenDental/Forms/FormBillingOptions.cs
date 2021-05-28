@@ -616,14 +616,19 @@ namespace OpenDental{
 		private int CreateManyHelper(List<long> listClinicNums) {
 			Cursor=Cursors.WaitCursor;
 			//Action actionClosingProgress=ODProgress.Show(ODEventType.Billing,typeof(BillingEvent),Lan.g(this,"Creating Billing Lists")+"...");
-			Dictionary<long,PatAgingData> dictionaryPatAgingData=AgingData.GetAgingData(checkSinglePatient.Checked,checkIncludeChanged.Checked,
-				checkExcludeInsPending.Checked,checkExcludeIfProcs.Checked,checkSuperFam.Checked,listClinicNums);
+			Dictionary<long,Dictionary<long,PatAgingData>> dictionaryClinicPatAgingData=AgingData.GetAgingData(checkSinglePatient.Checked,checkIncludeChanged.Checked,
+					checkExcludeInsPending.Checked,checkExcludeIfProcs.Checked,checkSuperFam.Checked,listClinicNums)
+				.GroupBy(x => x.Value.ClinicNum)
+				.ToDictionary(x => x.Key,x => x.ToDictionary(y => y.Key,y => y.Value));
 			int countAllClinics=0;
 			for(int i=0;i<listClinicNums.Count;i++) {
 				//BillingEvent.Fire(ODEventType.Billing,Lan.g(this,"Creating Billing Lists")+"..."+"("+(i+1).ToString()+"/"
 				//	+listClinicNums.Count.ToString()+")");
 				//jordan If we really want the above line, then we would use the chained series example pattern.
 				//The log string would be class wide because there is no progress bar at this exact location.
+				if(!dictionaryClinicPatAgingData.TryGetValue(listClinicNums[i],out Dictionary<long,PatAgingData> dictionaryPatAgingData)) {
+					dictionaryPatAgingData=new Dictionary<long,PatAgingData>();
+				}
 				int countThisClinic=CreateHelper(listClinicNums[i],checkUseClinicDefaults.Checked,true,dictionaryPatAgingData);
 				if(countThisClinic==-1){
 					Cursor=Cursors.Default;

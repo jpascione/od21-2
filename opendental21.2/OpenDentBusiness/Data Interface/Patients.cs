@@ -307,18 +307,39 @@ namespace OpenDentBusiness {
 			return dictAll.Values.ToList();
 		}
 
-		public static void SetDateBalBegan(long clinicNum,ref List<PatAging> listPatAgingAll,ref List<ClinicBalBegans> listClinicBalBegans) {
+		///<summary>Sets the DateBalBegan field for all PatAging objects in listPatAgingAll using the values calculated in listClinicBalBegans.  Will fill listClinicBalBegans with the
+		///guarantor and DateBalBegan values for all clinics the user has permission to access if it is null or empty.  If clinics are not enabled, listClinicBalBegans will have one
+		///item in it with ClinicNum 0.</summary>
+		/// <param name="clinicNum">The currently selected clinic, or 0 if clinics are not enabled.</param>
+		/// <param name="listClinicNums">The list of all ClinicNums the current user has permission to access.</param>
+		/// <param name="listPatAgingAll">The currently selected clinic's list of all PatAgings.</param>
+		/// <param name="listClinicBalBegans">Could be null or empty.  Once this method has been run once, this will be the list of ClinicBalBegans for all clinics for which the user
+		/// has permission to access.  It will remain filled while FormArManager is open or until the user presses the Run Aging button.</param>
+		public static void SetDateBalBegan(long clinicNum,ref List<PatAging> listPatAgingAll,ref List<ClinicBalBegans> listClinicBalBegans,List<long> listClinicNums=null) {
 			//No need to check RemotingRole; no call to db and uses ref parameters.
-			Dictionary<long,PatAging> dictAll=listPatAgingAll.ToDictionary(x => x.PatNum);
-			if(!listClinicBalBegans.Any(x => x.ClinicNum==clinicNum)) {
-				listClinicBalBegans.Add(new ClinicBalBegans(clinicNum,Ledgers.GetDateBalanceBegan(clinicNum)));//uses today's date, doesn't consider super families
+			Dictionary<long,PatAging> dictionaryAll=listPatAgingAll.ToDictionary(x => x.PatNum);
+			if(PrefC.GetBool(PrefName.AgingIsEnterprise)) {
+				if(listClinicBalBegans.IsNullOrEmpty()) {
+					listClinicBalBegans=Ledgers.GetDateBalanceBeganEnterprise(listClinicNums);//uses today's date, doesn't consider super families
+				}
+				if(listClinicBalBegans.All(x => x.ClinicNum!=clinicNum)) {
+					listClinicBalBegans.Add(Ledgers.GetDateBalanceBeganEnterprise(new List<long> { clinicNum }).First(x => x.ClinicNum==clinicNum));
+				}
 			}
-			Dictionary<long,DateTime> dictDateBals=listClinicBalBegans.First(x => x.ClinicNum==clinicNum).DictGuarDateBals;//guaranteed to contain clinicNum from above
-			foreach(long patNum in dictAll.Keys) {
-				if(!dictDateBals.ContainsKey(patNum)) {
+			else {
+				if(listClinicBalBegans.All(x => x.ClinicNum!=clinicNum)) {
+					listClinicBalBegans.Add(Ledgers.GetDateBalanceBegan(clinicNum));//uses today's date, doesn't consider super families
+				}
+			}
+			Dictionary<long,DateTime> dictionaryDateBals=listClinicBalBegans.First(x => x.ClinicNum==clinicNum).DictionaryGuarDateBals;//guaranteed to contain clinicNum from above
+			if(dictionaryDateBals.Values.Count==0) {
+				return;
+			}
+			foreach(long patNum in dictionaryAll.Keys) {
+				if(!dictionaryDateBals.ContainsKey(patNum)) {
 					continue;
 				}
-				dictAll[patNum].DateBalBegan=dictDateBals[patNum];
+				dictionaryAll[patNum].DateBalBegan=dictionaryDateBals[patNum];
 			}
 		}
 
@@ -2742,7 +2763,7 @@ namespace OpenDentBusiness {
 				FROM patient
 				{whereClause}
 				ORDER BY LName,FName";
-			return Db.GetTable(command).Select().Select(x => 
+			return Db.GetList(command,x =>
 				new PatAging() {
 					PatNum          = PIn.Long(x["PatNum"].ToString()),
 					Bal_0_30        = PIn.Double(x["Bal_0_30"].ToString()),
@@ -2760,7 +2781,7 @@ namespace OpenDentBusiness {
 					SuperFamily     = PIn.Long(x["SuperFamily"].ToString()),
 					HasSuperBilling = PIn.Bool(x["HasSuperBilling"].ToString()),
 					ClinicNum       = PIn.Long(x["ClinicNum"].ToString())
-				}).ToList();
+				});
 		}
 
 		///<summary>Used only by the OpenDentalService Transworld thread to sync accounts sent for collection.  Gets a list of PatAgings for the guars
@@ -5071,13 +5092,22 @@ namespace OpenDentBusiness {
 		}
 	}
 
+	///<summary>Contains a ClinicNum and a serializable dictionary of key=PatNum of guarantor, value=DateTime that the guarantor first had a bal>0 that has not been paid.</summary>
+	[Serializable]
 	public class ClinicBalBegans {
+		///<summary>Patient.ClinicNum of the guarantor of the family.</summary>
 		public long ClinicNum;
-		public Dictionary<long,DateTime> DictGuarDateBals;
+		///<summary>Key=PatNum of guarantor, value=DateTime that the guarantor first started to carry a bal>0.</summary>
+		public SerializableDictionary<long,DateTime> DictionaryGuarDateBals;
 
-		public ClinicBalBegans(long clinicNum,Dictionary<long,DateTime> dictGuarDateBals) {
+		///<summary>Required for serialization. Do not use.</summary>
+		public ClinicBalBegans() {
+		}
+
+		///<summary>DictGuarDateBals will be set to a new SerializableDictionary if dictGuarDateBals is null or not provided.</summary>
+		public ClinicBalBegans(long clinicNum,SerializableDictionary<long,DateTime> dictionaryGuarDateBals=null) {
 			ClinicNum=clinicNum;
-			DictGuarDateBals=dictGuarDateBals;
+			DictionaryGuarDateBals=dictionaryGuarDateBals??new SerializableDictionary<long,DateTime>();
 		}
 	}
 	
