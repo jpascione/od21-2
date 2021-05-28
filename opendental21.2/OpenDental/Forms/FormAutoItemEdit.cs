@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using OpenDentBusiness;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OpenDental{
 	///<summary></summary>
@@ -13,6 +14,13 @@ namespace OpenDental{
     public bool IsNew;
 		///<summary>Set this value externally before opening this form, even if IsNew.</summary>
 		public AutoCodeItem AutoCodeItemCur;
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormAutoItemEditCanada";
+			}
+			return "FormAutoItemEdit";
+		}
 
 		///<summary></summary>
 		public FormAutoItemEdit(){

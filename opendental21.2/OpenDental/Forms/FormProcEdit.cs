@@ -92,6 +92,13 @@ namespace OpenDental {
 			}
 		}
 
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA") && tabControl.SelectedTab==tabPageCanada) {
+				return "FormProcEditCanada";
+			}
+			return "FormProcEdit";
+		}
+
 		private void FillFees(){
 			List<ProcedureCode> listProcedureCodes=new List<ProcedureCode>(){ ProcedureCodes.GetProcCode(_procCur.CodeNum) };
 			List<Procedure> listProcedures=new List<Procedure>(){_procCur };

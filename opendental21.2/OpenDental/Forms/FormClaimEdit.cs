@@ -89,6 +89,9 @@ namespace OpenDental{
 			if(_claimCur.ClaimType.ToLower()=="preauth"){
 				return "FormClaimEditPreauth";
 			}
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormClaimEditCanada";
+			}
 			else{
 				return "FormClaimEdit";
 			}

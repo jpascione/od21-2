@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using OpenDental.UI;
 using OpenDentBusiness;
+using System.Globalization;
 
 namespace OpenDental {
 	///<summary></summary>
@@ -21,6 +22,13 @@ namespace OpenDental {
 			InitializeLayoutManager();
 			_covCatCur=covCatCur.Copy();
 			Lan.F(this);
+		}
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormInsCatEditCanada";
+			}
+			return "FormInsCatEdit";
 		}
 
 		private void FormInsCatEdit_Load(object sender,System.EventArgs e) {

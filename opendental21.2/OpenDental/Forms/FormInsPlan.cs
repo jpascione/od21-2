@@ -93,6 +93,13 @@ namespace OpenDental{
 			}
 		}
 
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormInsPlanCanada";
+			}
+			return "FormInsPlan";
+		}
+
 		///<summary>Called from ContrFamily and FormInsPlans. Must pass in the plan, patPlan, and sub, although patPlan and sub can be null.</summary>
 		public FormInsPlan(InsPlan InsPlanCur,PatPlan patPlanCur,InsSub insSubCur){
 			Cursor=Cursors.WaitCursor;
