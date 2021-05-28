@@ -139,6 +139,9 @@ namespace OpenDental {
 			FillComboDatabases();
 			SetReportServerUIEnabled();
 			#endregion Reports Tab
+			#region Manage Tab
+			checkEra835sRefreshOnLoad.Checked=PrefC.GetBool(PrefName.EraRefreshOnLoad);
+			#endregion Manage Tab
 		}
 
 		///<summary>Load values from database for hidden preferences if they exist.  If a pref doesn't exist then the corresponding UI is hidden.</summary>
@@ -287,6 +290,7 @@ namespace OpenDental {
 				| Prefs.UpdateBool(PrefName.EnterpriseExactMatchPhone,checkMatchExactPhoneNum.Checked)
 				| Prefs.UpdateInt(PrefName.EnterpriseExactMatchPhoneNumDigits,PIn.Int(textPhoneNumDigits.Text))
 				| Prefs.UpdateBool(PrefName.EnterpriseAllowRefreshWhileTyping,checkEnterpriseAllowRefresh.Checked)
+				| Prefs.UpdateBool(PrefName.EraRefreshOnLoad,checkEra835sRefreshOnLoad.Checked)
 			)
 			{
 				hasChanges=true;

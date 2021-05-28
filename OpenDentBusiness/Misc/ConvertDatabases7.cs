@@ -525,6 +525,12 @@ namespace OpenDentBusiness {
 			}
 		}
 
+		private static void To20_5_57() {
+			string command;
+			command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraRefreshOnLoad','1')";//Default to true.
+			Db.NonQ(command);
+		}//End of 20_5_57() method
+
 		private static void To21_1_1() {
 			string command;
 			DataTable table;
@@ -785,6 +791,14 @@ namespace OpenDentBusiness {
 					WHERE ExamFreqLimit=0 AND XrayFreqLimit=0 AND ProphyFreqLimit=0 AND FluorideFreqLimit=0 AND PerioFreqLimit=0 AND LimitedExamFreqLimit=0 AND PAFreqLimit=0";
 			Db.NonQ(command);
 		}//End of 21_1_28() method
+
+		private static void To21_1_31() {
+			string command="SELECT * FROM preference WHERE PrefName='EraRefreshOnLoad'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraRefreshOnLoad','1')";//Default to true.
+				Db.NonQ(command);
+			}
+		}//End of 21_1_31() method
 
 		private static void To21_2_1() {
 			string command;
@@ -1169,6 +1183,11 @@ namespace OpenDentBusiness {
 				INDEX(ApptReminderRuleNum)
 				) DEFAULT CHARSET=utf8";
 			Db.NonQ(command);
+			command="SELECT * FROM preference WHERE PrefName='EraRefreshOnLoad'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraRefreshOnLoad','1')";//Default to true.
+				Db.NonQ(command);
+			}
 		}//End of 21_2_1() method
 	}
 }
