@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using OpenDental.UI;
 using OpenDentBusiness;
 using CodeBase;
+using System.Globalization;
 
 namespace OpenDental{
 	/// <summary>
@@ -18,6 +19,13 @@ namespace OpenDental{
 		//public bool IsSelectionMode;
 		//<summary>Only used if IsSelectionMode.  On OK, contains selected pharmacyNum.  Can be 0.  Can also be set ahead of time externally.</summary>
 		//public int SelectedPharmacyNum;
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormRecallTypesCanada";
+			}
+			return "FormRecallTypes";
+		}
 
 		///<summary></summary>
 		public FormRecallTypes()

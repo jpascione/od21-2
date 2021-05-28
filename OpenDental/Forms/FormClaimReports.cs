@@ -10,6 +10,7 @@ using OpenDentBusiness;
 using CodeBase;
 using System.Net;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OpenDental{
 	/// <summary>
@@ -19,6 +20,13 @@ namespace OpenDental{
 		///<summary>If true, then reports will be automatically retrieved for default clearinghouse.  Then this form will close.</summary>
 		public bool AutomaticMode;
 		private List<Clearinghouse> _listHqClearinghouses;
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormClaimReportsCanada";
+			}
+			return "FormClaimReports";
+		}
 
 		///<summary></summary>
 		public FormClaimReports()

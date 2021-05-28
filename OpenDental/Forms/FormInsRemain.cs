@@ -5,12 +5,18 @@ using OpenDentBusiness;
 using OpenDental.UI;
 using CodeBase;
 using System.Linq;
+using System.Globalization;
 
 namespace OpenDental {
 	public partial class FormInsRemain:FormODBase {
 
 		private Patient _patCur;
 		private Family _famCur;
+
+		protected override string GetHelpOverride() {
+			return "FormInsRemain";//Canada-only page
+		}
+
 
 		public FormInsRemain(long selectedPatNum) {
 			InitializeComponent();

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using OpenDentBusiness;
 using CodeBase;
 using OpenDental.UI;
+using System.Globalization;
 
 namespace OpenDental{
 ///<summary></summary>
@@ -14,6 +15,14 @@ namespace OpenDental{
 		private bool _isDefChanged;
 		///<summary>All defs for the selected category, sorted.</summary>
 		private List<Def> _listDefsAll;
+
+		protected override string GetHelpOverride() {
+			DefCatOptions defCatOption=(DefCatOptions)listCategory.SelectedItem;
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA") && defCatOption.DefCat==DefCat.ApptProcsQuickAdd) {
+				return "FormDefinitionsCanada";
+			}
+			return "FormDefinitions";
+		}
 
 		///<summary>Must check security before allowing this window to open.</summary>
 		public FormDefinitions(DefCat defCatInitial){

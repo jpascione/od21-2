@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using OpenDentBusiness;
 using OpenDental.UI;
+using System.Globalization;
 
 namespace OpenDental{
 	///<summary></summary>
@@ -16,6 +17,13 @@ namespace OpenDental{
 		public AutoCode AutoCodeCur;
 		List<AutoCodeItem> listForCode;
 		private List<AutoCodeCond> _listAutoCodeConds;
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormAutoCodeEditCanada";
+			}
+			return "FormAutoCodeEdit";
+		}
 
 		///<summary></summary>
 		public FormAutoCodeEdit(){

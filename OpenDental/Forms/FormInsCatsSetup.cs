@@ -6,12 +6,20 @@ using System.Windows.Forms;
 using OpenDental.UI;
 using OpenDentBusiness;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OpenDental {
 	///<summary></summary>
 	public partial class FormInsCatsSetup:FormODBase {
 		private bool changed;
 		private List<CovCat> _listCovCats;
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormInsCatsSetupCanada";
+			}
+			return "FormInsCatsSetup";
+		}
 
 		///<summary></summary>
 		public FormInsCatsSetup() {

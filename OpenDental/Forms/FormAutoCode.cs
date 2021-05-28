@@ -5,12 +5,20 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using OpenDentBusiness;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace OpenDental{
 	///<summary></summary>
 	public partial class FormAutoCode : FormODBase {
 		private bool changed;
 		private List<AutoCode> _listAutoCodes=new List<AutoCode>();
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormAutoCodeCanada";
+			}
+			return "FormAutoCode";
+		}
 
 		///<summary></summary>
 		public FormAutoCode(){

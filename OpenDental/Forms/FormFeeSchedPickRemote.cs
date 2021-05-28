@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -41,6 +42,13 @@ namespace OpenDental {
 			get {
 				return ListFeeSchedFilesOntario.Contains(FileChosenName);
 			}
+		}
+
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormFeeSchedPickRemoteCanada";
+			}
+			return "FormFeeSchedTools";
 		}
 
 		public FormFeeSchedPickRemote() {

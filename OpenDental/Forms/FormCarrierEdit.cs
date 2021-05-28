@@ -17,6 +17,13 @@ namespace OpenDental{
 		public bool IsNew;
 		public Carrier CarrierCur;
 
+		protected override string GetHelpOverride() {
+			if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {
+				return "FormCarrierEditCanada";
+			}
+			return "FormCarrierEdit";
+		}
+
 		///<summary></summary>
 		public FormCarrierEdit(){
 			//
