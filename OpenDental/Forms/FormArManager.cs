@@ -53,7 +53,7 @@ namespace OpenDental {
 			_listBillTypesNoColl=billTypeDefs.Where(x => x.ItemValue.ToLower()!="c" && x.ItemValue.ToLower()!="ce").Select(x => x.Copy()).ToList();//This probably needs to change
 			_listClinics=new List<Clinic>();
 			if(PrefC.HasClinicsEnabled) {
-				_listClinics.AddRange(Clinics.GetForUserod(Security.CurUser,true,Lan.g(this,"Unassigned")).OrderBy(x => x.ClinicNum!=0).ThenBy(x => x.ItemOrder));
+				_listClinics.AddRange(Clinics.GetForUserod(Security.CurUser,true,Lan.g(this,"Unassigned")));
 			}
 			else {//clinics disabled
 				_listClinics.Add(Clinics.GetPracticeAsClinicZero(Lan.g(this,"Unassigned")));
@@ -342,7 +342,6 @@ namespace OpenDental {
 
 		///<summary>If aging happened automatically, like on load, pass in isAutomatic=true.  Returns true if aging was processed successfully.</summary>
 		private bool RunAgingIfNecessary(bool isAutomatic) {
-			_listClinicBalBegans=new List<ClinicBalBegans>();
 			string msgText="";
 			if(PrefC.GetBool(PrefName.AgingIsEnterprise)) {
 				return RunAgingEnterprise(isAutomatic);
@@ -365,6 +364,7 @@ namespace OpenDental {
 				}
 				SecurityLogs.MakeLogEntry(Permissions.AgingRan,0,"Aging complete - AR Manager");
 				AgingRanAuditHelper(isAutomatic);
+				_listClinicBalBegans=new List<ClinicBalBegans>();//will cause the list to be refreshed when setting the date bal begans for a clinic before filling the grids
 			}
 			msgText="Last aging date seems old.  Would you like to run aging now?  The account list will load whether or not aging gets updated.";
 			//All places in the program where aging can be run for all patients, the Setup permission is required because it can take a long time.
@@ -378,6 +378,9 @@ namespace OpenDental {
 				FormA.ShowDialog();
 				//FormAging has its own Audit Trail entries.
 				//The success or failure of aging in this window does not affect the return result here.
+				if(FormA.DialogResult==DialogResult.OK) {
+					_listClinicBalBegans=new List<ClinicBalBegans>();//will cause the list to be refreshed when setting the date bal begans for a clinic before filling the grids
+				}
 			}
 			return true;
 		}
@@ -409,6 +412,7 @@ namespace OpenDental {
 			progressOD.ActionMain=() => { 
 				Ledgers.ComputeAging(0,dtToday);
 				Prefs.UpdateString(PrefName.DateLastAging,POut.Date(dtToday,false));
+				_listClinicBalBegans=new List<ClinicBalBegans>();//will cause the list to be refreshed when setting the date bal begans for a clinic before filling the grids
 			};
 			progressOD.StartingMessage=msgText;
 			progressOD.TestSleep=true;
@@ -469,6 +473,10 @@ namespace OpenDental {
 			if(sortedByColumnIndexOld>-1) {//If the grid was being sorted by a column prior to BeginUpdate() then re-apply the sorting
 				gridExcluded.SortForced(sortedByColumnIndexOld,isAscendingOld);
 			}
+			List<long> listClinicNums=null;
+			if(PrefC.GetBool(PrefName.AgingIsEnterprise) && PrefC.HasClinicsEnabled) {
+				listClinicNums=_listClinics.Select(x => x.ClinicNum).ToList();
+			}
 			string msgText=Lan.g(this,"Retrieving aging list as of")+" "+MiscData.GetNowDateTime().ToShortDateString()+"...";
 			ProgressOD progressOD=new ProgressOD();
 			progressOD.ActionMain=() => { 
@@ -476,9 +484,7 @@ namespace OpenDental {
 				_listPatAgingUnsentAll=new List<PatAging>();
 				_listPatAgingExcludedAll=new List<PatAging>();
 				List<PatAging> listPatAgingAll=Patients.GetAgingList(_selectedClinicNum);
-				GC.Collect();//necessary because we are in a thread and need to garbage collect before starting the next method or we may get an OOM error
-				Patients.SetDateBalBegan(_selectedClinicNum,ref listPatAgingAll,ref _listClinicBalBegans);
-				GC.Collect();//to reclaim the temporary memory used by the above method
+				Patients.SetDateBalBegan(_selectedClinicNum,ref listPatAgingAll,ref _listClinicBalBegans,listClinicNums);
 				foreach(PatAging ptAgeCur in listPatAgingAll) {
 					if(_collectionBillType!=null && ptAgeCur.BillingType==_collectionBillType.DefNum) {
 						_listPatAgingSentAll.Add(ptAgeCur);

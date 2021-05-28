@@ -755,19 +755,42 @@ namespace OpenDentBusiness{
 				)).ToList();
 		}
 
+		///<summary>Gets the earliest date of any portion of the current balance for all guarantors in the database.  Used for A/R Manager (Transworld).  Returns a list of
+		///ClinicDateBalBegans, each clinic in listClinicNums with a dictionary of key=PatNum of guarantor, value=earliest date of balance or MinValue if no balance, for all guarantors
+		///for the clinic.</summary>
+		public static List<ClinicBalBegans> GetDateBalanceBeganEnterprise(List<long> listClinicNums) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<ClinicBalBegans>>(MethodBase.GetCurrentMethod(),listClinicNums);
+			}
+			//Create a dictionary that tells a story about the transactions and their dates for each family.
+			List<ClinicBalBegans> listClinicBalBegans=GetGuarDateBalsEnterprise(DateTime.Today,listClinicNums:listClinicNums)
+				.Select(x => new ClinicBalBegans(x.ClinicNum,
+					//find the earliest trans that uses up the account credits and is therefore the trans date for which the account balance is "first" positive
+					x.DictionaryGuarDateBals.ToSerializableDictionary(y => y.Key,y => y.Value.Where(z => z.Bal>0.005).Select(z => z.TranDate).DefaultIfEmpty(DateTime.MinValue).Min())))
+				.ToList();
+			if(!listClinicNums.IsNullOrEmpty()) {
+				List<long> listMissingClinicNums=listClinicNums.FindAll(x => listClinicBalBegans.All(y => y.ClinicNum!=x));//just in case, shouldn't happen
+				//add any clinics in the supplied list that are not in the returned list with empty dictionaries of date bals, just so every clinic is sure to be in the returned list
+				listClinicBalBegans.AddRange(listMissingClinicNums.Select(x => new ClinicBalBegans(x)));//won't add any if listMissingClinicNums is empty
+			}
+			return listClinicBalBegans;
+		}
+
 		///<summary>Gets the earliest date of any portion of the current balance for all guarantors in the database.  Used for A/R Manager (Transworld).
 		///Returns SerializableDictionary&lt;long,DateTime> with Key=GuarNum, Value=earliest date of balance or MinValue if no balance.</summary>
-		public static SerializableDictionary<long,DateTime> GetDateBalanceBegan(long clinicNum) {
+		public static ClinicBalBegans GetDateBalanceBegan(long clinicNum) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetSerializableDictionary<long,DateTime>(MethodBase.GetCurrentMethod(),clinicNum);
+				return Meth.GetObject<ClinicBalBegans>(MethodBase.GetCurrentMethod(),clinicNum);
 			}
 			List<long> listClinNums=null;
 			if(PrefC.HasClinicsEnabled) {
 				listClinNums=new List<long>() { clinicNum };
 			}
-			return GetGuarDateBals(DateTime.Today,listClinicNums:listClinNums)//Create a dictionary that tells a story about the transactions and their dates for each family.
+			//Create a dictionary that tells a story about the transactions and their dates for each family.
+			SerializableDictionary<long,DateTime> dictionaryGuarDateBals=GetGuarDateBals(DateTime.Today,listClinicNums:listClinNums)
 				//find the earliest trans that uses up the account credits and is therefore the trans date for which the account balance is "first" positive
 				.ToSerializableDictionary(x => x.Key,x => x.Value.Where(y => y.Bal>0.005).Select(y => y.TranDate).DefaultIfEmpty(DateTime.MinValue).Min());
+			return new ClinicBalBegans(clinicNum,dictionaryGuarDateBals);
 		}
 		
 		///<summary>Returns a data table with columns: PatNum, DateAccountAge, DateZeroBal, and ClinicNum.  If listGuarantors is empty or null, gets for
@@ -812,8 +835,14 @@ namespace OpenDentBusiness{
 				patNumStr=string.Join(",",listPatNumsAll);
 			}
 			//Create a dictionary that tells a story about the transactions and their dates for each family.
-			Dictionary<long,List<GuarDateBals>> dictGuarDateBals=GetGuarDateBals(dateAsOf,patNumStr,listClinicNums);
-			if(dictGuarDateBals.Count<1) {
+			Dictionary<long,List<GuarDateBals>> dictionaryGuarDateBals;
+			if(PrefC.GetBool(PrefName.AgingIsEnterprise)) {
+				dictionaryGuarDateBals=GetGuarDateBalsEnterprise(dateAsOf,patNumStr,listClinicNums).SelectMany(x => x.DictionaryGuarDateBals).ToDictionary(x => x.Key,x => x.Value);
+			}
+			else {
+				dictionaryGuarDateBals=GetGuarDateBals(dateAsOf,patNumStr,listClinicNums);
+			}
+			if(dictionaryGuarDateBals.Count<1) {
 				return retval;
 			}
 			DataRow row;
@@ -837,14 +866,14 @@ namespace OpenDentBusiness{
 				listDateBals=new List<DateTime>();
 				listDateZeroBals=new List<DateTime>();
 				foreach(long guarNum in listGuarNums) {
-					if(!dictGuarDateBals.ContainsKey(guarNum)) {//should never happen
+					if(!dictionaryGuarDateBals.ContainsKey(guarNum)) {//should never happen
 						continue;
 					}
-					listDateBals.Add(dictGuarDateBals[guarNum].Where(x => x.Bal>0.005).Select(x => x.TranDate).DefaultIfEmpty(DateTime.MinValue).Min());
+					listDateBals.Add(dictionaryGuarDateBals[guarNum].Where(x => x.Bal>0.005).Select(x => x.TranDate).DefaultIfEmpty(DateTime.MinValue).Min());
 					//list of guars, or if not a super statement a list of one guar, and the date of the trans that used up the last of the acct credits
-					listDateZeroBals.Add(dictGuarDateBals[guarNum]
+					listDateZeroBals.Add(dictionaryGuarDateBals[guarNum]
 						//Get dates greater than the most recent date the balance was 0
-						.Where(x => x.TranDate>dictGuarDateBals[guarNum]
+						.Where(x => x.TranDate>dictionaryGuarDateBals[guarNum]
 							.Where(y => y.BalZero<=0.005)//Per job 10783, we now want to include negative balances for consideration
 							.Select(y => y.TranDate).DefaultIfEmpty(DateTime.MinValue).Max())
 						//get the earliest date that was after the most recent 0 bal date. Defaults to DateTime.MinValue if patient has a zero balance.
@@ -860,6 +889,90 @@ namespace OpenDentBusiness{
 				retval.Rows.Add(row);
 			}
 			return retval;
+		}
+
+		///<summary>Private method only called from within this file and behind a remoting role check, so this method doesn't need to have a remoting role check.
+		///Returns a list of objects with a ClinicNum and a dictionary of key=PatNum (guarNum), value=GuarDateBals object with TranDate, Bal, and BalZero fields for the clinic.
+		///List of clinic nums filters by guar's clinic if provided, otherwise all guars.</summary>
+		private static List<ClinicDateBals> GetGuarDateBalsEnterprise(DateTime dateAsOf,string patNumStr=null,List<long> listClinicNums=null) {
+			//No remoting role check required, private method called from behind remoting role check already
+			bool isHistoric=(dateAsOf.Date!=DateTime.Today);
+			//Create a list of objects, 1 per clinic, that contains a dictionary that tells a story about the transactions and their dates for each family in that clinic.
+			List<ClinicDateBals> retval=new List<ClinicDateBals>();
+			string tmpTableName="tempguardatebals"+ODRandom.Next(1000000);
+			string dropTablecommand=$"DROP TABLE IF EXISTS ";
+			try {
+				string command=$@"{dropTablecommand}{tmpTableName};
+					CREATE TABLE {tmpTableName} (
+						PatNum bigint NOT NULL,
+						TranDate Date NOT NULL DEFAULT '0001-01-01',
+						ClinicNum bigint NOT NULL,
+						ChargeForDate double NOT NULL,
+						PayForDate double NOT NULL,
+						PRIMARY KEY(PatNum,TranDate),
+						INDEX(ClinicNum)
+					) DEFAULT CHARSET=utf8
+					SELECT patient.Guarantor PatNum,RawPatTrans.TranDate,{(!PrefC.HasClinicsEnabled?"0 ":"guar.")}ClinicNum,
+					SUM(CASE WHEN RawPatTrans.TranAmount>0 THEN RawPatTrans.TranAmount ELSE 0 END) AS ChargeForDate,
+					SUM(CASE WHEN RawPatTrans.TranAmount<0 THEN RawPatTrans.TranAmount ELSE 0 END) AS PayForDate
+					FROM (
+						{GetTransQueryString(dateAsOf,patNumStr,isHistoric:isHistoric)}
+					) RawPatTrans
+					INNER JOIN patient ON patient.PatNum=RawPatTrans.PatNum{(!PrefC.HasClinicsEnabled?"":$@"
+					INNER JOIN patient guar ON patient.Guarantor=guar.PatNum{(listClinicNums.IsNullOrEmpty()?"":$@"
+						AND guar.ClinicNum IN ({string.Join(",",listClinicNums.Select(x => POut.Long(x)))})")}")}
+					GROUP BY patient.Guarantor,RawPatTrans.TranDate
+					ORDER BY NULL";
+				Db.NonQ(command);
+				command=$@"SELECT PatNum,SUM(PayForDate) TotalCredits
+					FROM {tmpTableName}
+					GROUP BY PatNum";
+				using DataTable tableCreditTotals=Db.GetTable(command);
+				if(tableCreditTotals.Rows.Count==0) {
+					return retval;//temp table dropped in finally block
+				}
+				Dictionary<long,double> dictionaryGuarCreditTotals=tableCreditTotals.Select()
+					.ToDictionary(x => PIn.Long(x["PatNum"].ToString()),x => PIn.Double(x["TotalCredits"].ToString()));
+				double runningChargesToDate=0;
+				double runningCreditsToDate=0;
+				long guarNumCur;
+				Dictionary<long,string> dictionaryClinicCommands=new Dictionary<long,string>();
+				if(listClinicNums.IsNullOrEmpty()) {
+					dictionaryClinicCommands.Add(0,$"SELECT PatNum,TranDate,ChargeForDate,PayForDate FROM {tmpTableName} ORDER BY PatNum,TranDate");
+				}
+				else {
+					dictionaryClinicCommands=listClinicNums
+						.ToDictionary(x => x,x => $"SELECT PatNum,TranDate,ChargeForDate,PayForDate FROM {tmpTableName} WHERE ClinicNum={POut.Long(x)} ORDER BY PatNum,TranDate");
+				}
+				foreach(long clinicNum in dictionaryClinicCommands.Keys) {
+					Dictionary<long,List<GuarDateBals>> dictionaryGuarDateBals=new Dictionary<long,List<GuarDateBals>>();
+					using DataTable tableClinicGuarDateBals=Db.GetTable(dictionaryClinicCommands[clinicNum]);
+					foreach(DataRow rowCur in tableClinicGuarDateBals.Rows) {
+						guarNumCur=PIn.Long(rowCur["PatNum"].ToString());
+						if(!dictionaryGuarDateBals.ContainsKey(guarNumCur)) {
+							dictionaryGuarDateBals[guarNumCur]=new List<GuarDateBals>();
+							runningChargesToDate=0;
+							runningCreditsToDate=0;
+						}
+						runningChargesToDate+=PIn.Double(rowCur["ChargeForDate"].ToString());
+						runningCreditsToDate+=PIn.Double(rowCur["PayForDate"].ToString());
+						dictionaryGuarDateBals[guarNumCur].Add(new GuarDateBals() {
+							TranDate=PIn.Date(rowCur["TranDate"].ToString()),
+							Bal=runningChargesToDate+dictionaryGuarCreditTotals[guarNumCur],
+							BalZero=runningChargesToDate+runningCreditsToDate
+						});
+					}
+					retval.Add(new ClinicDateBals(clinicNum,dictionaryGuarDateBals));
+				}
+				return retval;//temp table dropped in finally block
+			}
+			finally {
+				//drop the temp table from this run as well as any old temp tables with name starting with tempguardatebals
+				List<string> listTableNamesToDrop=new List<string>() { tmpTableName };
+				string command="SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME LIKE 'tempguardatebals%' AND DATE(UPDATE_TIME)<CURDATE()";
+				listTableNamesToDrop.AddRange(Db.GetListString(command));
+				Db.NonQ(string.Join(";",listTableNamesToDrop.Select(x => dropTablecommand+x)));
+			}
 		}
 
 		///<summary>Private method only called from within this file and behind a remoting role check, so this method doesn't need to have a remoting role
@@ -925,6 +1038,16 @@ namespace OpenDentBusiness{
 					MessageBox.Show(currentForm,msg);
 				}
 			});
+		}
+
+		private class ClinicDateBals {
+			public long ClinicNum;
+			public Dictionary<long,List<GuarDateBals>> DictionaryGuarDateBals;
+
+			public ClinicDateBals(long clinicNum,Dictionary<long,List<GuarDateBals>> dictionaryGuarDateBals=null) {
+				ClinicNum=clinicNum;
+				DictionaryGuarDateBals=dictionaryGuarDateBals??new Dictionary<long,List<GuarDateBals>>();
+			}
 		}
 
 		///<summary>Only used within this file and only behind remoting role checks.  Not serialized or publicly available.</summary>
