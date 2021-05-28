@@ -49,7 +49,7 @@ namespace OpenDental {
 		private AccountModules.LoadData _loadData;
 		///<summary>Partially implemented lock object for an attempted bug fix.</summary>
 		private object _lockDataSetMain=new object();
-		private Panel _panelUnearnedBreakdown=new Panel();
+		private GridOD _gridUnearnedBreakdown=new GridOD();
 		///<summary></summary>
 		private Patient _patCur;
 		private PatientNote _patientNoteCur;
@@ -784,12 +784,12 @@ namespace OpenDental {
 
 		private void labelUnearnedAmt_MouseEnter(object sender,EventArgs e) {
 			if(Math.Abs(PIn.Decimal(labelUnearnedAmt.Text))>0) {
-				_panelUnearnedBreakdown.Visible=true;
+				_gridUnearnedBreakdown.Visible=true;
 			}
 		}
 
 		private void labelUnearnedAmt_MouseLeave(object sender,EventArgs e) {
-			_panelUnearnedBreakdown.Visible=false;
+			_gridUnearnedBreakdown.Visible=false;
 		}
 		#endregion Methods - Event Handlers Labels
 
@@ -1975,12 +1975,8 @@ namespace OpenDental {
 				});
 			Lan.C(this,contextMenuIns,contextMenuStatement);
 			LayoutToolBar();
-			_labelUnearnedBreakdown.Font=new Font(FontFamily.GenericMonospace,LayoutManager.ScaleF(8.00f));
-			_labelUnearnedBreakdown.TextAlign=ContentAlignment.MiddleRight;
-			_labelUnearnedBreakdown.Anchor=AnchorStyles.Top | AnchorStyles.Left;
-			_panelUnearnedBreakdown.Visible=false;
-			LayoutManager.Add(_panelUnearnedBreakdown,this);
-			LayoutManager.Add(_labelUnearnedBreakdown,_panelUnearnedBreakdown);
+			_gridUnearnedBreakdown.Visible=false;
+			LayoutManager.Add(_gridUnearnedBreakdown,this);
 			textQuickProcs.AcceptsTab=true;
 			textQuickProcs.KeyDown+=textQuickCharge_KeyDown;
 			textQuickProcs.MouseDown+=textQuickCharge_MouseClick;
@@ -2571,7 +2567,6 @@ namespace OpenDental {
 					}
 				}
 				labelUnearnedAmt.Text="";
-				_labelUnearnedBreakdown.Text="";
 				for(int i=0;i<tableMisc.Rows.Count;i++){
 					if(tableMisc.Rows[i]["descript"].ToString()=="unearnedIncome") {
 						//remove TP splits that do not show on account due to def being checked. 
@@ -2586,48 +2581,7 @@ namespace OpenDental {
 							labelUnearnedAmt.ForeColor=Color.Firebrick;
 							labelUnearnedAmt.Font=new Font(labelUnearnedAmt.Font,FontStyle.Bold);
 						}
-						//Sum up all of the payment splits by their unearned type.
-						Dictionary<long,string> dictUnearnedTotals=listUnearnedShownOnAccount.GroupBy(x => x.UnearnedType)
-								.ToDictionary(x => x.Key,x => x.Sum(y => y.SplitAmt).ToString("N2"));
-						//Figure out the largest strings on each side of the equals operator for formatting purposes.
-						List<Def> listUnearnedDefs=Defs.GetUnearnedDefs();
-						listUnearnedDefs.RemoveAll(def => !listUnearnedShownOnAccount.Exists(ps => ps.UnearnedType==def.DefNum)); // exclude definitions that are not showing on account.
-						string strZero=0.ToString("N2");
-						int longestUnearnedName=0;
-						int longestUnearnedAmount=strZero.Length;
-						if(listUnearnedDefs.Count > 0) {
-							longestUnearnedName=listUnearnedDefs.Max(x => x.ItemName.Length);
-						}
-						if(dictUnearnedTotals.Count > 0) {
-							longestUnearnedAmount=dictUnearnedTotals.Values.Max(x => x.Length);
-						}
-						//Display every unearned type along with the total of payment splits that are within said unearned bucket.
-						for(int j = 0;j<listUnearnedDefs.Count;j++) {
-							if(j > 0) {
-								_labelUnearnedBreakdown.Text+="\r\n";
-							}
-							//The left side of the label will be the unearned type.
-							string unearnedDefName=listUnearnedDefs[j].ItemName.PadRight(longestUnearnedName);
-							_labelUnearnedBreakdown.Text+=unearnedDefName+" = ";
-							//The right side will be the total of payment splits in said unearned type.
-							string unearnedAmountStr=strZero;
-							if(dictUnearnedTotals.ContainsKey(listUnearnedDefs[j].DefNum)) {
-								unearnedAmountStr=dictUnearnedTotals[listUnearnedDefs[j].DefNum];
-							}
-							_labelUnearnedBreakdown.Text+=unearnedAmountStr.PadLeft(longestUnearnedAmount);
-						}
-						if(!_labelUnearnedBreakdown.Text.IsNullOrEmpty()) {
-							//Adjust the unearned breakdown controls to match the updated text information dynamically
-							Size sizeUnearnedText=TextRenderer.MeasureText(_labelUnearnedBreakdown.Text,new Font(FontFamily.GenericMonospace,
-									LayoutManager.ScaleF(_labelUnearnedBreakdown.Font.Size)));
-							int width=sizeUnearnedText.Width;
-							int height=sizeUnearnedText.Height;
-							LayoutManager.MoveSize(_panelUnearnedBreakdown,new Size(width+8,height+8));//8 extra pixels for padding
-							LayoutManager.MoveLocation(_panelUnearnedBreakdown,new Point(labelUnearnedAmt.Right-width-4,groupBoxFamilyIns.Top));
-							LayoutManager.MoveSize(_labelUnearnedBreakdown,new Size(width,height));
-							LayoutManager.MoveLocation(_labelUnearnedBreakdown,new Point(4,4));
-							_panelUnearnedBreakdown.BringToFront();
-						}
+						FillUnearnedBreakDown(listUnearnedShownOnAccount);
 					}
 				}
 				//labelInsLeft.Text=Lan.g(this,"Ins Left");
@@ -2674,6 +2628,36 @@ namespace OpenDental {
 				labelUnearnedAmt.Text="";
 				//labelInsLeftAmt.Text="";
 			}
+		}
+
+		private void FillUnearnedBreakDown(List<PaySplit> listPaySplitsOnAccount) {
+			_gridUnearnedBreakdown.TitleVisible=false;
+			_gridUnearnedBreakdown.VScrollVisible=false;
+			//Sum up all of the payment splits by their unearned type.
+			Dictionary<long,string> dictUnearnedTotals=listPaySplitsOnAccount.GroupBy(x => x.UnearnedType)
+								.ToDictionary(x => x.Key,x => x.Sum(y => y.SplitAmt).ToString("N2"));
+			//Figure out the largest strings on each side of the equals operator for formatting purposes.
+			List<Def> listUnearnedDefs=Defs.GetUnearnedDefs();
+			listUnearnedDefs.RemoveAll(def => !listPaySplitsOnAccount.Exists(ps => ps.UnearnedType==def.DefNum)); // exclude definitions that are not showing on account.
+			//Display every unearned type along with the total of payment splits that are within said unearned bucket.
+			_gridUnearnedBreakdown.BeginUpdate();
+			_gridUnearnedBreakdown.ListGridColumns.Clear();
+			GridColumn col=new GridColumn(Lan.g(this,"Type"),100,HorizontalAlignment.Center);
+			_gridUnearnedBreakdown.ListGridColumns.Add(col);
+			col=new GridColumn(Lan.g(this,"Bal"),100,HorizontalAlignment.Center);
+			_gridUnearnedBreakdown.ListGridColumns.Add(col);
+			_gridUnearnedBreakdown.ListGridRows.Clear();
+			for(int i = 0;i<listUnearnedDefs.Count;i++) {
+				GridRow row=new GridRow();
+				row.Cells.Add(listUnearnedDefs[i].ItemName);
+				row.Cells.Add(dictUnearnedTotals[listUnearnedDefs[i].DefNum]);
+				_gridUnearnedBreakdown.ListGridRows.Add(row);
+			}
+			_gridUnearnedBreakdown.EndUpdate();
+			_gridUnearnedBreakdown.Height=(_gridUnearnedBreakdown.ListGridRows.Count() * 20) - 2;
+			LayoutManager.MoveSize(_gridUnearnedBreakdown,new Size(_gridUnearnedBreakdown.Width+8,_gridUnearnedBreakdown.Height+8));//8 extra pixels for padding
+			LayoutManager.MoveLocation(_gridUnearnedBreakdown,new Point(labelUnearnedAmt.Right-_gridUnearnedBreakdown.Width-4,groupBoxFamilyIns.Top));
+			_gridUnearnedBreakdown.BringToFront();
 		}
 
 		private void FillAutoOrtho(bool doCalculateFirstDate=true) {
