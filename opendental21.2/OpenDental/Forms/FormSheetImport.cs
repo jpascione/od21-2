@@ -2187,7 +2187,7 @@ namespace OpenDental {
 				if(employerNum>0) {
 					plan.EmployerNum=employerNum;
 				}
-				plan.PlanType="";
+				plan.PlanType=Prefs.GetBoolNoCache(PrefName.InsDefaultPPOpercent) ? "p" : "";
 				plan.CarrierNum=((Carrier)carrierNameRow.ImpValObj).CarrierNum;
 				if(groupNameRow!=null) {
 					plan.GroupName=groupNameRow.ImpValDisplay;
