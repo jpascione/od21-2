@@ -82,13 +82,9 @@ namespace OpenDental{
 			textTpNote.Text=ProcCode.DefaultTPNote;
 			textDefaultClaimNote.Text=ProcCode.DefaultClaimNote;
 			listTreatArea.Items.Clear();
-			for(int i=0;i<Enum.GetNames(typeof(TreatmentArea)).Length;i++){
-				listTreatArea.Items.Add(Lan.g("enumTreatmentArea",Enum.GetNames(typeof(TreatmentArea))[i]));
-			}
-			listTreatArea.SelectedIndex=(int)ProcCode.TreatArea;
-			if(listTreatArea.SelectedIndex==-1) { 
-				listTreatArea.SelectedIndex=3;
-			}
+			listTreatArea.Items.AddEnums<TreatmentArea>();
+			listTreatArea.SetSelectedEnum(ProcCode.TreatArea);	
+			checkToothRange.Checked=ProcCode.AreaAlsoToothRange;
 			listPaintType.Items.AddEnums<ToothPaintingType>();
 			listPaintType.SetSelectedEnum(ProcCode.PaintType);
 			textPaintText.Text=ProcCode.PaintText;
@@ -360,6 +356,17 @@ namespace OpenDental{
 			}
 		}
 
+		private void listTreatArea_SelectedIndexChanged(object sender,EventArgs e) {
+			TreatmentArea treatmentArea=listTreatArea.GetSelected<TreatmentArea>();
+			if(ListTools.In(treatmentArea,TreatmentArea.Arch,TreatmentArea.Quad)){
+				checkToothRange.Enabled=true;
+			}
+			else{
+				checkToothRange.Enabled=false;
+				checkToothRange.Checked=false;
+			}
+		}
+
 		///<summary>Returns a line that can be used in a security log entry if the entries are changed.</summary>
 		private string SecurityLogEntryHelper(string oldVal, string newVal,string textInLog) {			
 			if(oldVal!=newVal) {
@@ -431,6 +438,7 @@ namespace OpenDental{
 			else {
 				ProcCode.BypassGlobalLock=BypassLockStatus.NeverBypass;
 			}
+			ProcCode.AreaAlsoToothRange=checkToothRange.Checked;
 			if(ProcedureCodes.Update(ProcCode,_procCodeOld)) {//whether new or not.
 				string secLog="";
 				secLog+=SecurityLogEntryHelper(_procCodeOld.AlternateCode1,ProcCode.AlternateCode1,"alt code");
@@ -457,6 +465,7 @@ namespace OpenDental{
 				secLog+=SecurityLogEntryHelper(_procCodeOld.ProvNumDefault.ToString(),ProcCode.ProvNumDefault.ToString(),"provider number");
 				secLog+=SecurityLogEntryHelper(_procCodeOld.BypassGlobalLock.ToString(),ProcCode.BypassGlobalLock.ToString(),"bypass global lock box");
 				secLog+=SecurityLogEntryHelper(_procCodeOld.ProcCatDescript,ProcCode.ProcCatDescript,"category");
+				secLog+=SecurityLogEntryHelper(_procCodeOld.AreaAlsoToothRange.ToString(),ProcCode.AreaAlsoToothRange.ToString(),"category");
 				SecurityLogs.MakeLogEntry(Permissions.ProcCodeEdit,0,secLog,ProcCode.CodeNum,_procCodeOld.DateTStamp);
 				DataValid.SetInvalid(InvalidType.ProcCodes);
 			}
@@ -467,6 +476,6 @@ namespace OpenDental{
 			DialogResult=DialogResult.Cancel;
 		}
 
-	
+		
 	}
 }
