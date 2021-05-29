@@ -1188,6 +1188,10 @@ namespace OpenDentBusiness {
 				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraRefreshOnLoad','1')";//Default to true.
 				Db.NonQ(command);
 			}
+		}//End of 21_2_1() method
+
+		private static void To21_2_2() {
+			string command;
 			if(CultureInfo.CurrentCulture.Name=="en-US"){
 				command="UPDATE procedurecode SET TreatArea=0 "//None
 					+"WHERE TreatArea=3";//Mouth. ~337 rows
@@ -1200,6 +1204,6 @@ namespace OpenDentBusiness {
 			}
 			command="ALTER TABLE procedurecode ADD AreaAlsoToothRange tinyint NOT NULL";
 			Db.NonQ(command);
-		}//End of 21_2_1() method
+		}//End of 21_2_2() method
 	}
 }
