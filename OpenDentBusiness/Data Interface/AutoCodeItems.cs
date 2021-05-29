@@ -194,6 +194,7 @@ namespace OpenDentBusiness{
 			verifyCode=proc.CodeNum;
 			//these areas have no autocodes
 			if(procCode.TreatArea==TreatmentArea.Mouth
+				|| procCode.TreatArea==TreatmentArea.None
 				|| procCode.TreatArea==TreatmentArea.Quad
 				|| procCode.TreatArea==TreatmentArea.Sextant
 				|| Procedures.IsAttachedToClaim(proc,claimProcsForProc)) {

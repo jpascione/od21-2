@@ -1583,7 +1583,9 @@ namespace OpenDentBusiness {
 					return "02";
 				}
 			}
-			if(procCode.TreatArea==TreatmentArea.Mouth) {
+			if(procCode.TreatArea==TreatmentArea.Mouth
+				|| procCode.TreatArea==TreatmentArea.None) 
+			{
 				return "";
 			}
 			if(procCode.TreatArea==TreatmentArea.Quad) {

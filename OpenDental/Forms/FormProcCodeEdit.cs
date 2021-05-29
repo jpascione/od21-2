@@ -82,12 +82,12 @@ namespace OpenDental{
 			textTpNote.Text=ProcCode.DefaultTPNote;
 			textDefaultClaimNote.Text=ProcCode.DefaultClaimNote;
 			listTreatArea.Items.Clear();
-			for(int i=1;i<Enum.GetNames(typeof(TreatmentArea)).Length;i++){
+			for(int i=0;i<Enum.GetNames(typeof(TreatmentArea)).Length;i++){
 				listTreatArea.Items.Add(Lan.g("enumTreatmentArea",Enum.GetNames(typeof(TreatmentArea))[i]));
 			}
-			listTreatArea.SelectedIndex=(int)ProcCode.TreatArea-1;
+			listTreatArea.SelectedIndex=(int)ProcCode.TreatArea;
 			if(listTreatArea.SelectedIndex==-1) { 
-				listTreatArea.SelectedIndex=2;
+				listTreatArea.SelectedIndex=3;
 			}
 			listPaintType.Items.AddEnums<ToothPaintingType>();
 			listPaintType.SetSelectedEnum(ProcCode.PaintType);
@@ -414,7 +414,7 @@ namespace OpenDental{
 			ProcCode.DefaultClaimNote=textDefaultClaimNote.Text;
 			ProcCode.PaintType=listPaintType.GetSelected<ToothPaintingType>();
 			ProcCode.PaintText=textPaintText.Text;
-			ProcCode.TreatArea=(TreatmentArea)listTreatArea.SelectedIndex+1;
+			ProcCode.TreatArea=(TreatmentArea)listTreatArea.SelectedIndex;
 			ProcCode.BaseUnits=PIn.Int(textBaseUnits.Text.ToString());
 			ProcCode.DrugNDC=textDrugNDC.Text;
 			ProcCode.RevenueCodeDefault=textRevenueCode.Text;
