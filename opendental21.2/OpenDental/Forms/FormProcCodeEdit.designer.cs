@@ -104,6 +104,7 @@ namespace OpenDental {
 			this.textPaintText = new System.Windows.Forms.TextBox();
 			this.labelPaintText = new System.Windows.Forms.Label();
 			this.checkIsTaxed = new System.Windows.Forms.CheckBox();
+			this.checkToothRange = new System.Windows.Forms.CheckBox();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -216,6 +217,7 @@ namespace OpenDental {
 			this.listTreatArea.Name = "listTreatArea";
 			this.listTreatArea.Size = new System.Drawing.Size(118, 108);
 			this.listTreatArea.TabIndex = 24;
+			this.listTreatArea.SelectedIndexChanged += new System.EventHandler(this.listTreatArea_SelectedIndexChanged);
 			// 
 			// checkNoBillIns
 			// 
@@ -923,9 +925,20 @@ namespace OpenDental {
 			this.checkIsTaxed.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkIsTaxed.UseVisualStyleBackColor = true;
 			// 
+			// checkToothRange
+			// 
+			this.checkToothRange.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkToothRange.Location = new System.Drawing.Point(616, 127);
+			this.checkToothRange.Name = "checkToothRange";
+			this.checkToothRange.Size = new System.Drawing.Size(118, 18);
+			this.checkToothRange.TabIndex = 48;
+			this.checkToothRange.Text = "&& Tooth Range";
+			this.checkToothRange.UseVisualStyleBackColor = true;
+			// 
 			// FormProcCodeEdit
 			// 
 			this.ClientSize = new System.Drawing.Size(1072, 696);
+			this.Controls.Add(this.checkToothRange);
 			this.Controls.Add(this.checkIsTaxed);
 			this.Controls.Add(this.textPaintText);
 			this.Controls.Add(this.labelPaintText);
@@ -1087,5 +1100,6 @@ namespace OpenDental {
 		private Label labelPaintText;
 		private CheckBox checkIsTaxed;
 		private OpenDental.TableTimeBar tbTime;
+		private CheckBox checkToothRange;
 	}
 }
