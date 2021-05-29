@@ -159,13 +159,13 @@ namespace OpenDentBusiness{
 	//public enum StudentStat{None,Full,Part};
 	///<summary>Used in procedurecode setup to specify the treatment area for a procedure.  This determines what fields are available when editing an appointment.</summary>
 	public enum TreatmentArea{
-		///<summary>0-Same as 3 mouth.</summary>
+		///<summary>0-goes on claims as blank.</summary>
 		None,
 		///<summary>1</summary>
 		Surf,
 		///<summary>2</summary>
 		Tooth,
-		///<summary>3</summary>
+		///<summary>3-goes on claims as 00.</summary>
 		Mouth,
 		///<summary>4</summary>
 		Quad,
