@@ -314,7 +314,7 @@
 			this.textDesc.BackColor = System.Drawing.SystemColors.Control;
 			this.textDesc.Location = new System.Drawing.Point(106, 81);
 			this.textDesc.Name = "textDesc";
-			this.textDesc.Size = new System.Drawing.Size(216, 20);
+			this.textDesc.Size = new System.Drawing.Size(284, 20);
 			this.textDesc.TabIndex = 16;
 			// 
 			// label7
