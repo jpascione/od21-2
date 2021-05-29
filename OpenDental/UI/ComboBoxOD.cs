@@ -997,7 +997,7 @@ namespace OpenDental.UI{
 //comboEraAutomation.Items.AddListEnum(listEraAutomationModeValues);
 //To select an enum after filling the list:
 //comboArea.SetSelected((int)proc.Area);
-//Or, rarely: comboArea.SetSelectedEnum(proc.Area);//type is inferred 
+//Or: comboArea.SetSelectedEnum(proc.Area);//type is inferred 
 //...
 //proc.Area=comboArea.GetSelected<EnumArea>();
 //
