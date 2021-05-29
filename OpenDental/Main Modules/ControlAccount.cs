@@ -487,8 +487,8 @@ namespace OpenDental {
 					listClaimProcHistsLoop.AddRange(ClaimProcs.GetHistForProc(listClaimProc,listProcedures[i].ProcNum,listProcedures[i].CodeNum));
 				}
 				using FormProcEdit formProcEdit=new FormProcEdit(proc,pat,_famCur);
-				formProcEdit.HistList=_loadData.HistList;
-				formProcEdit.LoopList=listClaimProcHistsLoop;
+				formProcEdit.ListClaimProcHists=_loadData.HistList;
+				formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
 				formProcEdit.ShowDialog();
 			}
 			else if(table.Rows[e.Row]["AdjNum"].ToString()!="0"){
@@ -3641,8 +3641,8 @@ namespace OpenDental {
 				listClaimProcHistsLoop.AddRange(ClaimProcs.GetHistForProc(listClaimProc,listProcedures[i].ProcNum,listProcedures[i].CodeNum));
 			}
 			using FormProcEdit formProcEdit=new FormProcEdit(proc,_patCur,_famCur,true);
-			formProcEdit.HistList=_loadData.HistList;
-			formProcEdit.LoopList=listClaimProcHistsLoop;
+			formProcEdit.ListClaimProcHists=_loadData.HistList;
+			formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
 			formProcEdit.IsNew=true;
 			formProcEdit.ShowDialog();
 			if(formProcEdit.DialogResult!=DialogResult.OK) {
