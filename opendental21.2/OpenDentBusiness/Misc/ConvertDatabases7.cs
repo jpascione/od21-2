@@ -1189,15 +1189,17 @@ namespace OpenDentBusiness {
 				Db.NonQ(command);
 			}
 			if(CultureInfo.CurrentCulture.Name=="en-US"){
-				command="UPDATE procedurecode SET TreatArea=0"//None
+				command="UPDATE procedurecode SET TreatArea=0 "//None
 					+"WHERE TreatArea=3";//Mouth. ~337 rows
 				Db.NonQ(command);
-				command="UPDATE procedurecode SET TreatArea=3"//Mouth
-					+"WHERE TreatArea=0"//some codes my have been set by user to something like quad, so this won't touch those
+				command="UPDATE procedurecode SET TreatArea=3 "//Mouth
+					+"WHERE TreatArea=0 "//some codes my have been set by user to something like quad, so this won't touch those
 					+"AND ProcCode IN('D0330','D0701','D1110','D1120','D1206','D1208','D6190','D7285','D7286','D7287','D7288','D8050','D8060','D8070','D8080','D8090',"
 					+"'D8210','D8220','D8660','D8670','D8680','D8690','D8695')";//only 23 codes are ever supposed to be Mouth
 				Db.NonQ(command);
 			}
+			command="ALTER TABLE procedurecode ADD AreaAlsoToothRange tinyint NOT NULL";
+			Db.NonQ(command);
 		}//End of 21_2_1() method
 	}
 }
