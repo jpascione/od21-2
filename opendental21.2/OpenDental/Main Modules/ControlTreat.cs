@@ -1871,8 +1871,8 @@ namespace OpenDental{
 					LoopList.AddRange(ClaimProcs.GetHistForProc(ClaimProcList,ProcListTP[i].ProcNum,ProcListTP[i].CodeNum));
 				}
 				using FormProcEdit FormPE=new FormProcEdit(procCur,PatCur,FamCur,listPatToothInitials:ToothInitialList);
-				FormPE.LoopList=LoopList;
-				FormPE.HistList=HistList;
+				FormPE.ListClaimProcHistsLoop=LoopList;
+				FormPE.ListClaimProcHists=HistList;
 				FormPE.ShowDialog();
 				long treatPlanNum=_listTreatPlans[gridPlans.SelectedIndices[0]].TreatPlanNum;
 				ModuleSelected(PatCur.PatNum);

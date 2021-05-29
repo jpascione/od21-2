@@ -807,8 +807,8 @@ namespace OpenDental {
 				listClaimProcHistsLoop.AddRange(ClaimProcs.GetHistForProc(listClaimProc,_arrayProceduresTp[i].ProcNum,_arrayProceduresTp[i].CodeNum));
 			}
 			using FormProcEdit formProcEdit=new FormProcEdit(procCur,_patCur,_famCur,listPatToothInitials:_listToothInitials);
-			formProcEdit.LoopList=listClaimProcHistsLoop;
-			formProcEdit.HistList=_listClaimProcHists;
+			formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
+			formProcEdit.ListClaimProcHists=_listClaimProcHists;
 			formProcEdit.ShowDialog();
 			List<long> listSelectedTpNums=gridTreatPlans.SelectedIndices.Select(x => _listTreatPlans[x].TreatPlanNum).ToList();
 			RefreshModuleData(_patCur.PatNum,true);
@@ -2297,8 +2297,8 @@ namespace OpenDental {
 							listClaimProcHistsLoop.AddRange(ClaimProcs.GetHistForProc(listClaimProc,listProcedures[i].ProcNum,listProcedures[i].CodeNum));
 						}
 						using FormProcEdit formProcEdit=new FormProcEdit(proc,_patCur,_famCur,listPatToothInitials:_listToothInitials);
-						formProcEdit.LoopList=listClaimProcHistsLoop;
-						formProcEdit.HistList=_listClaimProcHists;
+						formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
+						formProcEdit.ListClaimProcHists=_listClaimProcHists;
 						Plugins.HookAddCode(this, "ContrChart.gridProg_CellDoubleClick_proc", proc, formProcEdit);
 						if(!formProcEdit.IsDisposed) { //Form might be disposed by the above hook.
 							formProcEdit.ShowDialog();
@@ -9283,8 +9283,8 @@ namespace OpenDental {
 			}
 			using FormProcEdit formProcEdit=new FormProcEdit(ProcCur,_patCur.Copy(),_famCur,listPatToothInitials:_listToothInitials);
 			formProcEdit.IsNew=true;
-			formProcEdit.LoopList=listClaimProcHistsLoop;
-			formProcEdit.HistList=LoadData.ListClaimProcHists;
+			formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
+			formProcEdit.ListClaimProcHists=LoadData.ListClaimProcHists;
 			formProcEdit.ShowDialog();
 			if(formProcEdit.DialogResult==DialogResult.Cancel) {
 				try {
@@ -9463,8 +9463,8 @@ namespace OpenDental {
 					&& PrefC.GetBool(PrefName.ProcEditRequireAutoCodes))
 				{
 					using FormProcEdit formProcEdit=new FormProcEdit(ProcCur,_patCur,_famCur,listPatToothInitials:_listToothInitials);//ProcCur may be modified in this form due to passing by reference. Intentional.
-					formProcEdit.LoopList=listClaimProcHistsLoop;
-					formProcEdit.HistList=LoadData.ListClaimProcHists;
+					formProcEdit.ListClaimProcHistsLoop=listClaimProcHistsLoop;
+					formProcEdit.ListClaimProcHists=LoadData.ListClaimProcHists;
 					formProcEdit.ShowDialog();
 					if(formProcEdit.DialogResult!=DialogResult.OK) {
 						try {

@@ -1071,8 +1071,8 @@ namespace OpenDental{
 				listClaimProcHistsLoop.AddRange(ClaimProcs.GetHistForProc(listClaimProc,listProcedures[i].ProcNum,listProcedures[i].CodeNum));
 			}
 			using FormProcEdit FormP=new FormProcEdit(proc,pat,fam);
-			FormP.HistList=_loadData.ListClaimProcHists;
-			FormP.LoopList=listClaimProcHistsLoop;
+			FormP.ListClaimProcHists=_loadData.ListClaimProcHists;
+			FormP.ListClaimProcHistsLoop=listClaimProcHistsLoop;
 			FormP.ShowDialog();
 			if(FormP.DialogResult!=DialogResult.OK){
 				CalculatePatternFromProcs();
@@ -1240,8 +1240,8 @@ namespace OpenDental{
 				null,false,false,listSubstitutionLinks,false,
 				listFees);
 			using FormProcEdit FormPE=new FormProcEdit(proc,pat.Copy(),fam);
-			FormPE.HistList=_loadData.ListClaimProcHists;
-			FormPE.LoopList=listClaimProcHistsLoop;
+			FormPE.ListClaimProcHists=_loadData.ListClaimProcHists;
+			FormPE.ListClaimProcHistsLoop=listClaimProcHistsLoop;
 			FormPE.IsNew=true;
 			FormPE.ShowDialog();
 			if(FormPE.DialogResult==DialogResult.Cancel) {
