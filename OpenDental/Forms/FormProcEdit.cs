@@ -753,152 +753,150 @@ namespace OpenDental {
 			textProc.Text=_procedureCode.ProcCode;
 			textDesc.Text=_procedureCode.Descript;
 			textDrugNDC.Text=_procedureCode.DrugNDC;
-			switch (_procedureCode.TreatArea){
-				case TreatmentArea.None:
-					break;
-				case TreatmentArea.Surf:
-					this.textTooth.Visible=true;
-					this.labelTooth.Visible=true;
-					this.textSurfaces.Visible=true;
-					this.labelSurfaces.Visible=true;
-					this.panelSurfaces.Visible=true;
-					if(Tooth.IsValidDB(_procedure.ToothNum)) {
-						errorProvider2.SetError(textTooth,"");
-						textTooth.Text=Tooth.ToInternat(_procedure.ToothNum);
-						textSurfaces.Text=Tooth.SurfTidyFromDbToDisplay(_procedure.Surf,_procedure.ToothNum);
-						SetSurfButtons();
+			if(_procedureCode.TreatArea==TreatmentArea.Surf){
+				textTooth.Visible=true;
+				labelTooth.Visible=true;
+				textSurfaces.Visible=true;
+				labelSurfaces.Visible=true;
+				panelSurfaces.Visible=true;
+				if(Tooth.IsValidDB(_procedure.ToothNum)) {
+					errorProvider2.SetError(textTooth,"");
+					textTooth.Text=Tooth.ToInternat(_procedure.ToothNum);
+					textSurfaces.Text=Tooth.SurfTidyFromDbToDisplay(_procedure.Surf,_procedure.ToothNum);
+					SetSurfButtons();
+				}
+				else{
+					errorProvider2.SetError(textTooth,Lan.g(this,"Invalid tooth number."));
+					textTooth.Text=_procedure.ToothNum;
+					//textSurfaces.Text=Tooth.SurfTidy(ProcCur.Surf,"");//only valid toothnums allowed
+				}
+				if(textSurfaces.Text==""){
+					errorProvider2.SetError(textSurfaces,"No surfaces selected.");
+				}
+				else{
+					errorProvider2.SetError(textSurfaces,"");
+				}
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Tooth){
+				textTooth.Visible=true;
+				labelTooth.Visible=true;
+				if(Tooth.IsValidDB(_procedure.ToothNum)){
+					errorProvider2.SetError(textTooth,"");
+					textTooth.Text=Tooth.ToInternat(_procedure.ToothNum);
+				}
+				else{
+					errorProvider2.SetError(textTooth,Lan.g(this,"Invalid tooth number."));
+					textTooth.Text=_procedure.ToothNum;
+				}
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Quad){
+				groupQuadrant.Visible=true;
+				switch (_procedure.Surf){
+					case "UR": this.radioUR.Checked=true; break;
+					case "UL": this.radioUL.Checked=true; break;
+					case "LR": this.radioLR.Checked=true; break;
+					case "LL": this.radioLL.Checked=true; break;
+					//default : 
+				}
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Sextant){
+				groupSextant.Visible=true;
+				switch (_procedure.Surf){
+					case "1": this.radioS1.Checked=true; break;
+					case "2": this.radioS2.Checked=true; break;
+					case "3": this.radioS3.Checked=true; break;
+					case "4": this.radioS4.Checked=true; break;
+					case "5": this.radioS5.Checked=true; break;
+					case "6": this.radioS6.Checked=true; break;
+					//default:
+				}
+				if(IsSextantSelected()) {
+					errorProvider2.SetError(groupSextant,"");
+				}
+				else {
+					errorProvider2.SetError(groupSextant,Lan.g(this,"Please select a sextant treatment area."));
+				}
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Arch){
+				groupArch.Visible=true;
+				switch (_procedure.Surf){
+					case "U": this.radioU.Checked=true; break;
+					case "L": this.radioL.Checked=true; break;
+				}
+				if(IsArchSelected()) {
+					errorProvider2.SetError(groupArch,"");
+				}
+				else {
+					errorProvider2.SetError(groupArch,Lan.g(this,"Please select an arch treatment area."));
+				}
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.ToothRange
+				|| _procedureCode.AreaAlsoToothRange)
+			{
+				labelRange.Visible=true;
+				listBoxTeeth.Visible=true;
+				listBoxTeeth.ColumnWidth=LayoutManager.Scale(16);
+				listBoxTeeth2.Visible=true;
+				listBoxTeeth2.ColumnWidth=LayoutManager.Scale(16);
+				listBoxTeeth.SelectionMode=System.Windows.Forms.SelectionMode.MultiExtended;
+				listBoxTeeth2.SelectionMode=System.Windows.Forms.SelectionMode.MultiExtended;
+				if(_listPatToothInitials==null) {
+					_listPatToothInitials=ToothInitials.Refresh(_patient.PatNum);
+				}
+				//First add teeth flagged as primary teeth for this specific patient from the Chart into _listPriTeeth.
+				_listPriTeeth=ToothInitials.GetPriTeeth(_listPatToothInitials);
+				//Preserve tooth range history for this procedure by ensuring that the UI shows the values from the database for the relevant teeth.
+				string[] arrayProcToothNums=new string[0];
+				if(!string.IsNullOrWhiteSpace(_procedure.ToothRange)){
+					arrayProcToothNums=_procedure.ToothRange.Split(',');//in Universal (American) nomenclature
+				}
+				foreach(string procToothNum in arrayProcToothNums) {
+					if(Tooth.IsPrimary(procToothNum)) {
+						_listPriTeeth.Add(Tooth.ToInt(procToothNum).ToString());//Convert the primary tooth to a permanent tooth.
 					}
-					else{
-						errorProvider2.SetError(textTooth,Lan.g(this,"Invalid tooth number."));
-						textTooth.Text=_procedure.ToothNum;
-						//textSurfaces.Text=Tooth.SurfTidy(ProcCur.Surf,"");//only valid toothnums allowed
+					else {//Permanent tooth
+						_listPriTeeth.Remove(procToothNum);//Preserve permanent tooth history.
 					}
-					if(textSurfaces.Text=="")
-						errorProvider2.SetError(textSurfaces,"No surfaces selected.");
-					else
-						errorProvider2.SetError(textSurfaces,"");
-					break;
-				case TreatmentArea.Tooth:
-					this.textTooth.Visible=true;
-					this.labelTooth.Visible=true;
-					if(Tooth.IsValidDB(_procedure.ToothNum)){
-						errorProvider2.SetError(textTooth,"");
-						textTooth.Text=Tooth.ToInternat(_procedure.ToothNum);
+				}
+				//Fill Maxillary/Upper Arch
+				listBoxTeeth.Items.Clear();
+				for(int toothNum=1;toothNum<=16;toothNum++) {
+					string toothId=toothNum.ToString();
+					if(_listPriTeeth.Contains(toothNum.ToString())) {//Is Primary
+						toothId=Tooth.PermToPri(toothId);
 					}
-					else{
-						errorProvider2.SetError(textTooth,Lan.g(this,"Invalid tooth number."));
-						textTooth.Text=_procedure.ToothNum;
+					listBoxTeeth.Items.Add(Tooth.GetToothLabelGraphic(toothId));//Display tooth is dependent on nomenclature preference.
+				}
+				//Fill Mandibular/Lower	Arch
+				listBoxTeeth2.Items.Clear();
+				for(int toothNum=32;toothNum>=17;toothNum--) {
+					string toothId=toothNum.ToString();
+					if(_listPriTeeth.Contains(toothNum.ToString())) {//Is Primary
+						toothId=Tooth.PermToPri(toothId);
 					}
-					break;
-				case TreatmentArea.Mouth:
-						break;
-				case TreatmentArea.Quad:
-					this.groupQuadrant.Visible=true;
-					switch (_procedure.Surf){
-						case "UR": this.radioUR.Checked=true; break;
-						case "UL": this.radioUL.Checked=true; break;
-						case "LR": this.radioLR.Checked=true; break;
-						case "LL": this.radioLL.Checked=true; break;
-						//default : 
+					listBoxTeeth2.Items.Add(Tooth.GetToothLabelGraphic(toothId));//Display tooth is dependent on nomenclature preference.
+				}
+				//Select tooth numbers in each arch depending on the database data stored in the procedure ToothRange.
+				foreach(string toothNum in arrayProcToothNums) {
+					if(Tooth.IsMaxillary(toothNum)) {//Works for primary or permanent tooth numbers.
+						int toothIndex=Tooth.ToInt(toothNum)-1;//Works for primary or permanent tooth numbers.
+						listBoxTeeth.SetSelected(toothIndex,true);
 					}
-					break;
-				case TreatmentArea.Sextant:
-					this.groupSextant.Visible=true;
-					switch (_procedure.Surf){
-						case "1": this.radioS1.Checked=true; break;
-						case "2": this.radioS2.Checked=true; break;
-						case "3": this.radioS3.Checked=true; break;
-						case "4": this.radioS4.Checked=true; break;
-						case "5": this.radioS5.Checked=true; break;
-						case "6": this.radioS6.Checked=true; break;
-						//default:
-					}
-					if(IsSextantSelected()) {
-						errorProvider2.SetError(groupSextant,"");
-					}
-					else {
-						errorProvider2.SetError(groupSextant,Lan.g(this,"Please select a sextant treatment area."));
-					}
-					break;
-				case TreatmentArea.Arch:
-					this.groupArch.Visible=true;
-					switch (_procedure.Surf){
-						case "U": this.radioU.Checked=true; break;
-						case "L": this.radioL.Checked=true; break;
-					}
-					if(IsArchSelected()) {
-						errorProvider2.SetError(groupArch,"");
-					}
-					else {
-						errorProvider2.SetError(groupArch,Lan.g(this,"Please select a arch treatment area."));
-					}
-					break;
-				case TreatmentArea.ToothRange:
-					this.labelRange.Visible=true;
-					this.listBoxTeeth.Visible=true;
-					this.listBoxTeeth.ColumnWidth=LayoutManager.Scale(16);
-					this.listBoxTeeth2.Visible=true;
-					this.listBoxTeeth2.ColumnWidth=LayoutManager.Scale(16);
-					listBoxTeeth.SelectionMode=System.Windows.Forms.SelectionMode.MultiExtended;
-					listBoxTeeth2.SelectionMode=System.Windows.Forms.SelectionMode.MultiExtended;
-					if(_listPatToothInitials==null) {
-						_listPatToothInitials=ToothInitials.Refresh(_patient.PatNum);
-					}
-					//First add teeth flagged as primary teeth for this specific patient from the Chart into _listPriTeeth.
-					_listPriTeeth=ToothInitials.GetPriTeeth(_listPatToothInitials);
-					//Preserve tooth range history for this procedure by ensuring that the UI shows the values from the database for the relevant teeth.
-					string[] arrayProcToothNums=new string[0];
-					if(!string.IsNullOrWhiteSpace(_procedure.ToothRange)){
-						arrayProcToothNums=_procedure.ToothRange.Split(',');//in Universal (American) nomenclature
-					}
-					foreach(string procToothNum in arrayProcToothNums) {
-						if(Tooth.IsPrimary(procToothNum)) {
-							_listPriTeeth.Add(Tooth.ToInt(procToothNum).ToString());//Convert the primary tooth to a permanent tooth.
-						}
-						else {//Permanent tooth
-							_listPriTeeth.Remove(procToothNum);//Preserve permanent tooth history.
-						}
-					}
-					//Fill Maxillary/Upper Arch
-					listBoxTeeth.Items.Clear();
-					for(int toothNum=1;toothNum<=16;toothNum++) {
-						string toothId=toothNum.ToString();
-						if(_listPriTeeth.Contains(toothNum.ToString())) {//Is Primary
-							toothId=Tooth.PermToPri(toothId);
-						}
-						listBoxTeeth.Items.Add(Tooth.GetToothLabelGraphic(toothId));//Display tooth is dependent on nomenclature preference.
-					}
-					//Fill Mandibular/Lower	Arch
-					listBoxTeeth2.Items.Clear();
-					for(int toothNum=32;toothNum>=17;toothNum--) {
-						string toothId=toothNum.ToString();
-						if(_listPriTeeth.Contains(toothNum.ToString())) {//Is Primary
-							toothId=Tooth.PermToPri(toothId);
-						}
-						listBoxTeeth2.Items.Add(Tooth.GetToothLabelGraphic(toothId));//Display tooth is dependent on nomenclature preference.
-					}
-					//Select tooth numbers in each arch depending on the database data stored in the procedure ToothRange.
-					foreach(string toothNum in arrayProcToothNums) {
-						if(Tooth.IsMaxillary(toothNum)) {//Works for primary or permanent tooth numbers.
-							int toothIndex=Tooth.ToInt(toothNum)-1;//Works for primary or permanent tooth numbers.
+					else {//Mandibular
+						int toothIndex=32-Tooth.ToInt(toothNum);//Works for primary or permanent tooth numbers.
+						if(toothIndex<0) {
+							//Tooth Range could be 3 to 4 digits (outside of range).  Split the numbers in order to select the correct teeth.
+							toothIndex=Tooth.ToInt(toothNum.Remove(toothNum.Length-2))-1;
+							int toothIndex2=32-Tooth.ToInt(toothNum.Substring(toothNum.Length-2,2));
 							listBoxTeeth.SetSelected(toothIndex,true);
+							listBoxTeeth2.SetSelected(toothIndex2,true);
 						}
-						else {//Mandibular
-							int toothIndex=32-Tooth.ToInt(toothNum);//Works for primary or permanent tooth numbers.
-							if(toothIndex<0) {
-								//Tooth Range could be 3 to 4 digits (outside of range).  Split the numbers in order to select the correct teeth.
-								toothIndex=Tooth.ToInt(toothNum.Remove(toothNum.Length-2))-1;
-								int toothIndex2=32-Tooth.ToInt(toothNum.Substring(toothNum.Length-2,2));
-								listBoxTeeth.SetSelected(toothIndex,true);
-								listBoxTeeth2.SetSelected(toothIndex2,true);
-							}
-							else {
-								listBoxTeeth2.SetSelected(toothIndex,true);
-							}
+						else {
+							listBoxTeeth2.SetSelected(toothIndex,true);
 						}
-					} 
-					break;
-			}//end switch
+					}
+				}//foreach
+			}//if toothrange
 			textProcFee.Text=_procedure.ProcFee.ToString("n");
 		}
 
@@ -1516,7 +1514,9 @@ namespace OpenDental {
 			Procedure procOld=_procedure.Copy();
 			ProcedureCode procCodeOld=ProcedureCodes.GetProcCode(_procedure.CodeNum);
 			ProcedureCode procCodeNew=ProcedureCodes.GetProcCode(FormP.SelectedCodeNum);
-			if(procCodeOld.TreatArea != procCodeNew.TreatArea) {
+			if(procCodeOld.TreatArea != procCodeNew.TreatArea
+				|| procCodeOld.AreaAlsoToothRange != procCodeNew.AreaAlsoToothRange) 
+			{
 				MsgBox.Show(this,"Not allowed due to treatment area mismatch.");
 				return;
 			}
@@ -2711,72 +2711,74 @@ namespace OpenDental {
 			//ProcCur.LabProcCode=textLabCode.Text;
 			//MessageBox.Show(ProcCur.ProcFee.ToString());
 			//Dx taken care of when radio pushed
-			switch(_procedureCode.TreatArea){
-				case TreatmentArea.None:
+			if(_procedureCode.TreatArea==TreatmentArea.None
+				|| _procedureCode.TreatArea==TreatmentArea.Mouth)
+			{
+				_procedure.Surf="";
+				_procedure.ToothNum="";	
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Surf){
+				_procedure.ToothNum=Tooth.FromInternat(textTooth.Text);
+				_procedure.Surf=Tooth.SurfTidyFromDisplayToDb(textSurfaces.Text,_procedure.ToothNum);
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Tooth){
+				_procedure.Surf="";
+				_procedure.ToothNum=Tooth.FromInternat(textTooth.Text);
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Quad){
+				//surf set when radio pushed
+				_procedure.ToothNum="";	
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Sextant){
+				//surf taken care of when radio pushed
+				_procedure.ToothNum="";	
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.Arch){
+				//taken care of when radio pushed
+				_procedure.ToothNum="";	
+			}
+			if(_procedureCode.TreatArea==TreatmentArea.ToothRange
+				|| _procedureCode.AreaAlsoToothRange)
+			{
+				//Deselect empty tooth selections in Maxillary/Upper Arch.
+				for(int j=0;j<listBoxTeeth.Items.Count;j++) {
+					if(listBoxTeeth.Items[j].ToString()=="") {//Can be blank when the tooth is flagged as primary when it is an adult tooth.
+						listBoxTeeth.SetSelected(j,false);
+					}
+				}
+				//Deselect empty tooth selections in Mandibular/Lower Arch.
+				for(int j=0;j<listBoxTeeth2.Items.Count;j++) {
+					if(listBoxTeeth2.Items[j].ToString()=="") {//Can be blank when the tooth is flagged as primary when it is an adult tooth.
+						listBoxTeeth2.SetSelected(j,false);
+					}
+				}
+				if(listBoxTeeth.SelectedItems.Count<1 && listBoxTeeth2.SelectedItems.Count<1) {
+					MessageBox.Show(Lan.g(this,"Must pick at least 1 tooth"));
+					return;
+				}
+				List <string> listSelectedToothNums=new List<string>();
+				//Store selected teeth in Maxillary/Upper Arch.
+				foreach(int index in listBoxTeeth.SelectedIndices) {
+					listSelectedToothNums.Add((index+1).ToString());
+				}
+				//Store selected teeth in Mandibular/Lower Arch.
+				foreach(int index in listBoxTeeth2.SelectedIndices) {
+					listSelectedToothNums.Add((32-index).ToString());
+				}
+				//Identify selected teeth which are primary and convert from permanent tooth num to primary tooth num for storage into database.
+				for(int j=0;j<listSelectedToothNums.Count;j++) {
+					if(_listPriTeeth.Contains(listSelectedToothNums[j])) {
+						listSelectedToothNums[j]=Tooth.PermToPri(listSelectedToothNums[j]);
+					}
+				}
+				_procedure.ToothRange=String.Join(",",listSelectedToothNums);
+				_procedure.ToothNum="";	
+				if(_procedureCode.AreaAlsoToothRange){
+					//arch or quad stored in surf
+				}
+				else{
 					_procedure.Surf="";
-					_procedure.ToothNum="";	
-					break;
-				case TreatmentArea.Surf:
-					_procedure.ToothNum=Tooth.FromInternat(textTooth.Text);
-					_procedure.Surf=Tooth.SurfTidyFromDisplayToDb(textSurfaces.Text,_procedure.ToothNum);
-					break;
-				case TreatmentArea.Tooth:
-					_procedure.Surf="";
-					_procedure.ToothNum=Tooth.FromInternat(textTooth.Text);
-					break;
-				case TreatmentArea.Mouth:
-					_procedure.Surf="";
-					_procedure.ToothNum="";	
-					break;
-				case TreatmentArea.Quad:
-					//surf set when radio pushed
-					_procedure.ToothNum="";	
-					break;
-				case TreatmentArea.Sextant:
-					//surf taken care of when radio pushed
-					_procedure.ToothNum="";	
-					break;
-				case TreatmentArea.Arch:
-					//don't HAVE to select arch
-					//taken care of when radio pushed
-					_procedure.ToothNum="";	
-					break;
-				case TreatmentArea.ToothRange:
-					//Deselect empty tooth selections in Maxillary/Upper Arch.
-					for(int j=0;j<listBoxTeeth.Items.Count;j++) {
-						if(listBoxTeeth.Items[j].ToString()=="") {//Can be blank when the tooth is flagged as primary when it is an adult tooth.
-							listBoxTeeth.SetSelected(j,false);
-						}
-					}
-					//Deselect empty tooth selections in Mandibular/Lower Arch.
-					for(int j=0;j<listBoxTeeth2.Items.Count;j++) {
-						if(listBoxTeeth2.Items[j].ToString()=="") {//Can be blank when the tooth is flagged as primary when it is an adult tooth.
-							listBoxTeeth2.SetSelected(j,false);
-						}
-					}
-					if(listBoxTeeth.SelectedItems.Count<1 && listBoxTeeth2.SelectedItems.Count<1) {
-						MessageBox.Show(Lan.g(this,"Must pick at least 1 tooth"));
-						return;
-					}
-					List <string> listSelectedToothNums=new List<string>();
-					//Store selected teeth in Maxillary/Upper Arch.
-					foreach(int index in listBoxTeeth.SelectedIndices) {
-						listSelectedToothNums.Add((index+1).ToString());
-					}
-					//Store selected teeth in Mandibular/Lower Arch.
-					foreach(int index in listBoxTeeth2.SelectedIndices) {
-						listSelectedToothNums.Add((32-index).ToString());
-					}
-					//Identify selected teeth which are primary and convert from permanent tooth num to primary tooth num for storage into database.
-					for(int j=0;j<listSelectedToothNums.Count;j++) {
-						if(_listPriTeeth.Contains(listSelectedToothNums[j])) {
-							listSelectedToothNums[j]=Tooth.PermToPri(listSelectedToothNums[j]);
-						}
-					}
-					_procedure.ToothRange=String.Join(",",listSelectedToothNums);
-					_procedure.Surf="";
-					_procedure.ToothNum="";	
-					break;
+				}
 			}
 			//Status taken care of when list pushed
 			_procedure.Note=this.textNotes.Text;

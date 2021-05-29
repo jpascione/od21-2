@@ -1809,7 +1809,7 @@ namespace OpenDentBusiness
 							}
 							EndSegment(sw);
 						}
-						else if(procCode.TreatArea==TreatmentArea.ToothRange) {
+						else if(procCode.TreatArea==TreatmentArea.ToothRange || procCode.AreaAlsoToothRange) {
 							string[] individTeeth=proc.ToothRange.Split(',');
 							for(int t=0;t<individTeeth.Length;t++) {
 								sw.Write("TOO"+s
@@ -3272,7 +3272,7 @@ namespace OpenDentBusiness
 						Comma(strb);
 						strb.Append(procCode.AbbrDesc+" missing arch");
 					}
-					if(procCode.TreatArea==TreatmentArea.ToothRange && proc.ToothRange=="") {
+					if((procCode.TreatArea==TreatmentArea.ToothRange || procCode.AreaAlsoToothRange) && proc.ToothRange=="") {
 						Comma(strb);
 						strb.Append(procCode.AbbrDesc+" tooth range");
 					}

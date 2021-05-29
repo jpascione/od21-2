@@ -4521,63 +4521,53 @@ namespace OpenDental{
 			string area="";
 			string toothNum="";
 			string surf="";
-			switch(ProcedureCodes.GetProcCode(procedure.CodeNum).TreatArea){
-				case TreatmentArea.Surf:
-					//area blank
-					toothNum=Tooth.ToInternat(procedure.ToothNum);
-					surf=Tooth.SurfTidyForClaims(procedure.Surf,procedure.ToothNum);
-					break;
-				case TreatmentArea.Tooth:
-					//area blank
-					toothNum=Tooth.ToInternat(procedure.ToothNum);
+			TreatmentArea treatmentArea=ProcedureCodes.GetProcCode(procedure.CodeNum).TreatArea;
+			if(treatmentArea==TreatmentArea.Surf){
+				//area blank
+				toothNum=Tooth.ToInternat(procedure.ToothNum);
+				surf=Tooth.SurfTidyForClaims(procedure.Surf,procedure.ToothNum);
+			}
+			if(treatmentArea==TreatmentArea.Tooth){
+				//area blank
+				toothNum=Tooth.ToInternat(procedure.ToothNum);
+				//surf blank
+			}
+			if(treatmentArea==TreatmentArea.Quad){
+				area=AreaToCode(procedure.Surf);//"UL" etc -> 20 etc
+				//toothNum blank
+				//surf blank
+			}
+			if(treatmentArea==TreatmentArea.Sextant){
+				if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canadian. en-CA or fr-CA
+					//United States Sextant 1 is Canadian sextant 03.
+					//United States Sextant 2 is Canadian sextant 04.
+					//United States Sextant 3 is Canadian sextant 05.
+					//United States Sextant 4 is Canadian sextant 06.
+					//United States Sextant 5 is Canadian sextant 07.
+					//United States Sextant 6 is Canadian sextant 08.
+					//The sextant goes into the "International Tooth Code" column on the claim form, according to the Nova Scotia NIHB fee guide page VII.
+					toothNum=(PIn.Int(procedure.Surf)+2).ToString().PadLeft(2,'0');//Add 2 to US sextant, then prepend a '0'.
+				}
+				else {//United States
+					area="";//leave it blank.  Never used anyway.
+					//area="S"+ProcCur.Surf;//area
+					//toothNum blank
 					//surf blank
-					break;
-				case TreatmentArea.Quad:
-					area=AreaToCode(procedure.Surf);//"UL" etc -> 20 etc
-					//num blank
-					//surf blank
-					break;
-				case TreatmentArea.Sextant:
-					if(CultureInfo.CurrentCulture.Name.EndsWith("CA")) {//Canadian. en-CA or fr-CA
-						//United States Sextant 1 is Canadian sextant 03.
-						//United States Sextant 2 is Canadian sextant 04.
-						//United States Sextant 3 is Canadian sextant 05.
-						//United States Sextant 4 is Canadian sextant 06.
-						//United States Sextant 5 is Canadian sextant 07.
-						//United States Sextant 6 is Canadian sextant 08.
-						//The sextant goes into the "International Tooth Code" column on the claim form, according to the Nova Scotia NIHB fee guide page VII.
-						toothNum=(PIn.Int(procedure.Surf)+2).ToString().PadLeft(2,'0');//Add 2 to US sextant, then prepend a '0'.
-					}
-					else {//United States
-						area="";//leave it blank.  Never used anyway.
-						//area="S"+ProcCur.Surf;//area
-						//num blank
-						//surf blank
-					}
-					break;
-				case TreatmentArea.Arch:
-					area=AreaToCode(procedure.Surf);//area "U", etc
-					//num blank
-					//surf blank
-					break;
-				case TreatmentArea.ToothRange:
-					//area blank
-					toothNum=Tooth.FormatRangeForDisplay(procedure.ToothRange);
-					/*for(int i=0;i<ProcCur.ToothRange.Split(',').Length;i++){
-						if(!Tooth.IsValidDB(ProcCur.ToothRange.Split(',')[i])){
-							continue;
-						}
-						if(i>0){
-							toothNum+=",";
-						}
-						toothNum+=Tooth.ToInternat(ProcCur.ToothRange.Split(',')[i]);
-					}*/
-					//surf blank
-					break;
-				default://mouth
-					//area?
-					break;
-			}//switch treatarea
+				}
+			}
+			if(treatmentArea==TreatmentArea.Arch){
+				area=AreaToCode(procedure.Surf);//area "U", etc
+				//toothNum blank
+				//surf blank
+			}
+			if(treatmentArea==TreatmentArea.ToothRange || ProcedureCodes.GetProcCode(procedure.CodeNum).AreaAlsoToothRange){
+				//area blank. Or, for AreaAlsoToothRange, already handled above for arch or quad
+				toothNum=Tooth.FormatRangeForDisplay(procedure.ToothRange);
+				//surf blank
+			}
+			if(treatmentArea==TreatmentArea.Mouth){
+				area="00";
+			}
       switch(field){
 				case "Area":
 					return area;

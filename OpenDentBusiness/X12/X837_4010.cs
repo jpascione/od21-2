@@ -1222,7 +1222,7 @@ namespace OpenDentBusiness {
 							}
 							sw.WriteLine("~");
 						}
-						else if(procCode.TreatArea==TreatmentArea.ToothRange) {
+						else if(procCode.TreatArea==TreatmentArea.ToothRange || procCode.AreaAlsoToothRange) {
 							string[] individTeeth=proc.ToothRange.Split(',');
 							for(int t=0;t<individTeeth.Length;t++) {
 								seg++;
@@ -1608,13 +1608,15 @@ namespace OpenDentBusiness {
 				return "";
 			}
 			if(procCode.TreatArea==TreatmentArea.Surf) {
-				return "";//might need to enhance this
+				return "";
 			}
 			if(procCode.TreatArea==TreatmentArea.Tooth) {
-				return "";//might need to enhance this
+				return "";
 			}
 			if(procCode.TreatArea==TreatmentArea.ToothRange) {
 				//already checked for blank tooth range
+				//This is the old behavior for tooth range, where it also "helps" the user by sending an arch. 
+				//It doesn't do this in 5010
 				if(Tooth.IsMaxillary(proc.ToothRange.Split(',')[0])) {
 					return "01";
 				}
@@ -1963,7 +1965,7 @@ namespace OpenDentBusiness {
 					}
 					strb.Append(procCode.AbbrDesc+" missing arch");
 				}
-				if(procCode.TreatArea==TreatmentArea.ToothRange && proc.ToothRange=="") {
+				if((procCode.TreatArea==TreatmentArea.ToothRange || procCode.AreaAlsoToothRange) && proc.ToothRange=="") {
 					if(strb.Length!=0) {
 						strb.Append(",");
 					}
