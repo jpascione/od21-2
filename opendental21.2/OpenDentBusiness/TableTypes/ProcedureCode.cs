@@ -102,6 +102,8 @@ namespace OpenDentBusiness{
 		public string TaxCode;
 		///<summary>The text to draw on the tooth for paint type Text.</summary>
 		public string PaintText;
+		///<summary>This is an adjunct to TreatArea. If Quad or Arch, then this allows users to also specify a tooth or tooth range.  Required by some insurance.</summary>
+		public bool AreaAlsoToothRange;
 
 		public ProcedureCode(){
 			ProcTime="/X/";
