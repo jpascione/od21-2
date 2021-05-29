@@ -465,7 +465,7 @@ namespace OpenDental{
 				secLog+=SecurityLogEntryHelper(_procCodeOld.ProvNumDefault.ToString(),ProcCode.ProvNumDefault.ToString(),"provider number");
 				secLog+=SecurityLogEntryHelper(_procCodeOld.BypassGlobalLock.ToString(),ProcCode.BypassGlobalLock.ToString(),"bypass global lock box");
 				secLog+=SecurityLogEntryHelper(_procCodeOld.ProcCatDescript,ProcCode.ProcCatDescript,"category");
-				secLog+=SecurityLogEntryHelper(_procCodeOld.AreaAlsoToothRange.ToString(),ProcCode.AreaAlsoToothRange.ToString(),"category");
+				secLog+=SecurityLogEntryHelper(_procCodeOld.AreaAlsoToothRange.ToString(),ProcCode.AreaAlsoToothRange.ToString(),"AreaAlsoToothRange box");
 				SecurityLogs.MakeLogEntry(Permissions.ProcCodeEdit,0,secLog,ProcCode.CodeNum,_procCodeOld.DateTStamp);
 				DataValid.SetInvalid(InvalidType.ProcCodes);
 			}
