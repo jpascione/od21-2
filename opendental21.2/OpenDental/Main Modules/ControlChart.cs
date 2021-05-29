@@ -2056,7 +2056,8 @@ namespace OpenDental {
 				procCur.CodeNum = formProcCodes.SelectedCodeNum;
 				//Procedures.Cur.ProcCode=ProcButtonItems.CodeList[i];
 				treatmentArea=procedureCode.TreatArea;
-				if((treatmentArea==TreatmentArea.Arch
+				if((treatmentArea==TreatmentArea.None
+					|| treatmentArea==TreatmentArea.Arch
 					|| treatmentArea==TreatmentArea.Mouth
 					|| treatmentArea==TreatmentArea.Quad
 					|| treatmentArea==TreatmentArea.Sextant
@@ -9662,7 +9663,8 @@ namespace OpenDental {
 				ProcCur.CodeNum=ProcedureCodes.GetCodeNum(textProcCode.Text);
 				bool isValid=true;
 				tArea=procedureCode.TreatArea;//ProcedureCodes.GetProcCode(ProcCur.CodeNum).TreatArea;
-				if((tArea==TreatmentArea.Arch
+				if((tArea==TreatmentArea.None
+					|| tArea==TreatmentArea.Arch
 					|| tArea==TreatmentArea.Mouth
 					|| tArea==TreatmentArea.Quad
 					|| tArea==TreatmentArea.Sextant
@@ -9877,7 +9879,8 @@ namespace OpenDental {
 							tArea=TreatmentArea.Tooth;
 						}
 					}
-					if((tArea==TreatmentArea.Arch
+					if((tArea==TreatmentArea.None
+						|| tArea==TreatmentArea.Arch
 						|| tArea==TreatmentArea.Mouth
 						|| tArea==TreatmentArea.Quad
 						|| tArea==TreatmentArea.Sextant
@@ -10008,7 +10011,8 @@ namespace OpenDental {
 					bool willBeMissing=Procedures.WillBeMissing(toothNumString,_patCur.PatNum);
 					procCur.CodeNum=AutoCodeItems.GetCodeNum(arrayAutoCodeList[i],toothNumString,surf,procCur.IsAdditional,_patCur.PatNum,_patCur.Age,willBeMissing);
 					tArea=ProcedureCodes.GetProcCode(procCur.CodeNum).TreatArea;
-					if((tArea==TreatmentArea.Arch
+					if((tArea==TreatmentArea.None
+						|| tArea==TreatmentArea.Arch
 						|| tArea==TreatmentArea.Mouth
 						|| tArea==TreatmentArea.Quad
 						|| tArea==TreatmentArea.Sextant

@@ -266,7 +266,7 @@
 			// 
 			// labelAmount
 			// 
-			this.labelAmount.Location = new System.Drawing.Point(30, 158);
+			this.labelAmount.Location = new System.Drawing.Point(30, 195);
 			this.labelAmount.Name = "labelAmount";
 			this.labelAmount.Size = new System.Drawing.Size(75, 16);
 			this.labelAmount.TabIndex = 4;
@@ -351,7 +351,7 @@
 			this.groupQuadrant.Controls.Add(this.radioUL);
 			this.groupQuadrant.Controls.Add(this.radioUR);
 			this.groupQuadrant.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.groupQuadrant.Location = new System.Drawing.Point(104, 99);
+			this.groupQuadrant.Location = new System.Drawing.Point(104, 134);
 			this.groupQuadrant.Name = "groupQuadrant";
 			this.groupQuadrant.Size = new System.Drawing.Size(108, 56);
 			this.groupQuadrant.TabIndex = 36;
@@ -404,7 +404,7 @@
 			this.groupArch.Controls.Add(this.radioL);
 			this.groupArch.Controls.Add(this.radioU);
 			this.groupArch.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.groupArch.Location = new System.Drawing.Point(104, 99);
+			this.groupArch.Location = new System.Drawing.Point(104, 134);
 			this.groupArch.Name = "groupArch";
 			this.groupArch.Size = new System.Drawing.Size(60, 56);
 			this.groupArch.TabIndex = 3;
@@ -441,7 +441,7 @@
 			this.panelSurfaces.Controls.Add(this.butM);
 			this.panelSurfaces.Controls.Add(this.butV);
 			this.panelSurfaces.Controls.Add(this.butOI);
-			this.panelSurfaces.Location = new System.Drawing.Point(188, 106);
+			this.panelSurfaces.Location = new System.Drawing.Point(177, 109);
 			this.panelSurfaces.Name = "panelSurfaces";
 			this.panelSurfaces.Size = new System.Drawing.Size(96, 66);
 			this.panelSurfaces.TabIndex = 100;
@@ -522,7 +522,7 @@
 			this.groupSextant.Controls.Add(this.radioS3);
 			this.groupSextant.Controls.Add(this.radioS1);
 			this.groupSextant.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.groupSextant.Location = new System.Drawing.Point(104, 99);
+			this.groupSextant.Location = new System.Drawing.Point(104, 134);
 			this.groupSextant.Name = "groupSextant";
 			this.groupSextant.Size = new System.Drawing.Size(156, 56);
 			this.groupSextant.TabIndex = 5;
@@ -594,7 +594,7 @@
 			// label9
 			// 
 			this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label9.Location = new System.Drawing.Point(5, 221);
+			this.label9.Location = new System.Drawing.Point(403, 53);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(100, 14);
 			this.label9.TabIndex = 45;
@@ -613,6 +613,7 @@
 			// panel1
 			// 
 			this.panel1.AllowDrop = true;
+			this.panel1.Controls.Add(this.textTooth);
 			this.panel1.Controls.Add(this.labelTaxEst);
 			this.panel1.Controls.Add(this.textTaxAmt);
 			this.panel1.Controls.Add(this.textOrigDateComp);
@@ -635,9 +636,9 @@
 			this.panel1.Controls.Add(this.labelAmount);
 			this.panel1.Controls.Add(this.textSurfaces);
 			this.panel1.Controls.Add(this.label6);
+			this.panel1.Controls.Add(this.groupArch);
 			this.panel1.Controls.Add(this.groupQuadrant);
 			this.panel1.Controls.Add(this.textProcFee);
-			this.panel1.Controls.Add(this.textTooth);
 			this.panel1.Controls.Add(this.labelStartTime);
 			this.panel1.Controls.Add(this.labelEndTime);
 			this.panel1.Controls.Add(this.labelRange);
@@ -647,16 +648,15 @@
 			this.panel1.Controls.Add(this.textRange);
 			this.panel1.Controls.Add(this.butChange);
 			this.panel1.Controls.Add(this.groupSextant);
-			this.panel1.Controls.Add(this.groupArch);
 			this.panel1.Controls.Add(this.labelTimeFinal);
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(397, 177);
+			this.panel1.Size = new System.Drawing.Size(397, 214);
 			this.panel1.TabIndex = 2;
 			// 
 			// labelTaxEst
 			// 
-			this.labelTaxEst.Location = new System.Drawing.Point(178, 157);
+			this.labelTaxEst.Location = new System.Drawing.Point(178, 194);
 			this.labelTaxEst.Name = "labelTaxEst";
 			this.labelTaxEst.Size = new System.Drawing.Size(75, 16);
 			this.labelTaxEst.TabIndex = 107;
@@ -666,7 +666,7 @@
 			// 
 			// textTaxAmt
 			// 
-			this.textTaxAmt.Location = new System.Drawing.Point(254, 154);
+			this.textTaxAmt.Location = new System.Drawing.Point(254, 191);
 			this.textTaxAmt.MaxVal = 100000000D;
 			this.textTaxAmt.MinVal = -100000000D;
 			this.textTaxAmt.Name = "textTaxAmt";
@@ -801,7 +801,7 @@
 			// 
 			// textProcFee
 			// 
-			this.textProcFee.Location = new System.Drawing.Point(106, 155);
+			this.textProcFee.Location = new System.Drawing.Point(106, 192);
 			this.textProcFee.MaxVal = 100000000D;
 			this.textProcFee.MinVal = -100000000D;
 			this.textProcFee.Name = "textProcFee";
@@ -1090,7 +1090,7 @@
 			// 
 			// labelSetComplete
 			// 
-			this.labelSetComplete.Location = new System.Drawing.Point(724, 23);
+			this.labelSetComplete.Location = new System.Drawing.Point(723, 9);
 			this.labelSetComplete.Name = "labelSetComplete";
 			this.labelSetComplete.Size = new System.Drawing.Size(157, 16);
 			this.labelSetComplete.TabIndex = 58;
@@ -1122,7 +1122,7 @@
 			// 
 			this.comboClinic.HqDescription = "None";
 			this.comboClinic.IncludeUnassigned = true;
-			this.comboClinic.Location = new System.Drawing.Point(69, 196);
+			this.comboClinic.Location = new System.Drawing.Point(467, 28);
 			this.comboClinic.Name = "comboClinic";
 			this.comboClinic.Size = new System.Drawing.Size(214, 21);
 			this.comboClinic.TabIndex = 74;
@@ -1130,7 +1130,7 @@
 			// 
 			// label14
 			// 
-			this.label14.Location = new System.Drawing.Point(403, 20);
+			this.label14.Location = new System.Drawing.Point(403, 7);
 			this.label14.Name = "label14";
 			this.label14.Size = new System.Drawing.Size(99, 16);
 			this.label14.TabIndex = 77;
@@ -1175,7 +1175,7 @@
 			// 
 			// comboProv
 			// 
-			this.comboProv.Location = new System.Drawing.Point(106, 217);
+			this.comboProv.Location = new System.Drawing.Point(504, 49);
 			this.comboProv.Name = "comboProv";
 			this.comboProv.Size = new System.Drawing.Size(158, 21);
 			this.comboProv.TabIndex = 100;
@@ -1248,7 +1248,7 @@
 			// 
 			this.checkHideGraphics.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkHideGraphics.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkHideGraphics.Location = new System.Drawing.Point(5, 178);
+			this.checkHideGraphics.Location = new System.Drawing.Point(5, 217);
 			this.checkHideGraphics.Name = "checkHideGraphics";
 			this.checkHideGraphics.Size = new System.Drawing.Size(114, 18);
 			this.checkHideGraphics.TabIndex = 162;
@@ -1411,7 +1411,7 @@
 			// 
 			// comboProcStatus
 			// 
-			this.comboProcStatus.Location = new System.Drawing.Point(504, 19);
+			this.comboProcStatus.Location = new System.Drawing.Point(504, 6);
 			this.comboProcStatus.Name = "comboProcStatus";
 			this.comboProcStatus.Size = new System.Drawing.Size(133, 21);
 			this.comboProcStatus.TabIndex = 167;
@@ -1419,7 +1419,7 @@
 			// 
 			// label13
 			// 
-			this.label13.Location = new System.Drawing.Point(418, 80);
+			this.label13.Location = new System.Drawing.Point(418, 85);
 			this.label13.Name = "label13";
 			this.label13.Size = new System.Drawing.Size(84, 16);
 			this.label13.TabIndex = 168;
@@ -1430,7 +1430,7 @@
 			// 
 			this.textReferral.BackColor = System.Drawing.SystemColors.Control;
 			this.textReferral.ForeColor = System.Drawing.Color.DarkRed;
-			this.textReferral.Location = new System.Drawing.Point(504, 77);
+			this.textReferral.Location = new System.Drawing.Point(504, 82);
 			this.textReferral.Name = "textReferral";
 			this.textReferral.ReadOnly = true;
 			this.textReferral.Size = new System.Drawing.Size(198, 20);
@@ -2056,7 +2056,7 @@
 			// 
 			// butReferral
 			// 
-			this.butReferral.Location = new System.Drawing.Point(707, 77);
+			this.butReferral.Location = new System.Drawing.Point(707, 82);
 			this.butReferral.Name = "butReferral";
 			this.butReferral.Size = new System.Drawing.Size(18, 21);
 			this.butReferral.TabIndex = 170;
@@ -2065,7 +2065,7 @@
 			// 
 			// butPickProv
 			// 
-			this.butPickProv.Location = new System.Drawing.Point(265, 217);
+			this.butPickProv.Location = new System.Drawing.Point(663, 49);
 			this.butPickProv.Name = "butPickProv";
 			this.butPickProv.Size = new System.Drawing.Size(18, 21);
 			this.butPickProv.TabIndex = 161;
@@ -2099,7 +2099,7 @@
 			// 
 			// butSetComplete
 			// 
-			this.butSetComplete.Location = new System.Drawing.Point(643, 19);
+			this.butSetComplete.Location = new System.Drawing.Point(642, 5);
 			this.butSetComplete.Name = "butSetComplete";
 			this.butSetComplete.Size = new System.Drawing.Size(79, 22);
 			this.butSetComplete.TabIndex = 54;

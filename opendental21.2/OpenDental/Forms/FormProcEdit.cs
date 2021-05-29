@@ -754,6 +754,8 @@ namespace OpenDental {
 			textDesc.Text=_procedureCode2.Descript;
 			textDrugNDC.Text=_procedureCode2.DrugNDC;
 			switch (_procedureCode2.TreatArea){
+				case TreatmentArea.None:
+					break;
 				case TreatmentArea.Surf:
 					this.textTooth.Visible=true;
 					this.labelTooth.Visible=true;
@@ -2710,6 +2712,10 @@ namespace OpenDental {
 			//MessageBox.Show(ProcCur.ProcFee.ToString());
 			//Dx taken care of when radio pushed
 			switch(_procedureCode2.TreatArea){
+				case TreatmentArea.None:
+					_procCur.Surf="";
+					_procCur.ToothNum="";	
+					break;
 				case TreatmentArea.Surf:
 					_procCur.ToothNum=Tooth.FromInternat(textTooth.Text);
 					_procCur.Surf=Tooth.SurfTidyFromDisplayToDb(textSurfaces.Text,_procCur.ToothNum);

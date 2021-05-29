@@ -203,17 +203,18 @@ namespace OpenDental {
 			// 
 			// listTreatArea
 			// 
-			this.listTreatArea.Items.AddRange(new object[] {
-            "Surface",
-            "Tooth",
-            "Mouth",
-            "Quadrant",
-            "Sextant",
-            "Arch",
-            "Tooth Range"});
+			this.listTreatArea.ItemStrings = new string[] {
+        "None",
+        "Surface",
+        "Tooth",
+        "Mouth",
+        "Quadrant",
+        "Sextant",
+        "Arch",
+        "Tooth Range"};
 			this.listTreatArea.Location = new System.Drawing.Point(616, 17);
 			this.listTreatArea.Name = "listTreatArea";
-			this.listTreatArea.Size = new System.Drawing.Size(118, 95);
+			this.listTreatArea.Size = new System.Drawing.Size(118, 108);
 			this.listTreatArea.TabIndex = 24;
 			// 
 			// checkNoBillIns
