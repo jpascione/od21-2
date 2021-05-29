@@ -33,12 +33,14 @@ namespace OpenDental{
 			this.butSimple = new OpenDental.UI.Button();
 			this.checkHidePaysplits = new System.Windows.Forms.CheckBox();
 			this.groupBoxOD1 = new OpenDental.UI.GroupBoxOD();
+			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.radioPayDont = new System.Windows.Forms.RadioButton();
 			this.radioPayAuto = new System.Windows.Forms.RadioButton();
 			this.radioPayEnforce = new System.Windows.Forms.RadioButton();
 			this.groupBoxOD2 = new OpenDental.UI.GroupBoxOD();
+			this.label7 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
 			this.radioAdjustDont = new System.Windows.Forms.RadioButton();
@@ -47,13 +49,11 @@ namespace OpenDental{
 			this.butDefault = new OpenDental.UI.Button();
 			this.labelPermission = new System.Windows.Forms.Label();
 			this.groupBox5 = new OpenDental.UI.GroupBoxOD();
+			this.labelRefundable = new System.Windows.Forms.Label();
 			this.checkAllowPrePayToTpProcs = new System.Windows.Forms.CheckBox();
 			this.checkIsRefundable = new System.Windows.Forms.CheckBox();
 			this.label57 = new System.Windows.Forms.Label();
 			this.comboTpUnearnedType = new OpenDental.UI.ComboBoxOD();
-			this.label3 = new System.Windows.Forms.Label();
-			this.labelRefundable = new System.Windows.Forms.Label();
-			this.label7 = new System.Windows.Forms.Label();
 			this.groupBoxOD1.SuspendLayout();
 			this.groupBoxOD2.SuspendLayout();
 			this.groupBox5.SuspendLayout();
@@ -156,21 +156,32 @@ namespace OpenDental{
 			this.groupBoxOD1.TabIndex = 305;
 			this.groupBoxOD1.Text = "Paysplits";
 			// 
+			// label3
+			// 
+			this.label3.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label3.Location = new System.Drawing.Point(93, 55);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(405, 30);
+			this.label3.TabIndex = 317;
+			this.label3.Text = "Highlight procedures before entering a payment to automatically split the payment" +
+    " to those procedures.  Otherwise, LIFO is used and history is ignored.";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// label2
 			// 
 			this.label2.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.label2.Location = new System.Drawing.Point(93, 94);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(343, 30);
+			this.label2.Size = new System.Drawing.Size(388, 30);
 			this.label2.TabIndex = 315;
-			this.label2.Text = "This looks simpler, but if the office ever wishes to move to payment of providers" +
-    " by collections, staff will need to be retrained.";
+			this.label2.Text = "Usually no splits, so this looks simpler.  But if the office ever wishes to move " +
+    "to payment of providers by collections, staff will need to be retrained.";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label1
 			// 
 			this.label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label1.Location = new System.Drawing.Point(93, 23);
+			this.label1.Location = new System.Drawing.Point(93, 19);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(425, 31);
 			this.label1.TabIndex = 306;
@@ -229,6 +240,16 @@ namespace OpenDental{
 			this.groupBoxOD2.Size = new System.Drawing.Size(462, 113);
 			this.groupBoxOD2.TabIndex = 318;
 			this.groupBoxOD2.Text = "Adjustments";
+			// 
+			// label7
+			// 
+			this.label7.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label7.Location = new System.Drawing.Point(93, 82);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(343, 18);
+			this.label7.TabIndex = 318;
+			this.label7.Text = "Not paying providers by collections.";
+			this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label6
 			// 
@@ -321,6 +342,16 @@ namespace OpenDental{
 			this.groupBox5.TabIndex = 322;
 			this.groupBox5.Text = "Treatment Planned Prepayments";
 			// 
+			// labelRefundable
+			// 
+			this.labelRefundable.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.labelRefundable.Location = new System.Drawing.Point(342, 41);
+			this.labelRefundable.Name = "labelRefundable";
+			this.labelRefundable.Size = new System.Drawing.Size(343, 58);
+			this.labelRefundable.TabIndex = 317;
+			this.labelRefundable.Text = resources.GetString("labelRefundable.Text");
+			this.labelRefundable.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// checkAllowPrePayToTpProcs
 			// 
 			this.checkAllowPrePayToTpProcs.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -361,37 +392,6 @@ namespace OpenDental{
 			this.comboTpUnearnedType.Name = "comboTpUnearnedType";
 			this.comboTpUnearnedType.Size = new System.Drawing.Size(163, 21);
 			this.comboTpUnearnedType.TabIndex = 15;
-			// 
-			// label3
-			// 
-			this.label3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label3.Location = new System.Drawing.Point(93, 55);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(405, 30);
-			this.label3.TabIndex = 317;
-			this.label3.Text = "Highlight procedures before entering a payment to automatically split the payment" +
-    " to those procedures.  Otherwise, LIFO is used and history is ignored.";
-			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// labelRefundable
-			// 
-			this.labelRefundable.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.labelRefundable.Location = new System.Drawing.Point(342, 41);
-			this.labelRefundable.Name = "labelRefundable";
-			this.labelRefundable.Size = new System.Drawing.Size(343, 58);
-			this.labelRefundable.TabIndex = 317;
-			this.labelRefundable.Text = resources.GetString("labelRefundable.Text");
-			this.labelRefundable.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// label7
-			// 
-			this.label7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label7.Location = new System.Drawing.Point(93, 82);
-			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(343, 18);
-			this.label7.TabIndex = 318;
-			this.label7.Text = "Not paying providers by collections.";
-			this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// FormAllocationsSetup
 			// 
