@@ -23,7 +23,6 @@ namespace OpenDental{
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
-			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormQueryParser));
 			this.textQuery = new OpenDental.ODtextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -51,7 +50,8 @@ namespace OpenDental{
 			this.textQuery.Location = new System.Drawing.Point(2, 23);
 			this.textQuery.Name = "textQuery";
 			this.textQuery.QuickPasteType = OpenDentBusiness.QuickPasteType.Query;
-			this.textQuery.Size = new System.Drawing.Size(785, 361);
+			this.textQuery.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.textQuery.Size = new System.Drawing.Size(785, 358);
 			this.textQuery.TabIndex = 1;
 			this.textQuery.Text = "";
 			this.textQuery.WordWrap = false;
@@ -82,6 +82,7 @@ namespace OpenDental{
 			this.splitContainer1.SplitterDistance = 210;
 			this.splitContainer1.SplitterWidth = 7;
 			this.splitContainer1.TabIndex = 3;
+			this.splitContainer1.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainer1_SplitterMoved);
 			// 
 			// butShowHide
 			// 
@@ -145,15 +146,12 @@ namespace OpenDental{
 			// 
 			// FormQueryParser
 			// 
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.ClientSize = new System.Drawing.Size(817, 681);
 			this.Controls.Add(this.butOK);
 			this.Controls.Add(this.butCancel);
 			this.Controls.Add(this.splitContainer1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.KeyPreview = true;
 			this.Name = "FormQueryParser";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Query Variables";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormQueryParser_FormClosing);
 			this.Load += new System.EventHandler(this.FormQueryParser_Load);

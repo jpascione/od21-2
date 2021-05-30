@@ -18,13 +18,13 @@ namespace OpenDental {
 			Lan.F(this);
 			_queryCur=queryCur;
 			_queryOld=queryCur.Copy();
-			//hide the query text by default.
-			Height = 325;
 			splitContainer1.Panel2Collapsed=true;
+			LayoutManager.LayoutControlBoundsAndFonts(splitContainer1);
 			this.Text +=" - " + _queryCur.Description;
 		}
 
 		private void FormQueryParser_Load(object sender,EventArgs e) {
+			Height = 325;//hide the query text by default.
 			SetFilterControlsAndAction(() => {
 					_queryCur.QueryText=textQuery.Text;
 					//No cell is currently selected, so the user must be typing in textQuery.  If a cell is selected, we got here because we made a change in a 
@@ -126,6 +126,11 @@ namespace OpenDental {
 				Height = 720;
 				this.butShowHide.Image = global::OpenDental.Properties.Resources.arrowUpTriangle;
 			}
+			LayoutManager.LayoutControlBoundsAndFonts(splitContainer1);
+		}
+
+		private void splitContainer1_SplitterMoved(object sender,SplitterEventArgs e) {
+			LayoutManager.LayoutControlBoundsAndFonts(splitContainer1);
 		}
 
 		private void gridMain_CellLeave(object sender,ODGridClickEventArgs e) {
