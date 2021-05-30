@@ -1069,7 +1069,7 @@ namespace OpenDental{
 				})
 			);
 			inputBox.setTitle(Lan.g(this,"Negative Pay Plan Adjustment"));
-			inputBox.Size=new Size(350,170);
+			inputBox.SizeInitial=new Size(350,170);
 			if(inputBox.ShowDialog()!=DialogResult.OK) {
 				return;
 			}

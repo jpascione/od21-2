@@ -452,7 +452,7 @@ namespace OpenDental {
 				new InputBoxParam(InputBoxType.RadioButton,"",Lan.g("ContrAccount","Do nothing"),Size.Empty)
 			});
 			inputBox.setTitle(Lan.g("ContrAccount","Outstanding secondary claims"));
-			inputBox.Size=new Size(450,200);
+			inputBox.SizeInitial=new Size(450,200);
 			if(inputBox.ShowDialog()!=DialogResult.OK) {
 				return;
 			}
