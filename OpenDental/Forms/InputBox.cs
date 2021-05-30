@@ -18,6 +18,8 @@ namespace OpenDental{
 		private Func<string,bool> _funcOkClick;
 		int _curLocationY=2;
 		int _minWidth=250;
+		///<summary>Must use this to set the initial size rather than Size directly, because of layout manager.  Pass in a size in 96 dpi. It will get scaled.</summary>
+		public Size SizeInitial;
 
 		#region Properties - Public
 		public int MaxInputTextLength {
@@ -177,6 +179,9 @@ namespace OpenDental{
 		private void InputBox_Load(object sender, EventArgs e){
 			Height=LayoutManager.Scale(_curLocationY+90);
 			Width=LayoutManager.Scale(_minWidth);
+			if(SizeInitial!=Size.Empty){
+				Size=LayoutManager.ScaleSize(SizeInitial);
+			}
 			//Add the controls to form after sizing the window to prevent right-anchored controls from moving.
 			for(int i=0;i<_listLabels.Count;i++)	{
 				_listLabels[i].Font=new Font(FontFamily.GenericSansSerif,LayoutManager.ScaleF(8.25f));
