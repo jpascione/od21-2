@@ -12,7 +12,7 @@ namespace OpenDentBusiness {
 		public PayPlanLink LinkedCredit;
 		public decimal AmountOriginal;
 		public decimal AmountOverride;
-		///<summary>Amount that still needs to be made into payplan charges (debited).</summary>
+		///<summary>Amount that still needs to be made into payplan charges (debited). If overrides are used, this will remain at the override value.</summary>
 		public decimal AmountRemaining;
 		[XmlIgnore]
 		public object ProductionTag;
@@ -30,6 +30,13 @@ namespace OpenDentBusiness {
 		///Adjustments description will be 'Adjustment' followed by the textual representation of the adjustment type.</summary>
 		public string Description;
 		public PayPlanLinkType LinkType;
+
+		[XmlIgnore]
+		public long PayPlanNum {
+			get {
+				return LinkedCredit.PayPlanNum;
+			}
+		}
 
 		[XmlElement(nameof(ProductionTag))]
 		public DtoObject ProductionTagXml {

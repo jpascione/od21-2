@@ -721,6 +721,9 @@ namespace OpenDentBusiness {
 		///<summary>The last known date and time that the dynamic payplan service ran.</summary>
 		[PrefName(ValueType=PrefValueType.DATETIME)]
 		DynamicPayPlanLastDateTime,
+		///<summary>FK to definition.DefNum Identifies a specific hidden PaySplitUnearnedType to allow unearned money to stay attached to dynamic payment plans (hides this money from the income transfer system).</summary>
+		[PrefName(ValueType=PrefValueType.LONG)]
+		DynamicPayPlanPrepaymentUnearnedType,
 		///<summary>Defaults to 9AM.  The time the user has specified that they would like the service to run on each day.</summary>
 		[PrefName(ValueType=PrefValueType.DATETIME)]
 		DynamicPayPlanRunTime,

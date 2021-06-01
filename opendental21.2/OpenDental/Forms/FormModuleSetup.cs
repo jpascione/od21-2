@@ -787,6 +787,8 @@ namespace OpenDental{
 			comboRecurringChargePayType.Items.AddDefNone("("+Lan.g(this,"default")+")");
 			comboRecurringChargePayType.Items.AddDefs(Defs.GetDefsForCategory(DefCat.PaymentTypes,true));
 			comboRecurringChargePayType.SetSelectedDefNum(PrefC.GetLong(PrefName.RecurringChargesPayTypeCC)); 
+			comboDppUnearnedType.Items.AddDefs(Defs.GetHiddenUnearnedDefs(true));
+			comboDppUnearnedType.SetSelectedDefNum(PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType));
 			//Fill the combobox with providers
 			comboSalesTaxDefaultProvider.Items.AddProvNone();
 			comboSalesTaxDefaultProvider.Items.AddProvsAbbr(Providers.GetDeepCopy(true));
@@ -962,6 +964,7 @@ namespace OpenDental{
 			_changed|=Prefs.UpdateLong(PrefName.SalesTaxDefaultProvider,comboSalesTaxDefaultProvider.GetSelectedProvNum());
 			_changed|=Prefs.UpdateBool(PrefName.SalesTaxDoAutomate,checkAutomateSalesTax.Checked);
 			_changed|=Prefs.UpdateLong(PrefName.RefundAdjustmentType,comboRefundAdjustmentType.GetSelectedDefNum());
+			_changed|=Prefs.UpdateLong(PrefName.DynamicPayPlanPrepaymentUnearnedType,comboDppUnearnedType.GetSelectedDefNum());
 			if(comboFinanceChargeAdjType.SelectedIndex!=-1) {
 				_changed|=Prefs.UpdateLong(PrefName.FinanceChargeAdjustmentType,comboFinanceChargeAdjType.GetSelectedDefNum());
 			}

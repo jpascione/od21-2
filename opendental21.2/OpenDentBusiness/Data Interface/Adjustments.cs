@@ -90,12 +90,12 @@ namespace OpenDentBusiness{
 		}
 
 		public static List<Adjustment> GetForProcs(List<long> listProcNums) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<Adjustment>>(MethodBase.GetCurrentMethod(),listProcNums);
-			}
 			List<Adjustment> listAdjustments=new List<Adjustment>();
 			if(listProcNums==null || listProcNums.Count < 1) {
 				return listAdjustments;
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<Adjustment>>(MethodBase.GetCurrentMethod(),listProcNums);
 			}
 			string command="SELECT * FROM adjustment WHERE ProcNum IN("+string.Join(",",listProcNums)+")";
 			return Crud.AdjustmentCrud.SelectMany(command);

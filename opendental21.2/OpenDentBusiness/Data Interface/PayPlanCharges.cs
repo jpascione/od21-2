@@ -47,11 +47,11 @@ namespace OpenDentBusiness{
 
 		///<summary>Returns a list of payplancharges associated to the passed in payplannums.  Will return a blank list if none.</summary>
 		public static List<PayPlanCharge> GetForPayPlans(List<long> listPayPlanNums) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<PayPlanCharge>>(MethodBase.GetCurrentMethod(),listPayPlanNums);
-			}
 			if(listPayPlanNums==null || listPayPlanNums.Count<1) {
 				return new List<PayPlanCharge>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<PayPlanCharge>>(MethodBase.GetCurrentMethod(),listPayPlanNums);
 			}
 			string command=
 				"SELECT * FROM payplancharge "

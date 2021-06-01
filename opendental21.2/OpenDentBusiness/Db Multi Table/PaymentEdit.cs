@@ -1149,8 +1149,9 @@ namespace OpenDentBusiness {
 				if(PrefC.HasClinicsEnabled) {//Clinics
 					paySplit.ClinicNum=fauxAccountEntry.ClinicNum;
 				}
-				paySplit.PayPlanNum=fauxAccountEntry.PayPlanNum;
+				paySplit.PayPlanDebitType=fauxAccountEntry.PayPlanDebitType;
 				paySplit.PayPlanChargeNum=fauxAccountEntry.PayPlanChargeNum;
+				paySplit.PayPlanNum=fauxAccountEntry.PayPlanNum;
 				paySplit.PayNum=payCur.PayNum;
 				paySplit.SplitAmt=amountToSplit;
 				fauxAccountEntry.AmountEnd-=(decimal)amountToSplit;
@@ -2695,15 +2696,20 @@ namespace OpenDentBusiness {
 
 		///<summary>Makes a split to take splitAmount away from unearned and then makes an offsetting split of splitAmount using the values passed in.
 		///Always returns exactly two PaySplits. The first will be the 'offset' split and the second will be the split taking from unearned.</summary>
-		private static List<PaySplit> CreateUnearnedTransfer(decimal splitAmount,long patNum,long provNum,long clinicNum,
+		public static List<PaySplit> CreateUnearnedTransfer(decimal splitAmount,long patNum,long provNum,long clinicNum,
 			ref IncomeTransferData incomeTransferData,long procNum=0,long adjNum=0,long unearnedType=0,long payPlanNum=0,DateTime datePay=default,
-			long payPlanChargeNum=0,PayPlanDebitTypes payPlanDebitType=PayPlanDebitTypes.Unknown)
+			long payPlanChargeNum=0,PayPlanDebitTypes payPlanDebitType=PayPlanDebitTypes.Unknown,bool isForDynamicPaymentPlanBalancing=false)
 		{
 			//No remoting role check; private method
 			long offsetUnearnedType=0;
 			//Payment plans are the only entities that need the ability to transfer unearned to unearned.
 			if(payPlanNum > 0) {
 				offsetUnearnedType=unearnedType;
+			}
+			long unearnedPayPlanNum=0;
+			if(isForDynamicPaymentPlanBalancing) {
+				offsetUnearnedType=0;
+				unearnedPayPlanNum=payPlanNum;
 			}
 			if(datePay.Year < 1880) {
 				datePay=DateTime.Today;
@@ -2712,6 +2718,7 @@ namespace OpenDentBusiness {
 				AdjNum=adjNum,
 				ClinicNum=clinicNum,
 				DatePay=datePay,
+				IsNew=true,
 				PatNum=patNum,
 				PayPlanChargeNum=payPlanChargeNum,
 				PayPlanDebitType=payPlanDebitType,
@@ -2725,8 +2732,9 @@ namespace OpenDentBusiness {
 				AdjNum=0,
 				ClinicNum=clinicNum,
 				DatePay=datePay,
+				IsNew=true,
 				PatNum=patNum,
-				PayPlanNum=0,
+				PayPlanNum=unearnedPayPlanNum,
 				ProcNum=0,
 				ProvNum=PrefC.GetBool(PrefName.AllowPrepayProvider) ? provNum : 0,
 				SplitAmt=0-(double)splitAmount,

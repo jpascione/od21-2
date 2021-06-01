@@ -100,8 +100,6 @@ namespace OpenDental {
 		private Program _xProg;
 		///<summary>The XWebResponse that created this payment. Will only be set if the payment originated from XWeb or EdgeExpress Card Not Present.</summary>
 		private XWebResponse _xWebResponse;
-		///<summary>List of PayPlanChargeNum of charges that need to be deleted. Used to remove recalculation charges for Dynamic Pay Plans.</summary>
-		private List<long> _listChargesToDelete;
 		#endregion
 
 		///<summary>PatCur and FamCur are not for the PatCur of the payment.  They are for the patient and family from which this window was accessed.
@@ -113,7 +111,6 @@ namespace OpenDental {
 			_famCur=famCur;
 			_paymentCur=paymentCur;
 			_preferCurrentPat=preferCurrentPat;
-			_listChargesToDelete=new List<long>();
 			Lan.F(this);
 			panelXcharge.ContextMenu=contextMenuXcharge;
 			butPayConnect.ContextMenu=contextMenuPayConnect;
@@ -828,17 +825,8 @@ namespace OpenDental {
 						_dictPatients[paySplit.PatNum]=pat;
 					}
 				}
-				if(FormPSE.PaySplitCur==null) {//Deleted the paysplit, just return here and delete any attached recalculation charges if on a dynamic plan.
-					if(!_listChargesToDelete.Contains(paySplitOld.PayPlanChargeNum) && PayPlanEdit.DoDeleteRecalcChargeIfDynamic(paySplitOld)) {
-						_listChargesToDelete.Add(paySplitOld.PayPlanChargeNum);
-					}
+				if(FormPSE.PaySplitCur==null) {//Deleted the paysplit, just return here.
 					return;
-				}
-				if(!_listChargesToDelete.Contains(paySplitOld.PayPlanChargeNum) 
-					&& FormPSE.PaySplitCur.PayPlanChargeNum!=paySplitOld.PayPlanChargeNum 
-					&& PayPlanEdit.DoDeleteRecalcChargeIfDynamic(paySplitOld))//Split was detached from a dynamic plan. Delete any attached recalculation charge.
-				{
-					_listChargesToDelete.Add(paySplitOld.PayPlanChargeNum);
 				}
 				//A shallow copy of the list of splits was passed into the PaySplit edit window so it could have been manipulated within.
 				//The user most likely changed something about the split which would cause paySplitOld to no longer be in the list.
@@ -2550,6 +2538,58 @@ namespace OpenDental {
 			Init(doSelectAllSplits:doSelectAllSplits,doPreserveValues:true);
 		}
 
+		///<summary>Checks if the dynamic payment plan has any charges with overpaid interest. If it does, prompts the user to balance on prepay, principal, or return to payment page. Returns false if the user wants to stay in the Payment window.</summary>
+		private bool CheckDynamicPaymentPlanRebalance() {
+			List<PayPlanEdit.PayPlanRecalculationData> listRecalcData=GetRecalculationDataForDynamicPaymentPlans();
+			if(!listRecalcData.IsNullOrEmpty()) { //If listRecalcData is not empty, we know we have overpaid interest.
+				DialogResult result=MessageBox.Show(Lan.g(this,"One or more Current Payment Splits are overpaying interest for dynamic payment plans."
+					+"\r\n\r\nDo you want to apply the overpayment to principal?"
+					+"\r\n\r\nYes pays on principal, No makes a prepayment, and Cancel returns to the Payment window."),Lan.g(this,"Interest Overpayment Detected"),MessageBoxButtons.YesNoCancel);
+				if(result==DialogResult.Cancel) {
+					return false;
+				}
+				bool isPrepay=(result!=DialogResult.Yes);
+				PayPlanEdit.BalanceOverpaidInterestForDynamicPaymentPlans(listRecalcData,isPrepay);
+			}
+			return true;
+		}
+
+		private List<PayPlanEdit.PayPlanRecalculationData> GetRecalculationDataForDynamicPaymentPlans() {
+			List<PayPlanEdit.PayPlanRecalculationData> listRecalcData=new List<PayPlanEdit.PayPlanRecalculationData>();
+			if(_listSplitsCur.All(x => x.PayPlanNum==0)) {
+				return listRecalcData;
+			}
+			List<long> payPlanNums=_listSplitsCur.Where(x=>x.PayPlanNum!=0).Select(x=>x.PayPlanNum).Distinct().ToList();
+			List<PayPlan> listPayPlans=PayPlans.GetMany(payPlanNums.ToArray());
+			List<PayPlanCharge> listPayPlanCharges=PayPlanCharges.GetForPayPlans(payPlanNums);
+			List<PaySplit> listPaySplits=PaySplits.GetForPayPlans(payPlanNums);
+			listPaySplits.RemoveAll(x=>ListTools.In(x.SplitNum,_listSplitsCur.Select(y=>y.SplitNum).ToList()));
+			listPaySplits.AddRange(_listSplitsCur.FindAll(x=>x.PayPlanNum!=0));
+			List<PayPlanLink> listPayPlanLinks=PayPlanLinks.GetForPayPlans(payPlanNums);
+			List<PayPlanProductionEntry> payPlanProductionEntries=PayPlanProductionEntry.GetWithAmountRemaining(listPayPlanLinks,listPayPlanCharges);
+			for(int i = 0;i<listPayPlans.Count;i++) {
+				PayPlan payPlan=listPayPlans[i];
+				List<PayPlanLink> listPayPlanLinksForPlan=listPayPlanLinks.FindAll(x=>x.PayPlanNum==payPlan.PayPlanNum);
+				PayPlanTerms terms=PayPlanEdit.GetPayPlanTerms(payPlan,listPayPlanLinksForPlan);
+				List<PayPlanCharge> listPayPlanChargesForPlan=listPayPlanCharges.FindAll(x=>x.PayPlanNum==payPlan.PayPlanNum);
+				List<PaySplit> listPaySplitsForPlan=listPaySplits.FindAll(x=>x.PayPlanNum==payPlan.PayPlanNum);
+				bool isInterestOverPaid=PayPlanEdit.IsDynamicPaymentPlanInterestOverpaid(listPayPlanChargesForPlan,listPaySplitsForPlan);
+				bool isPlanOverPaid=(terms.PrincipalAmount+listPayPlanChargesForPlan.Sum(x=>x.Interest)) < listPaySplitsForPlan.Sum(x=>x.SplitAmt);
+				if(isInterestOverPaid && !isPlanOverPaid) {
+					PayPlanEdit.PayPlanRecalculationData recalcData=new PayPlanEdit.PayPlanRecalculationData();
+					recalcData.Pat=_patCur;
+					recalcData.Terms=terms;
+					recalcData.PayPlan=payPlan;
+					recalcData.ListPayPlanCharges=listPayPlanChargesForPlan;
+					recalcData.ListPaySplits=listPaySplitsForPlan;
+					recalcData.ListPayPlanLinks=listPayPlanLinksForPlan;
+					recalcData.ListProductionEntry=payPlanProductionEntries.FindAll(x => x.PayPlanNum==payPlan.PayPlanNum);
+					listRecalcData.Add(recalcData);
+				}
+			}
+			return listRecalcData;
+		}
+
 		private bool SavePaymentToDb() {
 			if(!textDate.IsValid() || !textAmount.IsValid()) {
 				MessageBox.Show(Lan.g(this,"Please fix data entry errors first."));
@@ -2737,6 +2777,9 @@ namespace OpenDental {
 					return false;
 				}
 			}
+			if(!CheckDynamicPaymentPlanRebalance()) {
+				return false;
+			}
 			if(IsNew && !_isCCDeclined) {
 				//Currently we do not want to modify historical data or credit transaction values. Moving forward zero dollar splits are not valid.
 				_listSplitsCur.RemoveAll(x => CompareDouble.IsZero(x.SplitAmt));
@@ -2752,10 +2795,6 @@ namespace OpenDental {
 			}
 			else {
 				_paymentCur.IsSplit=false;
-			}
-			PayPlanCharges.DeleteMany(_listChargesToDelete);
-			if(!TryBalanceDynamicPayPlanOnPrincipal()) {//returns false if the payment would cause an illegal overpayment on a dynamic payment plan
-				return false;
 			}
 			try {
 				Payments.Update(_paymentCur,true);
@@ -2791,67 +2830,6 @@ namespace OpenDental {
 				string strErrorMsg=Ledgers.ComputeAgingForPaysplitsAllocatedToDiffPats(_patCur.PatNum,_listSplitsCur.Union(_listPaySplitsOld).ToList());
 				if(!string.IsNullOrEmpty(strErrorMsg)) {
 					MessageBox.Show(strErrorMsg);
-				}
-			}
-			return true;
-		}
-
-		/// <summary>Rebalances the Dynamic Pay Plan Charges associated with the paysplits on this payment.</summary>
-		private bool TryBalanceDynamicPayPlanOnPrincipal() {
-			PayPlan planCur;
-			PayPlanTerms terms;
-			PayPlanEdit.PayPlanRecalculationData recalcData;
-			List<PayPlanLink> listPayPlanLinks;											 // Pay Plan Links
-			List<PayPlanCharge> listPayPlanCharges;									 // Pay Plan Charges
-			List<PayPlanCharge> listPayPlanExpectedCharges;					 // Pay Plan Charges (Expected)
-			List<PaySplit>	listPayPlanPaySplits;										 // Pay Play PaySplits
-			//List<PaySplit> listPaySplitsChecked=new List<PaySplit>();//so we don't check the same plan more than once
-			List<PayPlan> listPayPlans=_listSplitsCur
-				.Select(x => x.PayPlanNum)
-				.Distinct()
-				.Where(x => x>0)
-				.Select(x => PayPlans.GetOne(x))
-				.Where(x => x?.IsDynamic??false)
-				.ToList();
-			for(int i=0;i<listPayPlans.Count;i++) {
-				planCur=listPayPlans[i];
-			//for(int i=0; i<_listSplitsCur.Count; i++) {
-			//	PaySplit splitCur = _listSplitsCur[i];
-			//	if(listPaySplitsChecked.Any(x => x.PayPlanNum==splitCur.PayPlanNum) || splitCur.PayPlanNum==0) {
-			//		if(splitCur.PayPlanNum==0) {
-			//			listPaySplitsChecked.Add(splitCur);
-			//		}
-			//		continue;
-			//	}
-			//	planCur=PayPlans.GetOne(splitCur.PayPlanNum);
-			//	if(planCur==null || !planCur.IsDynamic) {//at this point, it should not be possible for planCur to be null
-			//		listPaySplitsChecked.Add(splitCur);
-			//		continue;
-			//	}
-				//listPaySplitsChecked.AddRange(_listSplitsCur.FindAll(x => x.PayPlanNum == planCur.PayPlanNum));
-				listPayPlanLinks=PayPlanLinks.GetListForPayplan(planCur.PayPlanNum);
-				listPayPlanCharges=PayPlanCharges.GetForPayPlan(planCur.PayPlanNum);
-				listPayPlanPaySplits=_listSplitsCur.FindAll(x => x.PayPlanNum==planCur.PayPlanNum);
-				listPayPlanPaySplits.AddRange(PaySplits.GetForPayPlans(new List<long>{planCur.PayPlanNum})
-					.FindAll(x => !_listSplitsCur.Any(y => x.SplitNum==y.SplitNum)));
-				listPayPlanPaySplits=listPayPlanPaySplits.OrderBy(x => x.DatePay).ThenBy(x => x.SplitNum).ToList();
-				terms=PayPlanEdit.GetPayPlanTerms(planCur,listPayPlanLinks);
-				//listPayPlanExpectedCharges=PayPlanEdit.GetListExpectedCharges(listPayPlanCharges,terms,_famCur,listPayPlanLinks,planCur,false,listPaySplits:listPayPlanPaySplits);
-				recalcData=PayPlanEdit.PayPlanRecalculationData.CreateRecalculationData(terms,planCur,_famCur,_patCur.PriProv,_patCur.ClinicNum,
-					listPayPlanCharges,listPayPlanPaySplits,false,true);
-				recalcData.OverPaidAmt=recalcData.ListPaySplits.FindAll(x => x.PayPlanNum==planCur.PayPlanNum).Sum(x => x.SplitAmt)
-					-recalcData.ListPayPlanCharges.Where(x => x.ChargeDate<=DateTime.Today).Sum(x => x.Principal+x.Interest);
-				string message = Lan.g(this,"Payment is greater than the payment plan charge. Pay on principal instead of prepaying? (defaults to prepay)")
-					+"\r\n\r\n"+ Lan.g(this,"Plan")+": " + planCur.Note;
-				if(recalcData.OverPaidAmt<0) {
-					PayPlanEdit.BalanceDynamicPayPlanOnPrepay(_listSplitsCur.FindAll(x => x.PayPlanNum==planCur.PayPlanNum));
-				}
-				else if(recalcData.OverPaidAmt==0 || MsgBox.Show(MsgBoxButtons.YesNo,message)) {
-					//Apply overpayment as a payment on principal
-					PayPlanEdit.BalanceDynamicPayPlanOnPrincipal(recalcData, terms, ref _listSplitsCur);
-				}
-				else {
-					PayPlanEdit.BalanceDynamicPayPlanOnPrepay(_listSplitsCur.FindAll(x => x.PayPlanNum==planCur.PayPlanNum));
 				}
 			}
 			return true;
@@ -4074,14 +4052,6 @@ namespace OpenDental {
 		///<summary>Deletes all payment splits in the grid.</summary>
 		private void butDeleteAllSplits_Click(object sender,EventArgs e) {
 			gridSplits.SetAll(true);
-			foreach(PaySplit paySplit in gridSplits.SelectedTags<PaySplit>()) {//If any splits are attached to a recalculation charge for a dynamic plan
-				if(_listChargesToDelete.Contains(paySplit.PayPlanChargeNum)) {
-					continue;
-				}
-				if(PayPlanEdit.DoDeleteRecalcChargeIfDynamic(paySplit)) {//then delete the charge.
-					_listChargesToDelete.Add(paySplit.PayPlanChargeNum);
-				}
-			}
 			DeleteSelected();
 		}
 
@@ -4127,27 +4097,10 @@ namespace OpenDental {
 					+_paymentOld.PayAmt.ToString("c")+", with payment type '"+Payments.GetPaymentTypeDesc(_paymentOld,_listPaymentTypeDefs)+"'",
 					0,_paymentOld.SecDateTEdit);
 			}
-			foreach(PaySplit paySplit in _listSplitsCur) {//If any splits are attached to a recalculation charge for a dynamic plan then delete the charge.
-				if(_listChargesToDelete.Contains(paySplit.PayPlanChargeNum)) {
-					continue;
-				}
-				if(PayPlanEdit.DoDeleteRecalcChargeIfDynamic(paySplit)) {//then delete the charge.
-					_listChargesToDelete.Add(paySplit.PayPlanChargeNum);
-				}
-			}
-			PayPlanCharges.DeleteMany(_listChargesToDelete);
 			DialogResult=DialogResult.OK;
 		}
 
 		private void butDeleteSplits_Click(object sender,EventArgs e) {
-			foreach(PaySplit paySplit in gridSplits.SelectedTags<PaySplit>()) {//If any splits are attached to a recalculation charge for a dynamic plan
-				if(_listChargesToDelete.Contains(paySplit.PayPlanChargeNum)) {
-					continue;
-				}
-				if(PayPlanEdit.DoDeleteRecalcChargeIfDynamic(paySplit)) {//then delete the charge.
-					_listChargesToDelete.Add(paySplit.PayPlanChargeNum);
-				}
-			}
 			DeleteSelected();
 		}
 

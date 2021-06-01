@@ -1202,6 +1202,13 @@ namespace OpenDentBusiness {
 			}
 			command="ALTER TABLE procedurecode ADD AreaAlsoToothRange tinyint NOT NULL";
 			Db.NonQ(command);
+			command=$"SELECT MAX(ItemOrder)+1 FROM definition WHERE Category=29";//PaySplitUnearnedType
+			int itemOrderNext=PIn.Int(Db.GetScalar(command));
+			command="INSERT INTO definition (Category,ItemName,ItemOrder,ItemValue) "
+				+$"VALUES (29,'Payment Plan Prepay',{POut.Int(itemOrderNext)},'X')";//29 is PaySplitUnearnedType and X is hidden / Do Not Show.
+			long defNum=Db.NonQ(command,true);
+			command=$"INSERT INTO preference(PrefName,ValueString) VALUES('DynamicPayPlanPrepaymentUnearnedType','{defNum}')";
+			Db.NonQ(command);
 		}//End of 21_2_2() method
 	}
 }

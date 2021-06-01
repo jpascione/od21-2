@@ -34,11 +34,11 @@ namespace OpenDentBusiness{
 
 		///<summary>Returns a list of paysplits that have AdjNum of any of the passed in adjustments.</summary>
 		public static List<PaySplit> GetForAdjustments(List<long> listAdjustNums) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<PaySplit>>(MethodBase.GetCurrentMethod(),listAdjustNums);
-			}
 			if(listAdjustNums==null || listAdjustNums.Count==0) {
 				return new List<PaySplit>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<PaySplit>>(MethodBase.GetCurrentMethod(),listAdjustNums);
 			}
 			string command="SELECT * FROM paysplit WHERE AdjNum IN ("+string.Join(",",listAdjustNums)+")";
 			return Crud.PaySplitCrud.SelectMany(command);
@@ -339,11 +339,11 @@ namespace OpenDentBusiness{
 
 		///<summary>Takes a list of procNums and returns a list of all paysplits associated to the procedures.  Returns an empty list if there are none.</summary>
 		public static List<PaySplit> GetPaySplitsFromProcs(List<long> listProcNums,bool onlyHiddenUnearned=false) {
-			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetObject<List<PaySplit>>(MethodBase.GetCurrentMethod(),listProcNums,onlyHiddenUnearned);
-			}
 			if(listProcNums==null || listProcNums.Count<1) {
 				return new List<PaySplit>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<PaySplit>>(MethodBase.GetCurrentMethod(),listProcNums,onlyHiddenUnearned);
 			}
 			string command="SELECT * FROM paysplit WHERE ProcNum IN("+string.Join(",",listProcNums)+")";
 			if(onlyHiddenUnearned) {

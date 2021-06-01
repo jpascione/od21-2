@@ -132,6 +132,7 @@ namespace OpenDental{
 			this.checkSelectProv = new System.Windows.Forms.CheckBox();
 			this.checkGoogleAddress = new System.Windows.Forms.CheckBox();
 			this.tabAccount = new System.Windows.Forms.TabPage();
+			this.label62 = new System.Windows.Forms.Label();
 			this.groupBox10 = new OpenDental.UI.GroupBoxOD();
 			this.comboRefundAdjustmentType = new OpenDental.UI.ComboBoxOD();
 			this.labelRefundAdjustmentType = new System.Windows.Forms.Label();
@@ -393,7 +394,8 @@ namespace OpenDental{
 			this.checkRxSendNewToQueue = new System.Windows.Forms.CheckBox();
 			this.butCancel = new OpenDental.UI.Button();
 			this.butOK = new OpenDental.UI.Button();
-			this.label62 = new System.Windows.Forms.Label();
+			this.label39 = new System.Windows.Forms.Label();
+			this.comboDppUnearnedType = new OpenDental.UI.ComboBoxOD();
 			this.tabControlMain.SuspendLayout();
 			this.tabAppts.SuspendLayout();
 			this.groupBox8.SuspendLayout();
@@ -1600,6 +1602,17 @@ namespace OpenDental{
 			this.tabAccount.TabIndex = 2;
 			this.tabAccount.Text = "Account";
 			// 
+			// label62
+			// 
+			this.label62.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label62.Location = new System.Drawing.Point(12, 478);
+			this.label62.Name = "label62";
+			this.label62.Size = new System.Drawing.Size(288, 48);
+			this.label62.TabIndex = 308;
+			this.label62.Text = "Allocation options for Line Item Accounting have been moved to a different window" +
+    ".\r\nSee Main Menu, Setup, Allocations.";
+			this.label62.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// groupBox10
 			// 
 			this.groupBox10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
@@ -2337,7 +2350,7 @@ namespace OpenDental{
 			this.groupRepeatingCharges.Controls.Add(this.textRepeatingChargesAutomatedTime);
 			this.groupRepeatingCharges.Controls.Add(this.checkRepeatingChargesRunAging);
 			this.groupRepeatingCharges.Controls.Add(this.checkRepeatingChargesAutomated);
-			this.groupRepeatingCharges.Location = new System.Drawing.Point(818, 540);
+			this.groupRepeatingCharges.Location = new System.Drawing.Point(818, 558);
 			this.groupRepeatingCharges.Name = "groupRepeatingCharges";
 			this.groupRepeatingCharges.Size = new System.Drawing.Size(399, 78);
 			this.groupRepeatingCharges.TabIndex = 245;
@@ -2404,9 +2417,9 @@ namespace OpenDental{
 			this.groupRecurringCharges.Controls.Add(this.checkRecurringChargesAutomated);
 			this.groupRecurringCharges.Controls.Add(this.checkRecurringChargesUseTransDate);
 			this.groupRecurringCharges.Controls.Add(this.checkRecurChargPriProv);
-			this.groupRecurringCharges.Location = new System.Drawing.Point(818, 358);
+			this.groupRecurringCharges.Location = new System.Drawing.Point(818, 381);
 			this.groupRecurringCharges.Name = "groupRecurringCharges";
-			this.groupRecurringCharges.Size = new System.Drawing.Size(399, 178);
+			this.groupRecurringCharges.Size = new System.Drawing.Size(399, 173);
 			this.groupRecurringCharges.TabIndex = 244;
 			this.groupRecurringCharges.TabStop = false;
 			this.groupRecurringCharges.Text = "Recurring Charges";
@@ -2564,7 +2577,7 @@ namespace OpenDental{
 			this.groupCommLogs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
 			this.groupCommLogs.Controls.Add(this.checkCommLogAutoSave);
 			this.groupCommLogs.Controls.Add(this.checkShowFamilyCommByDefault);
-			this.groupCommLogs.Location = new System.Drawing.Point(818, 300);
+			this.groupCommLogs.Location = new System.Drawing.Point(818, 323);
 			this.groupCommLogs.Name = "groupCommLogs";
 			this.groupCommLogs.Size = new System.Drawing.Size(399, 54);
 			this.groupCommLogs.TabIndex = 243;
@@ -2645,6 +2658,8 @@ namespace OpenDental{
 			// groupPayPlans
 			// 
 			this.groupPayPlans.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
+			this.groupPayPlans.Controls.Add(this.label39);
+			this.groupPayPlans.Controls.Add(this.comboDppUnearnedType);
 			this.groupPayPlans.Controls.Add(this.label59);
 			this.groupPayPlans.Controls.Add(this.textDynamicPayPlan);
 			this.groupPayPlans.Controls.Add(this.label27);
@@ -2652,9 +2667,9 @@ namespace OpenDental{
 			this.groupPayPlans.Controls.Add(this.checkHideDueNow);
 			this.groupPayPlans.Controls.Add(this.checkPayPlansUseSheets);
 			this.groupPayPlans.Controls.Add(this.checkPayPlansExcludePastActivity);
-			this.groupPayPlans.Location = new System.Drawing.Point(818, 171);
+			this.groupPayPlans.Location = new System.Drawing.Point(818, 172);
 			this.groupPayPlans.Name = "groupPayPlans";
-			this.groupPayPlans.Size = new System.Drawing.Size(399, 125);
+			this.groupPayPlans.Size = new System.Drawing.Size(399, 147);
 			this.groupPayPlans.TabIndex = 240;
 			this.groupPayPlans.TabStop = false;
 			this.groupPayPlans.Text = "Pay Plans";
@@ -4518,16 +4533,23 @@ namespace OpenDental{
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
-			// label62
+			// label39
 			// 
-			this.label62.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label62.Location = new System.Drawing.Point(12, 478);
-			this.label62.Name = "label62";
-			this.label62.Size = new System.Drawing.Size(288, 48);
-			this.label62.TabIndex = 308;
-			this.label62.Text = "Allocation options for Line Item Accounting have been moved to a different window" +
-    ".\r\nSee Main Menu, Setup, Allocations.";
-			this.label62.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.label39.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label39.Location = new System.Drawing.Point(3, 121);
+			this.label39.Name = "label39";
+			this.label39.Size = new System.Drawing.Size(195, 17);
+			this.label39.TabIndex = 249;
+			this.label39.Text = "Dynamic payment plan prepayment type";
+			this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// comboDppUnearnedType
+			// 
+			this.comboDppUnearnedType.Location = new System.Drawing.Point(199, 120);
+			this.comboDppUnearnedType.Name = "comboDppUnearnedType";
+			this.comboDppUnearnedType.Size = new System.Drawing.Size(194, 21);
+			this.comboDppUnearnedType.TabIndex = 248;
+			this.comboDppUnearnedType.Text = "comboBoxOD1";
 			// 
 			// FormModuleSetup
 			// 
@@ -4960,5 +4982,7 @@ namespace OpenDental{
 		private ComboBoxOD comboRefundAdjustmentType;
 		private Label labelRefundAdjustmentType;
 		private Label label62;
+		private Label label39;
+		private ComboBoxOD comboDppUnearnedType;
 	}
 }
