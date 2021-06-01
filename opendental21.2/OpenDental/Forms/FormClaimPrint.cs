@@ -1611,48 +1611,68 @@ namespace OpenDental{
 						}
 						break;
 					case "BillingDentistPh123":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticeBillingPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(0,3);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(0,3);
 							}
 						}
 						break;
 					case "BillingDentistPh456":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticeBillingPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(3,3);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(3,3);
 							}
 						}
 						break;
 					case "BillingDentistPh78910":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticeBillingPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(6);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(6);
 							}
 						}
 						break;
 					case "BillingDentistPhoneFormatted":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticeBillingPhone).Length==10){
-								_stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3)
-									+")"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3)
-									+"-"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+							_stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
+						}
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticePhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticePhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticePhone).Substring(6);
 						}
 						else{
 							if(clinic.Phone.Length==10){
@@ -1663,8 +1683,14 @@ namespace OpenDental{
 						}
 						break;
 					case "BillingDentistPhoneRaw":
-						if(clinic==null) {
-							_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone);
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="") {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone);
+						}
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims)) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone);
+						}
+						else if(clinic==null) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone);
 						}
 						else {
 							_stringArrayDisplay[i]=clinic.Phone;
@@ -1773,48 +1799,68 @@ namespace OpenDental{
 						}
 						break;
 						case "PayToDentistPh123":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticePayToPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(0,3);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(0,3);
 							}
 						}
 						break;
 					case "PayToDentistPh456":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticePayToPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(3,3);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(3,3);
 							}
 						}
 						break;
 					case "PayToDentistPh78910":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticePayToPhone).Length==10){
-								_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
 						}
-						else{
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone).Substring(6);
+						}
+						else {
 							if(clinic.Phone.Length==10){
 								_stringArrayDisplay[i]=clinic.Phone.Substring(6);
 							}
 						}
 						break;
 					case "PayToDentistPhoneFormatted":
-						if(clinic==null){
-							if(PrefC.GetString(PrefName.PracticePayToPhone).Length==10){
-								_stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3)
-									+")"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3)
-									+"-"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
-							}
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="" && PrefC.GetString(PrefName.PracticePayToPhone).Length==10) {
+							_stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticePayToPhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticePayToPhone).Substring(6);
+						}
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims) && PrefC.GetString(PrefName.PracticeBillingPhone).Length==10) {
+						  _stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticeBillingPhone).Substring(6);
+						}
+						else if(clinic==null && PrefC.GetString(PrefName.PracticePhone).Length==10) {
+						  _stringArrayDisplay[i]="("+PrefC.GetString(PrefName.PracticePhone).Substring(0,3)
+								+")"+PrefC.GetString(PrefName.PracticePhone).Substring(3,3)
+								+"-"+PrefC.GetString(PrefName.PracticePhone).Substring(6);
 						}
 						else{
 							if(clinic.Phone.Length==10){
@@ -1825,8 +1871,14 @@ namespace OpenDental{
 						}
 						break;
 					case "PayToDentistPhoneRaw":
-						if(clinic==null) {
-							_stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone);
+						if(PrefC.GetString(PrefName.PracticePayToAddress)!="") {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePayToPhone);
+						}
+						else if(PrefC.GetBool(PrefName.UseBillingAddressOnClaims)) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticeBillingPhone);
+						}
+						else if(clinic==null) {
+						  _stringArrayDisplay[i]=PrefC.GetString(PrefName.PracticePhone);
 						}
 						else {
 							_stringArrayDisplay[i]=clinic.Phone;
