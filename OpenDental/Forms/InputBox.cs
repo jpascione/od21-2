@@ -428,6 +428,10 @@ namespace OpenDental{
 				MsgBox.Show(this,"Can only make one selection.");
 				return;
 			}
+			if(_listInputControls.OfType<RadioButton>().ToList().Count>1 && _listInputControls.OfType<RadioButton>().Where(x => x.Checked).Count()==0) {
+				MsgBox.Show(this,"Please make a selection.");
+				return;
+			}
 			if(_funcOkClick!=null && !_funcOkClick(textResult.Text)) {
 				//It is up to the implementor for _onOkClick to handle any messages to portray to the user.
 				//We will simply block the user from closing the window.
