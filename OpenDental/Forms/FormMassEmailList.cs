@@ -434,7 +434,7 @@ namespace OpenDental {
 			}
 			//send the email with the selected template to each person that is in the selected patients grid.
 			if(listPatientsSelected.Count<=0) {
-				MsgBox.Show(this,"Patients must be selected before email can be sent.");
+				MsgBox.Show(this,"Using the Available Patients list, highlight which patients to send this email to and then click 'Set Selected'.");
 				return;
 			}
 			if(template.TemplateId==0) {
