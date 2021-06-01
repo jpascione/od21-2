@@ -441,6 +441,9 @@ namespace OpenDental{
 				classRef=comboClassRefs.SelectedItem.ToString();
 			}
 			try {
+				if(CompareDouble.IsLessThanOrEqualToZero(_depositCur.Amount)) {
+					throw new ODException(Lan.g(this,"Only deposits greater than zero can be sent to QuickBooks."));
+				}
 				QuickBooks.CreateDeposit(_depositCur.DateDeposit
 					,formQBAccountSelect.DepositAccountSelected
 					,formQBAccountSelect.IncomeAccountSelected
@@ -452,7 +455,7 @@ namespace OpenDental{
 				Cursor.Current=Cursors.Default;
 				if(allowContinue) {
 					if(MessageBox.Show(ex.Message+"\r\n\r\n"
-						+Lan.g(this,"A deposit has not been created in QuickBooks, continue anyway?")
+						+Lan.g(this,"The deposit has not been created in QuickBooks. Would you like to create the deposit locally anyway?")
 						,Lan.g(this,"QuickBooks Deposit Create Failed")
 						,MessageBoxButtons.YesNo)==DialogResult.Yes) 
 					{
@@ -490,6 +493,9 @@ namespace OpenDental{
 			QuickBooksOnlineDepositResponse quickBooksOnlineDepositResponse=null;
 			List<decimal> listSelectedPaymentAmounts=GetListSelectedPaymentAmounts();
 			try {
+				if(CompareDecimal.IsLessThanOrEqualToZero(listSelectedPaymentAmounts.Sum())) {
+					throw new ODException(Lan.g(this,"Only deposits greater than zero can be sent to QuickBooks Online."));
+				}
 				if(_programPropertyQboClassRefs.PropertyValue!="" && comboClassRefs.SelectedItem!=null) {
 					string classRefName=comboClassRefs.SelectedItem.ToString();
 					string classRefId=ProgramProperties.GetQuickBooksOnlineEntityIdByName(_programPropertyQboClassRefs.PropertyValue,classRefName);
@@ -516,7 +522,7 @@ namespace OpenDental{
 				Cursor.Current=Cursors.Default;
 				if(allowContinue) {
 					if(MessageBox.Show(ex.Message+"\r\n\r\n"
-						+Lan.g(this,"A deposit has not been created in QuickBooks Online, continue anyway?")
+						+Lan.g(this,"The deposit has not been created in QuickBooks Online. Would you like to create the deposit locally anyway?")
 						,Lan.g(this,"QuickBooks Online Deposit Create Failed")
 						,MessageBoxButtons.YesNo)==DialogResult.Yes)
 					{
@@ -645,10 +651,10 @@ namespace OpenDental{
 			}
 			if(IsNew && !_hasBeenSavedToDB){
 				//Create a deposit in QuickBooks or QuickBooks Online
-				bool hasDepositInfo=Accounts.DepositsLinked() && _depositCur.Amount>0;
+				bool hasDepositInfo=Accounts.DepositsLinked();
 				bool isQbOrQbo=(IsQuickBooks() && !ODBuild.IsWeb()) || IsQuickBooksOnline();
-				bool wasDepositCreated=CreateDepositQbOrQbo(true);
-				if(hasDepositInfo && isQbOrQbo && !wasDepositCreated) {
+				//Short circuit so that CreateDepositQbOrQbo() is only called if hasDepositInfo and isQbOrQbo are both true.
+				if(hasDepositInfo && isQbOrQbo && !CreateDepositQbOrQbo(true)) {
 					return false;
 				}
 				Deposits.Insert(_depositCur);
