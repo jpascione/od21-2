@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDiffDocumentation.xsl"?>
-<database version="21.2.1.0">
+<database version="21.2.2.0">
     <table name="alertcategorylink">
         <summary></summary>
         <column order="2" name="AlertType" type="tinyint(4)">
@@ -266,6 +266,12 @@
                 <EnumValue name="Principal">1 - Flags a split as a principal only payment.</EnumValue>
                 <EnumValue name="Interest">2 - Flags a split as an interest only payment.</EnumValue>
             </Enumeration>
+        </column>
+    </table>
+    <table name="procedurecode">
+        <summary></summary>
+        <column order="35" name="AreaAlsoToothRange" type="tinyint(4)">
+            <summary>This is an adjunct to TreatArea. If Quad or Arch, then this allows users to also specify a tooth or tooth range.  Required by some insurance.</summary>
         </column>
     </table>
     <table name="referral">

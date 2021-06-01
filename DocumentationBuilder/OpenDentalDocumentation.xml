@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDocumentation.xsl"?>
-<database version="21.2.1.0">
+<database version="21.2.2.0">
     <table name="account">
         <summary>Used in the accounting section in chart of accounts.  Not related to patient accounts in any way.</summary>
         <column order="0" name="AccountNum" type="bigint(20)">
@@ -11341,10 +11341,10 @@
             <summary>Enum:TreatmentArea </summary>
             <Enumeration name="TreatmentArea">
                 <summary>Used in procedurecode setup to specify the treatment area for a procedure.  This determines what fields are available when editing an appointment.</summary>
-                <EnumValue name="None">0-Same as 3 mouth.</EnumValue>
+                <EnumValue name="None">0-goes on claims as blank.</EnumValue>
                 <EnumValue name="Surf">1</EnumValue>
                 <EnumValue name="Tooth">2</EnumValue>
-                <EnumValue name="Mouth">3</EnumValue>
+                <EnumValue name="Mouth">3-goes on claims as 00.</EnumValue>
                 <EnumValue name="Quad">4</EnumValue>
                 <EnumValue name="Sextant">5</EnumValue>
                 <EnumValue name="Arch">6</EnumValue>
@@ -11471,6 +11471,9 @@
         </column>
         <column order="34" name="PaintText" type="varchar(255)">
             <summary>The text to draw on the tooth for paint type Text.</summary>
+        </column>
+        <column order="35" name="AreaAlsoToothRange" type="tinyint(4)">
+            <summary>This is an adjunct to TreatArea. If Quad or Arch, then this allows users to also specify a tooth or tooth range.  Required by some insurance.</summary>
         </column>
     </table>
     <table name="procedurelog">
