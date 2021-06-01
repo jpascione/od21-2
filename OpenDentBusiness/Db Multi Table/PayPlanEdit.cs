@@ -48,130 +48,6 @@ namespace OpenDentBusiness {
 			return ppCharge;
 		}
 
-		public static bool DoDeleteRecalcChargeIfDynamic(PaySplit splitCur) {
-			if(splitCur.PayPlanChargeNum==0) {
-				return false;
-			}
-			PayPlan planCur=PayPlans.GetOne(splitCur.PayPlanNum);
-			if(planCur==null || !planCur.IsDynamic) {
-				return false;
-			}
-			PayPlanCharge chargeCur=PayPlanCharges.GetOne(splitCur.PayPlanChargeNum);
-			if(chargeCur==null || !chargeCur.Note.StartsWith("Recalculated based on")) {
-				return false;
-			}
-			return true;
-		}
-
-		private static void BalancePaySplitForDynamicPayPlan(PaySplit splitCur, PayPlanCharge chargeCur, PayPlanRecalculationData recalcData, 
-			PayPlanTerms terms, List<PaySplit> listPaySplitsThisPayment, List<PaySplit> listPaySplitsThisPaymentThisPlan) 
-		{
-			if(chargeCur.Note.StartsWith("Recalculated based on")) {//This is a recalculation charge, adjust principal if neccessary
-				chargeCur.Principal=splitCur.SplitAmt;
-				chargeCur.Interest=0;
-				PayPlanCharges.Update(chargeCur);
-				return;
-			}
-
-			//This is a pay plan charge, make sure total charges = total splits
-			double chargeTotal=chargeCur.Principal+chargeCur.Interest;
-			List<PaySplit> listPaySplitsNotThisPayment=recalcData.ListPaySplits
-				.FindAll(x => listPaySplitsThisPayment.All(y => x.SplitNum!=y.SplitNum && x.PayNum!=y.PayNum));
-			recalcData.ListPaySplits.Clear();
-			recalcData.ListPaySplits.AddRange(listPaySplitsNotThisPayment);
-			recalcData.ListPaySplits.AddRange(listPaySplitsThisPayment);
-			List<PaySplit> listPaySplitsThisChargeThisPayment=listPaySplitsThisPayment.FindAll(x => x.PayPlanChargeNum==chargeCur.PayPlanChargeNum);
-			List<PaySplit> listPaySplitsThisChargeNotThisPayment=listPaySplitsNotThisPayment.FindAll(x => x.PayPlanChargeNum==chargeCur.PayPlanChargeNum);
-			//Process negative splits first because the if/else short-circuits once chargeTotal=0
-			listPaySplitsThisChargeNotThisPayment.OrderBy(x => x.SplitAmt).ForEach(x => {
-				if(chargeTotal==0) {
-					return;
-				}
-				if(x.SplitAmt<chargeTotal) {
-					chargeTotal-=x.SplitAmt;
-					chargeTotal=Math.Round(chargeTotal,terms.RoundDec);//Fixes rounding error when payment is automatically split into principal and interest
-				}
-				else if(x.SplitAmt>=chargeTotal) {
-					chargeTotal=0;
-				}
-			});
-			//Process negative splits first because the if/else short-circuits once chargeTotal=0
-			listPaySplitsThisChargeThisPayment.OrderBy(x => x.SplitAmt).ForEach(x => {
-				if(chargeTotal==0) {
-					x.PayPlanChargeNum=0;
-					return;
-				}
-				if(x.SplitAmt<chargeTotal) {
-					chargeTotal-=x.SplitAmt;
-					chargeTotal=Math.Round(chargeTotal,terms.RoundDec);//Fixes rounding error when payment is automatically split into principal and interest
-				}
-				else if(x.SplitAmt>=chargeTotal) {
-					if(x.SplitAmt>chargeTotal) {
-						PaySplit newSplit = x.Copy();
-						newSplit.SplitAmt = x.SplitAmt-chargeTotal;
-						newSplit.PayPlanChargeNum = 0;
-						listPaySplitsThisPayment.Add(newSplit);
-						listPaySplitsThisPaymentThisPlan.Add(newSplit);
-						recalcData.ListPaySplits.Add(newSplit);
-						x.SplitAmt = chargeTotal;
-					}
-					chargeTotal=0;
-				}
-			});
-		}
-
-		public static void BalanceDynamicPayPlanOnPrincipal(PayPlanRecalculationData recalcData, PayPlanTerms terms, ref List<PaySplit> listPaySplitsThisPayment) {
-			PaySplit splitCur;
-			PayPlanCharge chargeCur;
-			listPaySplitsThisPayment=listPaySplitsThisPayment.OrderBy(x => x.DatePay).ThenBy(x => x.SplitNum).ToList();
-			List<PaySplit> listPaySplitsThisPaymentThisPlan = listPaySplitsThisPayment.FindAll(x => x.PayPlanNum==recalcData.PayPlan.PayPlanNum);
-			for(int i=0; i<listPaySplitsThisPaymentThisPlan.Count; i++) {
-				splitCur = listPaySplitsThisPaymentThisPlan[i];
-				chargeCur=recalcData.ListPayPlanCharges.Where(x => x.PayPlanChargeNum==splitCur.PayPlanChargeNum).FirstOrDefault();
-				if(chargeCur==null) {
-					splitCur.PayPlanChargeNum=0;
-				}
-				else {//This split already has an associated charge
-					BalancePaySplitForDynamicPayPlan(splitCur, chargeCur, recalcData, terms, listPaySplitsThisPayment, listPaySplitsThisPaymentThisPlan);
-				}
-				if(splitCur.PayPlanChargeNum==0) {//This split needs a new charge created
-					foreach(PayPlanCharge charge in recalcData.ListPayPlanCharges) {
-						if(Math.Round(recalcData.ListPaySplits.Where(x => x.PayPlanChargeNum==charge.PayPlanChargeNum).Sum(x => x.SplitAmt), terms.RoundDec)>=charge.Interest+charge.Principal) {
-							continue;
-						}
-						chargeCur=charge;
-						BalancePaySplitForDynamicPayPlan(splitCur, chargeCur, recalcData, terms, listPaySplitsThisPayment, listPaySplitsThisPaymentThisPlan);
-						return;
-					}
-					chargeCur=CreateDebitCharge(recalcData.PayPlan,recalcData.Fam,recalcData.ProvNum,recalcData.ClinicNum,0,0,DateTime.Today,
-						"Recalculated based on pay on principal");
-					chargeCur.Principal=splitCur.SplitAmt;
-					chargeCur.Interest=0;
-					splitCur.PayPlanChargeNum=PayPlanCharges.Insert(chargeCur);
-					chargeCur.PayPlanChargeNum=splitCur.PayPlanChargeNum;
-					recalcData.ListPayPlanCharges.Add(chargeCur);
-				}
-			}
-		}
-
-		public static void BalanceDynamicPayPlanOnPrepay(List<PaySplit> listPaySplitsThisPaymentThisPlan) {
-			List<long> listPayPlanChargesToDelete=new List<long>();
-			foreach(PaySplit splitCur in listPaySplitsThisPaymentThisPlan) {
-				if(splitCur.PayPlanChargeNum==0) {
-					continue;
-				}
-				if(listPayPlanChargesToDelete.Contains(splitCur.PayPlanChargeNum)) {
-					continue;
-				}
-				PayPlanCharge chargeCur=PayPlanCharges.GetOne(splitCur.PayPlanChargeNum);
-				if(chargeCur!=null && chargeCur.Note.StartsWith("Recalculated based on")) {
-					splitCur.PayPlanChargeNum=0;
-					listPayPlanChargesToDelete.Add(chargeCur.PayPlanChargeNum);
-				}
-			}
-			PayPlanCharges.DeleteMany(listPayPlanChargesToDelete);
-		}
-
 		/// <summary>Allocate money for payplan adjustments for one or multiple adjustments.</summary>
 		public static List<PayPlanCharge> CreatePayPlanAdjustments(double negAdjAmt,List<PayPlanCharge> listPayPlanCharges,double totalNegFutureAdjs) {
 			double moneyToAllocate=(totalNegFutureAdjs+negAdjAmt)*-1;//the total amount of ALL future adjustments, existing + new. 
@@ -1037,7 +913,8 @@ namespace OpenDentBusiness {
 			//specifically to make a check more accurate where determining if payplan will ever be paid off
 			decimal previousSumPrincipalNotYetCharged=sumPrincipalNotYetCharged;
 			int maxPayPlanCharges=2000;//ceiling of payplan charges should not go beyond 2000
-			while(sumPrincipalNotYetCharged > 0 && chargesCount < maxPayPlanCharges) {
+			//Iterates over the periods.
+			while(sumPrincipalNotYetCharged > 0 && chargesCount < maxPayPlanCharges) { 
 				DateTime periodDate=CalcNextPeriodDate(terms.DateFirstPayment,periodCount,terms.Frequency);
 				double interestForPeriod=CalculateInterestAmountForPeriod(sumPrincipalNotYetCharged,terms,periodDate,isNextPeriodOnly,listPaySplits
 					,listChargesInDB,listExpectedCharges);
@@ -1092,28 +969,399 @@ namespace OpenDentBusiness {
 			return listExpectedCharges;//returns all expected for the entire life of the payment plan. 
 		}
 
-		///<summary>Returns the difference between the principal and sum of pay splits that apply to the principal.
-		///If the sum of pay splits that apply to the principal is less than the downpayment amount, 
-		///then the difference between the principal and the down payment amount is returned instead.</summary>
+		///<summary>Expects all PaySplits and PayPlanCharges to be linked to the same plan.</summary>
+		public static bool IsDynamicPaymentPlanInterestOverpaid(List<PayPlanCharge> listPayPlanCharges,List<PaySplit> listPaySplits) {
+			DynamicPaymentPlanRecalculationBuckets buckets=GetDynamicPaymentPlanRecalculationBuckets(listPayPlanCharges,listPaySplits);
+			return CompareDouble.IsGreaterThan(buckets.InterestSplitAmtRem,0);
+		}
+
+		///<summary>Returns the total of splits that are associated to the DynamicPayPlanPrepaymentUnearnedType.</summary>
+		public static double GetDynamicPayPlanPrepaymentAmount(List<PaySplit> listPaySplits) {
+			long paymentPlanHiddenUnearnedPrepaymentNum=PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType);
+			return listPaySplits.FindAll(x=>x.UnearnedType==paymentPlanHiddenUnearnedPrepaymentNum).Sum(x=>x.SplitAmt);
+		}
+
+		///<summary>Run by OpenDentalService.PaymentThread. Takes any hiddenUnearnedTotal from hidden unearned, and applies it to listPayPlanChargesExpected.</summary>
+		public static void ApplyPrepaymentToDynamicPaymentPlan(long patNum,double hiddenUnearnedTotal,List<PayPlanCharge> listPayPlanChargesExpected) {
+			List<PaySplit> listTransferSplits=new List<PaySplit>();
+			long PrepayUnearnedType=PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType);
+			Payment transferPayment=new Payment();
+			transferPayment.DateEntry=DateTime.Today;
+			transferPayment.PayDate=DateTime.Today;
+			transferPayment.PaymentSource=CreditCardSource.None;
+			transferPayment.ProcessStatus=ProcessStat.OfficeProcessed;
+			transferPayment.PayType=0;
+			transferPayment.PatNum=patNum;
+			for(int i = 0;i<listPayPlanChargesExpected.Count;i++) {
+				if(CompareDouble.IsLessThanOrEqualToZero(hiddenUnearnedTotal)) {
+					break;
+				}
+				PayPlanCharge charge=listPayPlanChargesExpected[i];
+				double splitInterestAmt=Math.Min(hiddenUnearnedTotal,charge.Interest);
+				hiddenUnearnedTotal-=splitInterestAmt;
+				double splitPrincipalAmt=Math.Min(hiddenUnearnedTotal,charge.Principal);
+				hiddenUnearnedTotal-=splitPrincipalAmt;
+				//Make a positive interest, and positive princial split linked to the charge.
+				if(!CompareDouble.IsZero(splitInterestAmt)) {
+					listTransferSplits.AddRange(CreateTransferSplitsForPrepay(splitInterestAmt,charge,PayPlanDebitTypes.Interest,PrepayUnearnedType));
+				}
+				if(!CompareDouble.IsZero(splitPrincipalAmt)) {
+					listTransferSplits.AddRange(CreateTransferSplitsForPrepay(splitPrincipalAmt,charge,PayPlanDebitTypes.Principal,PrepayUnearnedType));
+				}
+			}
+			if(!CompareDouble.IsZero(listTransferSplits.Sum(x=>x.SplitAmt))) {
+				throw new ApplicationException("Applying prepayments to dynamic payment plan tried to create a non-zero amount income transfer.");
+			}
+			transferPayment.PayAmt=0;//Income transfers are always $0.
+			transferPayment.PayNum=Payments.Insert(transferPayment,listTransferSplits);
+			string logText=Payments.GetSecuritylogEntryText(transferPayment,transferPayment,isNew:true)+", "+Lans.g("PayPlanEdit","from the dynamic payment plan prepayment processing service.");
+			SecurityLogs.MakeLogEntry(Permissions.PaymentCreate,transferPayment.PatNum,logText);
+		}
+
+		///<summary>Calculates the principal amount left on the plan. Considers paysplits on interest, principal, and unknown.</summary>
 		public static double CalculatePrincipalRemaining(double principalAmount,double downPayment,List<PaySplit> listPaySplitsForPayPlan
-			,List<PayPlanCharge> listChargesInDB,List<PayPlanCharge> listExpectedCharges)
+			,List<PayPlanCharge> listChargesInDB,List<PayPlanCharge> listExpectedCharges,bool isForNextPeriodOnly) 
 		{
-			//Total up all of the PaySplits attached to the payment plan.
-			double amtToApply=listPaySplitsForPayPlan.Sum(x => x.SplitAmt);
-			//Always "apply" PaySplits towards interest charges first.
-			//This can cause future interest charges to fluctuate sometimes (typically will increase).
-			//There is currently no way to explicitly specify payments as allocated to principal only or interest only.
-			//This code will need to change once that feature has been introduced.  Old code used PayPlanChargeNum to achieve this.
-			//It would be best to have an official flag that designates amounts towards principal and interest.
-			//This is mainly because PayPlanCharge entries hold value for both interest and principal and we need to support partials.
-			double sumInterestCharged=listChargesInDB.Sum(x => x.Interest)+listExpectedCharges.Sum(x => x.Interest);
-			amtToApply-=Math.Min(amtToApply,sumInterestCharged);
-			//Figure out the amount of principal remaining by subtracting the overall principal from the remainder of PaySplits on the plan after interest.
-			//This may be negative if the entire plan is overpaid. We must subtract the down payment amount at minimum as we never charge interest on it.
-			//The result is the total amount of principal left on the payment plan that can be used to calculate future interest charges.
-			double planTotalPrincipalRemaining=(principalAmount-Math.Max(downPayment,amtToApply));
-			//Return zero if the total principal balance is negative because we can't use a negative balance in interest calculations.
-			return Math.Max(0,planTotalPrincipalRemaining);
+			List<PayPlanCharge> listPayPlanCharges=new List<PayPlanCharge>(listChargesInDB);
+			listPayPlanCharges.AddRange(listExpectedCharges);
+			DynamicPaymentPlanRecalculationBuckets buckets=GetDynamicPaymentPlanRecalculationBuckets(listPayPlanCharges,listPaySplitsForPayPlan,isOverpaidInterestPrincipal:true);
+			//Principle expected to be charged out
+			double principalNotYetCharged=principalAmount-(listPayPlanCharges.Sum(x=>x.Principal));
+			//If the user has selected to apply excess interest to principal
+			//if payment on principal is greater than principal that is / will be due, no interest should be charged.
+			double totalAgainstPrincipal=Math.Max(0,buckets.PrincipalSplitAmtRem+buckets.UnknownSplitAmtRem+buckets.InterestSplitAmtRem);
+			double unpaidPrincipal=0;
+			if(isForNextPeriodOnly) {
+				unpaidPrincipal=buckets.PrincipalChargedRem;
+			}
+			double principalRemaining=principalNotYetCharged+unpaidPrincipal-totalAgainstPrincipal;
+			return Math.Max(0,principalRemaining);
+		}
+
+		///<summary>Returns a helper object that gives information regarding the current state of the payment plan based on the parameters provided.
+		///The main purpose of this method is to house the logic for how patient payments should be applied in regards to principal and interest.</summary>
+		private static DynamicPaymentPlanRecalculationBuckets GetDynamicPaymentPlanRecalculationBuckets(List<PayPlanCharge> listPayPlanCharges,List<PaySplit> listPaySplits,bool isOverpaidInterestPrincipal=false) {
+			/* When calculating interest remaining, we want to consider the account in its current state at this exact moment in time.
+			 * To do this, we will need to partition paysplits into 3 buckets. Principal, Interest, and unknown.
+			 * Paysplits for principal, are exclusive to principal, and cannot be applied to interest.
+			 * Similarly, interest will be applied to interest first, but then can be applied to principal.
+			 * First, if transfers exist in the unkown category, the negative splits will be pulled from the unknown bucket, then if there is any remaining negative
+			 * value, we will remove from the principal bucket, and the interest bucket last. Negative Principal/Interest only gets removed from the positive Principal/Interest buckets.
+			 * Next, we pull the charged interest from the interest bucket, then charged principal from the principal bucket.
+			 * Finally, if there is anything left charged (either interest or principal), pull interest charged from unknown bucket first, then principal.
+			 * Any left over value in the unknown, or principal buckets can be applied to principal not yet charged. */
+			DynamicPaymentPlanRecalculationBuckets retVal=new DynamicPaymentPlanRecalculationBuckets();
+			if(listPayPlanCharges.IsNullOrEmpty() || listPaySplits.IsNullOrEmpty()) {
+				if(!listPayPlanCharges.IsNullOrEmpty()) {
+					retVal.InterestChargedRem=listPayPlanCharges.Sum(x=>x.Interest);
+					retVal.PrincipalChargedRem=listPayPlanCharges.Sum(x=>x.Principal);
+				}
+				return retVal;
+			}
+			//Payment Splits-----------------------------------------------------------------------------------------------------------------------------------
+			//The principle bucket will be the sum of all paysplits flagged for principal
+			retVal.PrincipalSplitAmtRem=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Principal && x.SplitAmt>=0).Sum(x=>x.SplitAmt);
+			//transferPrincipalBucket is a positive value that represents negative splits.
+			double transferPrincipalBucket=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Principal && x.SplitAmt<0).Sum(x=>-x.SplitAmt);
+			//The interest bucket will be the sum of all paysplits flagged for interest
+			retVal.InterestSplitAmtRem=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Interest && x.SplitAmt>=0).Sum(x=>x.SplitAmt);
+			//transferInterestBucket is a positive value that represents negative splits.
+			double transferInterestBucket=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Interest && x.SplitAmt<0).Sum(x=>-x.SplitAmt);
+			//The unknown bucket will be the sum of all paysplits flagged as unknown (legacy splits)
+			retVal.UnknownSplitAmtRem=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Unknown && x.SplitAmt>=0).Sum(x=>x.SplitAmt);
+			//transferUknownBucket is a positive value that represents negative splits.
+			double transferUnknownBucket=listPaySplits.Where(x=>x.PayPlanDebitType==PayPlanDebitTypes.Unknown && x.SplitAmt<0).Sum(x=>-x.SplitAmt);
+			//Charges------------------------------------------------------------------------------------------------------------------------------------------
+			retVal.InterestChargedRem=listPayPlanCharges.Sum(x=>x.Interest);
+			retVal.PrincipalChargedRem=listPayPlanCharges.Sum(x=>x.Principal);
+			#region Negative splits
+			//Apply negative principal first
+			retVal.PrincipalSplitAmtRem-=Math.Min(transferPrincipalBucket,retVal.PrincipalSplitAmtRem);
+			//Next apply negative interest
+			retVal.InterestSplitAmtRem-=Math.Min(transferInterestBucket,retVal.InterestSplitAmtRem);
+			//Lastly apply negative unknown
+			//transferUknownBucket is a positive value that represents negative splits.
+			double negativeUnknownSplitsApplyingToUnknownSplits=Math.Min(transferUnknownBucket,retVal.UnknownSplitAmtRem);
+			transferUnknownBucket-=negativeUnknownSplitsApplyingToUnknownSplits; //Apply unknown positive splits to unknown negative splits.
+			retVal.UnknownSplitAmtRem-=negativeUnknownSplitsApplyingToUnknownSplits; //Remove value applied from the Unknown bucket.
+			//Take any excess principal and apply the negative unknown to it.
+			if(!CompareDouble.IsZero(transferUnknownBucket)) {
+				double negativeUnknownSplitsApplyingToPrincipalSplits=Math.Min(transferUnknownBucket,retVal.PrincipalSplitAmtRem);
+				retVal.PrincipalSplitAmtRem-=negativeUnknownSplitsApplyingToPrincipalSplits;
+				transferUnknownBucket-=negativeUnknownSplitsApplyingToPrincipalSplits;
+			}
+			//Take any excess interest and apply the negative unknown to it.
+			if(!CompareDouble.IsZero(transferUnknownBucket)) {
+				double negativeUnknownSplitsApplyingToInterestSplits=Math.Min(transferUnknownBucket,retVal.InterestSplitAmtRem);
+				retVal.InterestSplitAmtRem-=negativeUnknownSplitsApplyingToInterestSplits;
+				transferUnknownBucket-=negativeUnknownSplitsApplyingToInterestSplits;
+			}
+			if(transferUnknownBucket>0) {
+				//We never want to do anything in this state, and it really shouldn't be possible since this would mean the entire plan has transfer splits far exceeding their positive counterpart.
+			}
+			#endregion
+			#region Positive splits
+			//Apply positive interest first
+			double interestSplitsApplyingToInterestCharged=Math.Min(retVal.InterestSplitAmtRem,retVal.InterestChargedRem);
+			retVal.InterestChargedRem-=interestSplitsApplyingToInterestCharged;
+			retVal.InterestSplitAmtRem-=interestSplitsApplyingToInterestCharged;
+			if(retVal.InterestChargedRem!=0) {
+				double unknownApplyingToInterest=Math.Min(retVal.UnknownSplitAmtRem,retVal.InterestChargedRem);
+				retVal.UnknownSplitAmtRem-=unknownApplyingToInterest;
+				retVal.InterestChargedRem-=unknownApplyingToInterest;
+			}
+			//Conditionally treat overpaid interest as if it is money that can be applied towards principal.
+			if(isOverpaidInterestPrincipal) {
+				retVal.PrincipalSplitAmtRem+=retVal.InterestSplitAmtRem;
+				retVal.InterestSplitAmtRem=0;
+			}
+			//Next apply positive principal
+			double principalSplitsApplyingToPrincipalCharged=Math.Min(retVal.PrincipalSplitAmtRem,retVal.PrincipalChargedRem);
+			retVal.PrincipalChargedRem-=principalSplitsApplyingToPrincipalCharged;
+			retVal.PrincipalSplitAmtRem-=principalSplitsApplyingToPrincipalCharged;
+			if(retVal.PrincipalChargedRem!=0) {
+				double unknwonApplyingToPrincipal=Math.Min(retVal.UnknownSplitAmtRem,retVal.PrincipalChargedRem);
+				retVal.UnknownSplitAmtRem-=unknwonApplyingToPrincipal;
+				retVal.PrincipalChargedRem-=unknwonApplyingToPrincipal;
+			}
+			#endregion
+			return retVal;
+		}
+
+		///<summary>This will balance the dynamic payment plan. If isBalanceOnPrepay is true, interest that exceeds PayPlanCharge.Interest will be moved to hidden unearned via payment splits. 
+		///Otherwise, the overpaid interest will be allocated to new payment plan debits that are created from any outstanding production via payment splits and payment plan charges.
+		///Each recalcData object passed in should be filled with values corresponding to only one payment plan.</summary>
+		public static void BalanceOverpaidInterestForDynamicPaymentPlans(List<PayPlanRecalculationData> listRecalcData,bool isBalanceOnPrepay) {
+			//No remoting role check; no call to db.
+			for(int i=0;i<listRecalcData.Count;i++) {
+				//Calculate the overall value of the payment plan; (Principal + Interest) - Patient Payments
+				double plansValue=listRecalcData[i].Terms.PrincipalAmount+listRecalcData[i].ListPayPlanCharges.Sum(x=>x.Interest)-listRecalcData[i].ListPaySplits.Sum(x=>x.SplitAmt);
+				//if the entire plan is overpaid
+				if(plansValue<0) {
+					//No-Touchie, this will include interest being overpaid when there is no more principal to apply to. ITM should handle this.
+					continue;
+				}
+				BalanceOverpaidInterestForDynamicPaymentPlan(listRecalcData[i],isBalanceOnPrepay);
+			}
+		}
+
+		private static void BalanceOverpaidInterestForDynamicPaymentPlan(PayPlanRecalculationData recalcData,bool isBalanceOnPrepay) {
+			PayPlan payPlan=recalcData.PayPlan;
+			List<PaySplit> listSplits=recalcData.ListPaySplits;
+			List<PayPlanCharge> listPayPlanCharges=recalcData.ListPayPlanCharges;
+			//No remoting role check; ref parameter used.
+			long PrepayUnearnedType=PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType);
+			//Separate all of the charges up and keep track of the splits that are associated to said charges.
+			List<DynamicPaymentPlanRecalculationChargeSplits> listDppChargeSplits=listPayPlanCharges.Select(x => new DynamicPaymentPlanRecalculationChargeSplits() {
+					ListPaySplits=listSplits.FindAll(y => y.PayPlanChargeNum==x.PayPlanChargeNum),
+					ListPaySplitsToTransfer=new List<PaySplit>(),
+					PayPlanChargeCur=x,
+				}).ToList();
+			//Get a list of all of the charges that are overpaid.
+			List<PayPlanCharge> listPayPlanChargesOverpaid=GetDynamicPaymentPlanChargesOverpaidInterest(listSplits,listPayPlanCharges);
+			//Create transfers for the splits associated to each charge that has been overpaid.
+			for(int i = 0;i<listPayPlanChargesOverpaid.Count;i++) {
+				DynamicPaymentPlanRecalculationChargeSplits chargeSplitsPairTakingFrom=listDppChargeSplits.FirstOrDefault(x=>x.PayPlanChargeCur==listPayPlanChargesOverpaid[i]);
+				DynamicPaymentPlanRecalculationBuckets bucket=GetDynamicPaymentPlanRecalculationBuckets(ListTools.FromSingle(chargeSplitsPairTakingFrom.PayPlanChargeCur),chargeSplitsPairTakingFrom.ListPaySplits);
+				//Get the amount available to be transfered from this charge.
+				double overpaidAmount=bucket.InterestSplitAmtRem;
+				if(isBalanceOnPrepay) { //Balancing on prepay simply create transfer splits to moves excess funds to Hidden Unearned
+					chargeSplitsPairTakingFrom.ListPaySplitsToTransfer=CreateTransferSplitsForPrepay(-overpaidAmount,listPayPlanChargesOverpaid[i],PayPlanDebitTypes.Interest,PrepayUnearnedType);
+				}
+				else { //Balance on principal moves overpaid interest to principal debits.
+					while(CompareDouble.IsGreaterThan(overpaidAmount,0)) {
+						//Get a PayPlanCharge for the overpaid amount. Could be pre-existing, or a new charge.
+						PayPlanCharge chargeGivingTo=GetChargeForRebalancing(
+							overpaidAmount,
+							recalcData,
+							listDppChargeSplits);
+						//If no more charges can be created, the plan has maxed out its value, and has been entirely overpaid. We shouldn't reach this point.
+						if(chargeGivingTo==null){
+							return;
+						}
+						PayPlanProductionEntry entryGivingTo=recalcData.ListProductionEntry.FirstOrDefault(x=>x.LinkType==chargeGivingTo.LinkType && x.PriKey==chargeGivingTo.FKey);
+						if(entryGivingTo==null) { //This really shouldn't happen.
+							return;
+						}
+						DynamicPaymentPlanRecalculationChargeSplits chargeSplitsGivingTo=listDppChargeSplits.FirstOrDefault(x=>x.PayPlanChargeCur==chargeGivingTo);
+						if(chargeSplitsGivingTo==null) {//If we just created a new charge, add it to the overall list of charges for this plan. Will get inserted later. Also, more splits can be added later.
+							chargeSplitsGivingTo=new DynamicPaymentPlanRecalculationChargeSplits();
+							chargeSplitsGivingTo.ListPaySplits=new List<PaySplit>();
+							chargeSplitsGivingTo.ListPaySplitsToTransfer=new List<PaySplit>();
+							chargeSplitsGivingTo.PayPlanChargeCur=chargeGivingTo;
+							listDppChargeSplits.Add(chargeSplitsGivingTo);
+						} 
+						DynamicPaymentPlanRecalculationBuckets bucketsForCharge=GetDynamicPaymentPlanRecalculationBuckets(ListTools.FromSingle(chargeSplitsGivingTo.PayPlanChargeCur),chargeSplitsGivingTo.ListPaySplitsAll);
+						double splitAmount=Math.Min(overpaidAmount,bucketsForCharge.PrincipalChargedRem);
+						//Create negative split
+						PaySplit paySplitNegative=CreateTransferSplitForDynamicPaymentPlanCharge(-splitAmount,chargeSplitsPairTakingFrom.PayPlanChargeCur,PayPlanDebitTypes.Interest);
+						chargeSplitsPairTakingFrom.ListPaySplitsToTransfer.Add(paySplitNegative);
+						//Create positive split
+						PaySplit paySplitPositive=CreateTransferSplitForDynamicPaymentPlanCharge(splitAmount,chargeSplitsGivingTo.PayPlanChargeCur,PayPlanDebitTypes.Principal);
+						chargeSplitsGivingTo.ListPaySplitsToTransfer.Add(paySplitPositive);
+						overpaidAmount-=splitAmount;
+					}
+				}
+			}
+			//Insert new charges and set the PayPlanChargeNum field for all of its corresponding paysplits.
+			List<PaySplit> listPaySplitsToInsert=new List<PaySplit>();
+			for(int i=0;i<listDppChargeSplits.Count;i++) {
+				if(listDppChargeSplits[i].PayPlanChargeCur.IsNew) {
+					listDppChargeSplits[i].PayPlanChargeCur.PayPlanChargeNum=PayPlanCharges.Insert(listDppChargeSplits[i].PayPlanChargeCur);
+				}
+				listDppChargeSplits[i].ListPaySplitsToTransfer.ForEach(x=>x.PayPlanChargeNum=listDppChargeSplits[i].PayPlanChargeCur.PayPlanChargeNum);
+				listPaySplitsToInsert.AddRange(listDppChargeSplits[i].ListPaySplitsToTransfer);
+			}
+			//Create Transfer Payments
+			if(listPaySplitsToInsert.Count>0) {
+				if(!CompareDouble.IsZero(listPaySplitsToInsert.Sum(x=>x.SplitAmt))) {
+					throw new ApplicationException("Balancing overpaid interest for dynamic payment plan tried to create a non-zero amount income transfer.");
+				}
+				Payment transferPayment=new Payment();
+				transferPayment.DateEntry=DateTime.Today;
+				transferPayment.PaymentSource=CreditCardSource.None;
+				transferPayment.ProcessStatus=ProcessStat.OfficeProcessed;
+				transferPayment.PayType=0;
+				transferPayment.PayAmt=0;//Income transfers are required to be $0.
+				transferPayment.PayDate=DateTime.Today;
+				transferPayment.PatNum=payPlan.PatNum;
+				//Explicitly set ClinicNum=0, since a pat's ClinicNum will remain set if the user enabled clinics, assigned patients to clinics, and then
+				//disabled clinics because we use the ClinicNum to determine which PayConnect or XCharge/XWeb credentials to use for payments.
+				if(PrefC.HasClinicsEnabled) {//if clinics aren't enabled default to 0
+					transferPayment.ClinicNum=Clinics.ClinicNum;
+					if((PayClinicSetting)PrefC.GetInt(PrefName.PaymentClinicSetting)==PayClinicSetting.PatientDefaultClinic) {
+						transferPayment.ClinicNum=recalcData.Pat.ClinicNum;
+					}
+					else if((PayClinicSetting)PrefC.GetInt(PrefName.PaymentClinicSetting)==PayClinicSetting.SelectedExceptHQ) {
+						transferPayment.ClinicNum=(Clinics.ClinicNum==0 ? recalcData.Pat.ClinicNum : Clinics.ClinicNum);
+					}
+				}
+				Payments.Insert(transferPayment,listPaySplitsToInsert);
+				string logText=Payments.GetSecuritylogEntryText(transferPayment,transferPayment,isNew:true)+", "+Lans.g("PayPlanEdit","from Dynamic Payment Plan Balancer.");
+				SecurityLogs.MakeLogEntry(Permissions.PaymentCreate,transferPayment.PatNum,logText);
+			}
+		}
+
+		private static List<PayPlanCharge> GetDynamicPaymentPlanChargesOverpaidInterest(List<PaySplit> listSplits,List<PayPlanCharge> listPayPlanCharges) {
+			List<PayPlanCharge> listPayPlanChargesOverpaid=new List<PayPlanCharge>();
+			for(int i = 0;i<listPayPlanCharges.Count;i++) {
+				PayPlanCharge payPlanCharge=listPayPlanCharges[i];
+				if(IsDynamicPaymentPlanInterestOverpaid(ListTools.FromSingle(payPlanCharge),listSplits.FindAll(x => x.PayPlanChargeNum==payPlanCharge.PayPlanChargeNum))) {
+					listPayPlanChargesOverpaid.Add(payPlanCharge);
+				}
+			}
+			return listPayPlanChargesOverpaid;
+		}
+
+		private static List<PaySplit> CreateTransferSplitsForPrepay(double splitAmount,PayPlanCharge charge,PayPlanDebitTypes debitType,long unearnedType) {
+			long procNum=0;
+			long adjNum=0;
+			if(charge.LinkType==PayPlanLinkType.Procedure) {
+				procNum=charge.FKey;
+			}
+			else if(charge.LinkType==PayPlanLinkType.Adjustment) {
+				adjNum=charge.FKey;
+			}
+			PaymentEdit.IncomeTransferData notUsed=new PaymentEdit.IncomeTransferData();
+			List<PaySplit> listPaySplit=PaymentEdit.CreateUnearnedTransfer(
+				(decimal)splitAmount,
+				charge.PatNum,
+				charge.ProvNum,
+				charge.ClinicNum,
+				ref notUsed,
+				procNum:procNum,
+				adjNum:adjNum,
+				unearnedType:unearnedType,
+				payPlanNum:charge.PayPlanNum,
+				payPlanChargeNum:charge.PayPlanChargeNum,
+				payPlanDebitType:debitType,
+				isForDynamicPaymentPlanBalancing:true);
+			return listPaySplit;
+		}
+
+		private static PaySplit CreateTransferSplitForDynamicPaymentPlanCharge(double splitAmount,PayPlanCharge charge,PayPlanDebitTypes debitType,long DefNum=0) {
+			PaySplit paySplit=new PaySplit();
+			paySplit.IsNew=true;
+			paySplit.DateEntry=DateTime.Today;
+			paySplit.DatePay=DateTime.Today;
+			paySplit.SplitAmt=splitAmount;
+			paySplit.PatNum=charge.PatNum;
+			paySplit.ProvNum=charge.ProvNum;
+			paySplit.ClinicNum=charge.ClinicNum;
+			paySplit.PayPlanNum=charge.PayPlanNum;
+			paySplit.PayPlanDebitType=debitType;
+			paySplit.PayPlanChargeNum=charge.PayPlanChargeNum;
+			paySplit.ProcNum=0;
+			paySplit.AdjNum=0;
+			if(charge.LinkType==PayPlanLinkType.Procedure) {
+				paySplit.ProcNum=charge.FKey;
+			}
+			else if(charge.LinkType==PayPlanLinkType.Adjustment) {
+				paySplit.AdjNum=charge.FKey;
+			}
+			return paySplit;
+		}
+
+		///<summary>Returns the first payment plan charge debit from listPayPlanCharges that has a positive PrincipalChargedRem amount.
+		///If every payment plan charge from listPayPlanCharges has had its principal paid off then a new charge can be returned if there are any production entries passed in with a positive Amount Remaining.
+		///If there are no outstanding production entries to create a new charge for then this method returns null. New charges returned from this method will not have Interest set.</summary>
+		private static PayPlanCharge GetChargeForRebalancing(double amountToTransfer,PayPlanRecalculationData recalcData,List<DynamicPaymentPlanRecalculationChargeSplits> listChargeSplits) {
+			//No remoting role check; ref parameter used.
+			if(CompareDouble.IsLessThanOrEqualToZero(amountToTransfer)) {
+				return null;
+			}
+			List<DynamicPaymentPlanRecalculationChargeSplits> listChargeSplitsOld=listChargeSplits.FindAll(x => !x.PayPlanChargeCur.IsNew);
+			//Return the first existing charge with an amount due.
+			for(int i=0;i<listChargeSplitsOld.Count;i++) {
+				DynamicPaymentPlanRecalculationBuckets bucket=GetDynamicPaymentPlanRecalculationBuckets(
+					ListTools.FromSingle(listChargeSplitsOld[i].PayPlanChargeCur),
+					listChargeSplitsOld[i].ListPaySplitsAll);
+				if(CompareDouble.IsGreaterThan(bucket.PrincipalChargedRem,0)) {
+					return listChargeSplitsOld[i].PayPlanChargeCur;
+				}
+			}
+			//There are no existing charges with an amount due. Check to see if there are any production entries with an amount remaining (has yet to be charged out and is due right now).
+			PayPlanProductionEntry entry=recalcData.ListProductionEntry.FirstOrDefault(x=>CompareDecimal.IsGreaterThanZero(x.AmountRemaining));
+			if(entry==null) {
+				//We need to return, as there is no production to create debits for.
+				return null;
+			}
+			double amountAdditionalPrincipal=Math.Min(amountToTransfer,(double)entry.AmountRemaining);
+			//There is at least one outstanding production entry that can have a principal charge created for it.
+			//If we have already created a payment plan charge for this outstanding production entry before, simply apply as much amountToTransfer to it as possible.
+			DynamicPaymentPlanRecalculationChargeSplits chargeSplitsForProdNew=listChargeSplits.Where(x=>x.PayPlanChargeCur.IsNew)
+				.FirstOrDefault(x=>x.PayPlanChargeCur.LinkType==entry.LinkType && x.PayPlanChargeCur.FKey==entry.PriKey);
+			PayPlanCharge payPlanCharge=chargeSplitsForProdNew?.PayPlanChargeCur??null;
+			//Check to see if the production entry has an amount remaining and we have created a charge for it already.
+			if(payPlanCharge==null) {//Create a new debit that will be purely principal.
+				payPlanCharge=GetPayPlanChargeForEntry(entry,recalcData.PayPlan,amountAdditionalPrincipal,listChargeSplitsOld.Max(x=>x.PayPlanChargeCur.ChargeDate));
+				payPlanCharge.Note=Lans.g("PayPlanEdit","(Charge created for pay on principal)");
+			}
+			else {//Apply as much amountToTransfer to this payment plan charge as possible.
+				payPlanCharge.Principal+=amountAdditionalPrincipal;
+			}
+			entry.AmountRemaining-=(decimal)amountAdditionalPrincipal;
+			return payPlanCharge;
+		}
+
+		public static PayPlanCharge GetPayPlanChargeForEntry(PayPlanProductionEntry payPlanProductionEntry,PayPlan payPlan,double principal,DateTime chargeDate) {
+			//No remoting role check; no call to db
+			PayPlanCharge charge=new PayPlanCharge();
+			charge.ChargeDate=chargeDate;
+			charge.ChargeType=PayPlanChargeType.Debit;
+			charge.LinkType=payPlanProductionEntry.LinkType;
+			charge.FKey=payPlanProductionEntry.PriKey;
+			charge.ProcNum=payPlanProductionEntry.GetProcNum();
+			charge.PatNum=payPlanProductionEntry.PatNum;
+			charge.ProvNum=payPlanProductionEntry.ProvNum;
+			charge.ClinicNum=payPlanProductionEntry.ClinicNum;
+			charge.Guarantor=payPlan.Guarantor;
+			charge.PayPlanNum=payPlan.PayPlanNum;
+			charge.IsOffset=false;
+			charge.Interest=0;
+			charge.IsNew=true;
+			charge.Principal=principal;
+			return charge;
 		}
 
 		public static decimal CalculatePeriodPayment(double apr,PayPlanFrequency frequency,decimal periodPayment,int payCount,int roundDec
@@ -1166,22 +1414,12 @@ namespace OpenDentBusiness {
 			if(periodDate.Date>=terms.DateInterestStart.Date) {
 				double periodRate=CalcPeriodRate(terms.APR,terms.Frequency);
 				double sumChargesAllPrincipal=listChargesInDB.Sum(x => x.Principal)+listExpectedCharges.Sum(x => x.Principal);
-				double sumChargesAllPrincipalAndInterest=sumChargesAllPrincipal+listChargesInDB.Sum(x => x.Interest)+listExpectedCharges.Sum(x => x.Interest);
-				bool isPlanOverpaid=CompareDouble.IsGreaterThan(listPaySplits.Sum(x => x.SplitAmt),sumChargesAllPrincipalAndInterest);
-				decimal principalAmountUsedForCalculation=sumPrincipalNotYetCharged;
-				//If we are creating a charge, or the payments made towards the plan have covered all posted charges and all expected charges generated thus
-				//far, we must calculate interest using the amount of principal that has not been covered yet. 
-				//This means that when an overpayment has been made, the amortization schedule may show increasing interest on expected charges that
-				//are covered by the overpayment because as each one is generated some of the overpayment will be pulled away from crediting principal toward
-				//the interest of the charge being generated.
-				if(isNextPeriodOnly || isPlanOverpaid) {
-					//Figure out the total principal value for the plan by adding up the principal on the charges in the database, the 'future' charges that 
-					//have been calculated, and the amount of principal that has yet to be considered (via the calling method).
-					double principalAmount=sumChargesAllPrincipal+(double)sumPrincipalNotYetCharged;
-					principalAmountUsedForCalculation=(decimal)CalculatePrincipalRemaining(principalAmount,terms.DownPayment,listPaySplits,listChargesInDB
-						,listExpectedCharges);
-				}
-				interest=Math.Round(((double)principalAmountUsedForCalculation*periodRate),terms.RoundDec);
+				//Figure out the total principal value for the plan by adding up the principal on the charges in the database, the 'future' charges that 
+				//have been calculated, and the amount of principal that has yet to be considered (via the calling method).
+				double principalAmount=sumChargesAllPrincipal+(double)sumPrincipalNotYetCharged;
+				double principalAmountUsedForCalculation=CalculatePrincipalRemaining(principalAmount,terms.DownPayment,listPaySplits,listChargesInDB
+					,listExpectedCharges,isNextPeriodOnly);
+				interest=Math.Round((principalAmountUsedForCalculation*periodRate),terms.RoundDec);
 			}
 			return interest;
 		}
@@ -1252,12 +1490,43 @@ namespace OpenDentBusiness {
 			public long	ProvNum;
 		}
 
+		///<summary>Used for calculating the state of a dynamic payment plan. Helps keep track of values used when calculating Interest, Principal, or Unknown paysplits, 
+		///or figuring out how much charge is left on a dynmaic payment plan.</summary>
+		private class DynamicPaymentPlanRecalculationBuckets {
+			public double InterestSplitAmtRem;
+			public double PrincipalSplitAmtRem;
+			public double UnknownSplitAmtRem;
+			public double InterestChargedRem; 
+			public double PrincipalChargedRem;
+		}
+
+		///<summary>Used for keeping track of new paysplits and their corresponding charges. Helps to prevent needing to insert charges prematurely when balancing DPPs.</summary>
+		private class DynamicPaymentPlanRecalculationChargeSplits {
+			public PayPlanCharge PayPlanChargeCur;
+			///<summary>Existing payment splits that are attached to the payment plan charge.</summary>
+			public List<PaySplit> ListPaySplits=new List<PaySplit>();
+			///<summary>New payment splits that need to be inserted into the database and should be associated to the payment plan charge.</summary>
+			public List<PaySplit> ListPaySplitsToTransfer=new List<PaySplit>();
+
+			///<summary>Returns a list of existing payment splits along with any new splits that need to be inserted into the database.</summary>
+			public List<PaySplit> ListPaySplitsAll {
+				get {
+					List<PaySplit> listPaySplitsAll=new List<PaySplit>(ListPaySplits);
+					listPaySplitsAll.AddRange(ListPaySplitsToTransfer);
+					return listPaySplitsAll;
+				}
+			}
+		}
+
 		///<summary>Helper class to store all data needed for recalculating an existing amortization schedule.</summary>
 		public class PayPlanRecalculationData {
 			///<summary>The pay plan for which the amortization schedule is being recalculated.</summary>
 			public PayPlan PayPlan=new PayPlan();
+			public PayPlanTerms Terms=new PayPlanTerms();
 			///<summary>Family of the patient to which the pay plan belongs.</summary>
 			public Family Fam=new Family();
+			///<summary>Patient that the pay plan belongs to.</summary>
+			public Patient Pat;
 			///<summary>ProvNum associated to the pay plan.</summary>
 			public long ProvNum;
 			///<summary>ClinicNum associated to the pay plan.</summary>
@@ -1270,6 +1539,10 @@ namespace OpenDentBusiness {
 			public List<PayPlanCharge> ListFutureDebits=new List<PayPlanCharge>();
 			///<summary>All recalculated charges that will be added to ListPayPlanCharges.</summary>
 			public List<PayPlanCharge> ListChargesToAdd=new List<PayPlanCharge>();
+			///<summary>Associated productions to the plan.</summary>
+			public List<PayPlanLink> ListPayPlanLinks=new List<PayPlanLink>();
+			///<summary>Pay plan production entries for the plan. May or may not have amount remaining calculated.</summary>
+			public List<PayPlanProductionEntry> ListProductionEntry=new List<PayPlanProductionEntry>();
 			///<summary>Pay plans payment count minus count of past debits. Down payment charges and charges created due to previous recalculations are
 			///not included in the count of past debits subtracted.</summary>
 			public int PaymentRemainingCount;
