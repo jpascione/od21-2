@@ -1135,12 +1135,10 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 			command="INSERT INTO definition (Category,ItemName,ItemValue,ItemOrder) VALUES (53,'Insurance Card Back','Please take a picture of the back side of your insurance card',3)";
 			Db.NonQ(command);
-			LargeTableHelper.AlterLargeTable("claimproc","ClaimProcNum",new List<Tuple<string,string>> { Tuple.Create("ClaimAdjReasonCodes","varchar(255) NOT NULL") });
+			LargeTableHelper.AlterTable("claimproc","ClaimProcNum",new ColNameAndDef("ClaimAdjReasonCodes","varchar(255) NOT NULL"));
 			command="ALTER TABLE paysplit ADD PayPlanDebitType tinyint NOT NULL";
 			Db.NonQ(command);
-			LargeTableHelper.AlterLargeTable("treatplan","TreatPlanNum",
-				new List<Tuple<string,string>> { Tuple.Create("MobileAppDeviceNum","bigint NOT NULL DEFAULT 0") },
-				new List<Tuple<string,string>> { Tuple.Create("MobileAppDeviceNum","") });
+			LargeTableHelper.AlterTable("treatplan","TreatPlanNum",new ColNameAndDef("MobileAppDeviceNum","bigint NOT NULL"),new IndexColsAndName("MobileAppDeviceNum",""));
 			try {
 				if(IsUsingReplication()) {
 					string replicationMonitorMsg="Monitoring the slave status is now monitored by the OpenDentalReplicationService. "
