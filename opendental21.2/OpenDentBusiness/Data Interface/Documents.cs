@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using CodeBase;
 using DataConnectionBase;
 using OpenDental.Thinfinity;
+using PdfSharp.Pdf;
 
 namespace OpenDentBusiness {
 	///<summary>Handles documents and images for the Images module</summary>
@@ -876,6 +877,74 @@ namespace OpenDentBusiness {
 			}
 			Crud.DocumentCrud.ClearFkey(listDocNums);
 		}
+
+		#region Xam Methods
+		///<summary>Will create a treatment plan PDF without any references to OpenDental. This method is only used in areas that don't have access to 
+		///OpenDental and should only be used in such a case. Returns true if it successfully saved a document.</summary>
+		public static bool CreateAndSaveTreatmentPlanPDF(TreatPlan treatPlan) {
+			try {
+				//If it is local AtoZ storage, then we need to check if they are using network storage, because we can still save the file 
+				//on the network.
+				if(PrefC.AtoZfolderUsed==DataStorageType.LocalAtoZ && !ImageStore.GetPreferredAtoZpath().StartsWith(@"\\")) {
+					return false;
+				}
+				SheetDrawingJob sheetDrawingJob=new SheetDrawingJob();
+				Patient PatCur=Patients.GetPat(treatPlan.PatNum);
+				Sheet sheetTP=TreatPlans.CreateSheetFromTreatmentPlan(treatPlan);
+				bool hasPracticeSig=sheetTP.SheetFields.Any(x => x.FieldType==SheetFieldType.SigBoxPractice);
+				//Determine each of the document categories that this TP should be saved to.
+				//"R"==TreatmentPlan; see FormDefEditImages.cs
+				List<Def> listImageCatDefs=Defs.GetDefsForCategory(DefCat.ImageCats,true);
+				List<long> categories= listImageCatDefs.Where(x => x.ItemValue.Contains("R")).Select(x=>x.DefNum).ToList();
+				if(categories.Count==0) {
+					//we must save at least one document, pick first non-hidden image category.
+					Def imgCat=listImageCatDefs.FirstOrDefault(x => !x.IsHidden);
+					if(imgCat==null) {
+						return false;
+					}
+					categories.Add(imgCat.DefNum);
+				}
+				string tempFile=PrefC.GetRandomTempFile(".pdf");
+				string rawBase64="";
+				//Create a PDF with the given sheet and file. The other parameters can remain null, because they aren't used for TreatPlan sheets.
+				PdfDocument pdfDocument=sheetDrawingJob.CreatePdf(sheetTP,tempFile,null,null,null);
+				if(PrefC.AtoZfolderUsed!=DataStorageType.LocalAtoZ) {
+					//Convert the pdf into its raw bytes
+					rawBase64=Convert.ToBase64String(System.IO.File.ReadAllBytes(tempFile));
+				}
+				foreach(long docCategory in categories) {//usually only one, but do allow them to be saved once per image category.
+					Document docSave=new Document();
+					docSave.DocNum=Insert(docSave);
+					string fileName="TPArchive"+docSave.DocNum;
+					docSave.ImgType=ImageType.Document;
+					docSave.DateCreated=DateTime.Now;
+					docSave.PatNum=treatPlan.PatNum;
+					docSave.DocCategory=docCategory;
+					docSave.Description=fileName;//no extension.
+					docSave.RawBase64=rawBase64;//blank if using AtoZfolder
+					if(PrefC.AtoZfolderUsed==DataStorageType.LocalAtoZ) {
+						string filePath=ImageStore.GetPatientFolder(PatCur,ImageStore.GetPreferredAtoZpath());
+						while(File.Exists(filePath+"\\"+fileName+".pdf")) {
+							fileName+="x";
+						}
+						File.Copy(tempFile,filePath+"\\"+fileName+".pdf");
+					}
+					else if(CloudStorage.IsCloudStorage) {
+						//Upload file to patient's AtoZ folder
+						OpenDentalCloud.Core.TaskStateUpload state=CloudStorage.Upload(ImageStore.GetPatientFolder(PatCur,"")
+							,fileName+".pdf"
+							,File.ReadAllBytes(tempFile));
+					}
+					docSave.FileName=fileName+".pdf";//file extension used for both DB images and AtoZ images
+					Update(docSave);
+				}
+			}
+			catch(Exception) {
+				return false;
+			}
+			return true;
+		}
+		#endregion Xam Methods
 	}
 
 	public class DocumentForApi {
