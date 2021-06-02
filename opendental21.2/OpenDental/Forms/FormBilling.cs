@@ -502,11 +502,11 @@ namespace OpenDental{
 				if(maxStmtsPerBatch==0 || PrefC.GetString(PrefName.BillingUseElectronic)=="2" || PrefC.GetString(PrefName.BillingUseElectronic)=="4") {//Max is disabled or Output to File billing option or using EDS.
 					maxStmtsPerBatch=gridBill.SelectedIndices.Length;//Make the batch size equal to the list of statements so that we send them all at once.
 				}
-				int batchCount=0;
+				int batchCount=-1; //-1 so we can start the dictionary at 0
 				for(int i=0;i<listStatements.Count;i++) {
 					if(i % maxStmtsPerBatch==0) {
-						dictionaryStatementsForSend.Add(batchCount,new List<Statement>());
 						batchCount++;
+						dictionaryStatementsForSend.Add(batchCount,new List<Statement>());
 					}
 					dictionaryStatementsForSend[batchCount].Add(listStatements[i]);
 				}
