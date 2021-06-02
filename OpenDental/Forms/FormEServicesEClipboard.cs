@@ -518,7 +518,9 @@ namespace OpenDental {
 				if(_eClipboardAllowEdit) {
 					#region Delete click handler
 					void DeleteClick(object sender,EventArgs e) {
-						if(listMobileAppDevicesToShow[i].PatNum>0) {
+						//int i in the for loop doesn't actually get disposed once the loop ends, because it was being used here to access 
+						//listMobileAppDevicesToShow. i was always i+1, no matter which row you clicked, so use selected index instead.
+						if(listMobileAppDevicesToShow[gridMobileAppDevices.SelectedIndices[0]].PatNum>0) {
 							MsgBox.Show("A patient is currently using this device. Please clear the patient from the device using the Kiosk Manager" +
 								" or wait until the patient is no longer using the device.");
 							return;
@@ -527,7 +529,7 @@ namespace OpenDental {
 							" Continue?")) {
 							return;
 						}
-						MobileAppDevices.Delete(listMobileAppDevicesToShow[i].MobileAppDeviceNum);
+						MobileAppDevices.Delete(listMobileAppDevicesToShow[gridMobileAppDevices.SelectedIndices[0]].MobileAppDeviceNum);
 						FillGridMobileAppDevices();
 					}
 					#endregion Delete click handler
