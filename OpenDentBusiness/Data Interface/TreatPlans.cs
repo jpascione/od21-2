@@ -469,6 +469,28 @@ namespace OpenDentBusiness{
 		}
 
 		#region Xam TP methods
+		///<summary>To be used when you need a sheet for a TreatPlan and you don't have a reference to OpenDental.</summary>
+		public static Sheet CreateSheetFromTreatmentPlan(TreatPlan treatPlan) {
+			treatPlan.ListProcTPs=ProcTPs.RefreshForTP(treatPlan.TreatPlanNum);
+			Sheet sheet=SheetUtil.CreateSheet(SheetDefs.GetSheetsDefault(SheetTypeEnum.TreatmentPlan,Clinics.ClinicNum),treatPlan.PatNum);
+			//These are all of the different sheet parameters that can be added to a treatment plan
+			sheet.Parameters.Add(new SheetParameter(true,"TreatPlan") { ParamValue=treatPlan });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscountNotAutomatic") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscount") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowMaxDed") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowSubTotals") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowTotals") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowCompleted") { ParamValue=PrefC.GetBool(PrefName.TreatPlanShowCompleted) });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowFees") { ParamValue=true });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowIns") { ParamValue=!PrefC.GetBool(PrefName.EasyHideInsurance) });
+			sheet.Parameters.Add(new SheetParameter(true,"toothChartImg") { ParamValue=SheetFramework.ToothChartHelper.GetImage(treatPlan.PatNum,
+				PrefC.GetBool(PrefName.TreatPlanShowCompleted),treatPlan) 
+			});
+			SheetFiller.FillFields(sheet);
+			SheetUtil.CalculateHeights(sheet);
+			return sheet;
+		}
+
 		///<summary>Attempts to sign a treamentplan with the provided signatures. If signaturePractice is not needed (as defined by the TP sheet) then set to null.
 		///Returns true if there are no errors, otherwise returns false and sets out error param.</summary>
 		public static bool TrySignTreatmentPlan(TreatPlan treatPlan,string signaturePatient,string signaturePractice,out string error) {
