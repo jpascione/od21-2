@@ -18,6 +18,8 @@ namespace OpenDental {
 		private List<RepeatCharge> _listErxRepeatCharges=null;
 		///<summary>Holds all relevant charges reported from NewCrop XML.  Corresponds 1-1 with what shows in the grid.</summary>
 		private List<NewCropCharge> _listNewCropCharges=null;
+		///<summary>Holds all NewCrop repeating charges that must be added</summary>
+		private List<NewCropCharge> _listNewCropChargesToAdd=new List<NewCropCharge>();
 		private DateTime _dateBillingMonthYear=DateTime.MinValue;
 
 		public FormNewCropBilling() {
@@ -68,10 +70,11 @@ namespace OpenDental {
 				MessageBox.Show("Invalid billing year or month.");
 				return;
 			}
-			FillGrid();
+			_listNewCropChargesToAdd=new List<NewCropCharge>();
+			FillGrid(isLoading:true);
 		}
 
-		private void CreateChargeList() {
+		private void CreateChargeList(bool isLoading) {
 			#region Parse CSV
 			_listNewCropCharges=new List<NewCropCharge>();
 			string csvData=File.ReadAllText(textBillingFilePath.Text);
@@ -123,6 +126,9 @@ namespace OpenDental {
 			_listErxRepeatCharges=RepeatCharges.GetForErx();
 			foreach(NewCropCharge charge in _listNewCropCharges) {
 				charge.repeatCharge=_listErxRepeatCharges.FirstOrDefault(x => x.ErxAccountId==charge.AccountId && x.Npi==charge.NPI);
+				if(charge.repeatCharge is null && isLoading) {
+					_listNewCropChargesToAdd.Add(charge);
+				}
 			}
 		}
 
@@ -163,9 +169,9 @@ namespace OpenDental {
 			gridBillingList.EndUpdate();
 		}
 
-		private void FillGrid() {
+		private void FillGrid(bool isLoading=false) {
 			try {
-				CreateChargeList();
+				CreateChargeList(isLoading:isLoading);
 				RefreshGridColumns();
 				gridBillingList.BeginUpdate();
 				gridBillingList.ListGridRows.Clear();
@@ -283,6 +289,26 @@ namespace OpenDental {
 			}
 			return day;
 		}
+		///<summary>Appends the Name, AccountId, and NPI of each charge in the list of charges passed in to the StringBuilder object also passed in</summary>
+		private void StringBuilderAddRepeatCharges(StringBuilder sbMsg,List<NewCropCharge> listNewCropCharges) { 
+			const int colNameWidth=62;
+			const int colErxAccountIdWidth=18;
+			const int colNpiWidth=10;
+			sbMsg.Append("  ");
+			sbMsg.Append("NAME".PadRight(colNameWidth,' '));
+			sbMsg.Append("ERXACCOUNTID".PadRight(colErxAccountIdWidth,' '));
+			sbMsg.AppendLine("NPI".PadRight(colNpiWidth,' '));
+			foreach(NewCropCharge charge in listNewCropCharges) {
+				string firstLastName=charge.FirstName+" "+charge.LastName;
+				if(firstLastName.Length > colNameWidth) {
+					firstLastName=firstLastName.Substring(0,colNameWidth);
+				}
+				sbMsg.Append("  ");
+				sbMsg.Append(firstLastName.PadRight(colNameWidth,' '));
+				sbMsg.Append(charge.AccountId.PadRight(colErxAccountIdWidth,' '));
+				sbMsg.AppendLine(charge.NPI.PadRight(colNpiWidth,' '));
+			}
+		}
 
 		private void butProcess_Click(object sender,EventArgs e) {
 			if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"This will add a new repeating charge for each provider in the list above"
@@ -291,6 +317,7 @@ namespace OpenDental {
 			}
 			Cursor=Cursors.WaitCursor;
 			List<NewCropCharge> listAddedCharges=new List<NewCropCharge>();
+			List<NewCropCharge> listNewCropChargesNoProcedure=new List<NewCropCharge>();
 			int numSkipped=0;
 			StringBuilder strBldArchivedPats=new StringBuilder();
 			foreach(NewCropCharge charge in _listNewCropCharges) {
@@ -307,6 +334,7 @@ namespace OpenDental {
 						dayOtherCharges=daysInMonth;
 					}
 					DateTime dateErxCharge=new DateTime(DateTime.Today.Year,DateTime.Today.Month,dayOtherCharges);
+					//This if statement is no longer relevant after jobnum 6917 
 					if(dateErxCharge<DateTime.Today.AddMonths(-3)) {//Just in case the user runs an older report.
 						numSkipped++;
 						continue;
@@ -345,7 +373,10 @@ namespace OpenDental {
 					charge.repeatCharge.RepeatChargeNum=RepeatCharges.Insert(charge.repeatCharge);
 					RepeatCharges.InsertRepeatChargeChangeSecurityLogEntry(charge.repeatCharge,Permissions.RepeatChargeCreate,isAutomated:true,oldPat:patOld,newPat:patNew);
 					DateTime now=MiscData.GetNowDateTime();
-					RepeatCharges.AddProcForRepeatCharge(charge.repeatCharge,now,now,new OrthoCaseProcLinkingData(charge.repeatCharge.PatNum),isNewCropInitial:true);
+					Procedure procedure=RepeatCharges.AddProcForRepeatCharge(charge.repeatCharge,now,now,new OrthoCaseProcLinkingData(charge.repeatCharge.PatNum),isNewCropInitial:true);
+					if(procedure.ProcNum==0) {
+						listNewCropChargesNoProcedure.Add(charge);
+					}
 					_listErxRepeatCharges.Add(charge.repeatCharge);
 					listAddedCharges.Add(charge);
 				}
@@ -370,24 +401,17 @@ namespace OpenDental {
 				sbMsg.AppendLine("Number skipped due to old DateBilling (over 3 months ago): "+numSkipped);
 			}
 			if(listAddedCharges.Count > 0) {
-				const int colNameWidth=62;
-				const int colErxAccountIdWidth=18;
-				const int colNpiWidth=10;
 				sbMsg.AppendLine("Added the following new repeating charges ("+listAddedCharges.Count+" total):");
-				sbMsg.Append("  ");
-				sbMsg.Append("NAME".PadRight(colNameWidth,' '));
-				sbMsg.Append("ERXACCOUNTID".PadRight(colErxAccountIdWidth,' '));
-				sbMsg.AppendLine("NPI".PadRight(colNpiWidth,' '));
-				foreach(NewCropCharge charge in listAddedCharges) {
-					string firstLastName=charge.FirstName+" "+charge.LastName;
-					if(firstLastName.Length > colNameWidth) {
-						firstLastName=firstLastName.Substring(0,colNameWidth);
-					}
-					sbMsg.Append("  ");
-					sbMsg.Append(firstLastName.PadRight(colNameWidth,' '));
-					sbMsg.Append(charge.AccountId.PadRight(colErxAccountIdWidth,' '));
-					sbMsg.AppendLine(charge.NPI.PadRight(colNpiWidth,' '));
-				}
+				StringBuilderAddRepeatCharges(sbMsg,listAddedCharges);
+			}
+			if(listNewCropChargesNoProcedure.Count>0) {
+				sbMsg.AppendLine("Could not attach a z-code proc to the following repeated charges: ");
+				StringBuilderAddRepeatCharges(sbMsg,listNewCropChargesNoProcedure);
+			}
+			List<NewCropCharge> listNewCropChargesFailed=_listNewCropChargesToAdd.Where(x => listAddedCharges.All(y => y.AccountId != x.AccountId && y.NPI != x.NPI)).ToList();
+			if(listNewCropChargesFailed.Count>0) { 
+				sbMsg.AppendLine("Failed to add the following repeating charges: ");
+				StringBuilderAddRepeatCharges(sbMsg,listNewCropChargesFailed);
 			}
 			if(strBldArchivedPats.Length > 0) {
 				sbMsg.AppendLine("Archived patients that had a repeating charge created:");
