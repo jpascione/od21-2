@@ -133,6 +133,11 @@ namespace OpenDental {
 						listErrors.Add(err);
 					}
 				}
+				else if(Rule.TypeCur==ApptReminderType.PatientPortalInvite) {
+					if(Rule.TemplateEmailAggShared=="" || Rule.TemplateEmailAggPerAppt=="") { //Patient Portal Invites don't include sms
+						listErrors.Add(err);
+					}
+				}
 				else {
 					if(Rule.TemplateSMSAggShared=="" || Rule.TemplateSMSAggPerAppt=="" || Rule.TemplateEmailAggShared=="" || Rule.TemplateEmailAggPerAppt=="") {
 						listErrors.Add(err);
