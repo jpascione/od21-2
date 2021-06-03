@@ -178,6 +178,7 @@ namespace OpenDental{
 			this.checkEmailDisclaimer.TabIndex = 14;
 			this.checkEmailDisclaimer.Text = "Include Opt-Out Statement";
 			this.checkEmailDisclaimer.UseVisualStyleBackColor = true;
+			this.checkEmailDisclaimer.CheckedChanged += new System.EventHandler(this.checkEmailDisclaimer_CheckedChanged);
 			// 
 			// FormEmailAddresses
 			// 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
@@ -177,5 +178,10 @@ namespace OpenDental {
 			}
 		}
 
+		private void checkEmailDisclaimer_CheckedChanged(object sender,EventArgs e) {
+			if(!checkEmailDisclaimer.Checked && CultureInfo.CurrentCulture.Name.EndsWith("US")) {
+				MsgBox.Show(this,"An opt-out statement is legally required in the US. We do not recommend removing this from your outgoing emails.");
+			}
+		}
 	}
 }
