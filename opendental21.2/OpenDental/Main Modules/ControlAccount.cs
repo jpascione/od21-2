@@ -2654,7 +2654,8 @@ namespace OpenDental {
 				_gridUnearnedBreakdown.ListGridRows.Add(row);
 			}
 			_gridUnearnedBreakdown.EndUpdate();
-			_gridUnearnedBreakdown.Height=(_gridUnearnedBreakdown.ListGridRows.Count() * 20) - 2;
+			_gridUnearnedBreakdown.Height=_gridUnearnedBreakdown.ListGridRows.Count() * 20;
+			_gridUnearnedBreakdown.Width=_gridUnearnedBreakdown.Columns.Count * 100;
 			LayoutManager.MoveSize(_gridUnearnedBreakdown,new Size(_gridUnearnedBreakdown.Width+8,_gridUnearnedBreakdown.Height+8));//8 extra pixels for padding
 			LayoutManager.MoveLocation(_gridUnearnedBreakdown,new Point(labelUnearnedAmt.Right-_gridUnearnedBreakdown.Width-4,groupBoxFamilyIns.Top));
 			_gridUnearnedBreakdown.BringToFront();
