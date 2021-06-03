@@ -63,7 +63,7 @@ namespace OpenDental{
 				butPickDomainUser.Visible=false;
 			}
 			checkRequireReset.Checked=UserCur.IsPasswordResetRequired;
-			_listUserGroups=UserGroups.GetList();
+			_listUserGroups=UserGroups.GetList(_isFromCentralUserEdit);
 			_isFillingList=true;
 			for(int i=0;i<_listUserGroups.Count;i++){
 				listUserGroup.Items.Add(_listUserGroups[i].Description,_listUserGroups[i]);
