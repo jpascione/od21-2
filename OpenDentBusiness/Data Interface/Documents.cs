@@ -390,17 +390,16 @@ namespace OpenDentBusiness {
 
 		public static Bitmap NoAvailablePhoto(){
 			//No need to check RemotingRole; no call to db.
-			Bitmap bitmap=new Bitmap(150,150);
-			Graphics g=Graphics.FromImage(bitmap);
+			Bitmap bitmap=new Bitmap(100,100);
+			using Graphics g=Graphics.FromImage(bitmap);
 			g.InterpolationMode=InterpolationMode.High;
 			g.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAlias;
-			g.FillRectangle(Brushes.Gray,0,0,bitmap.Width,bitmap.Height);
-			StringFormat notAvailFormat=new StringFormat();
+			g.FillRectangle(Brushes.Gainsboro,0,0,bitmap.Width,bitmap.Height);
+			using StringFormat notAvailFormat=new StringFormat();
 			notAvailFormat.Alignment=StringAlignment.Center;
 			notAvailFormat.LineAlignment=StringAlignment.Center;
-			Font font=new Font("Courier New",8F,FontStyle.Regular,GraphicsUnit.Point,((byte)(0)));
-			g.DrawString("Thumbnail not available",font,Brushes.Black,new RectangleF(0,0,150,150),notAvailFormat);
-			g.Dispose();
+			using Font font=new Font(FontFamily.GenericSansSerif,8f);
+			g.DrawString("Thumbnail not available",font,Brushes.Black,new RectangleF(0,0,100,100),notAvailFormat);
 			return bitmap;
 		}
 
