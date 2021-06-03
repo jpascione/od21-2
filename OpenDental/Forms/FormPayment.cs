@@ -2387,7 +2387,7 @@ namespace OpenDental {
 		}
 
 		private string MakeEdgeExpressTransactionCNP(EdgeExpressTransType transType,double amt,bool doCreateToken,
-			string aliasToken,string transactionId)
+			string aliasToken,string transactionId, double prepaidAmount=0)
 		{
 			XWebResponse response;
 			XWebResponse xWebResponseProcessed;
@@ -2446,6 +2446,10 @@ namespace OpenDental {
 					response=EdgeExpress.CNP.VoidTransaction(_patCur.PatNum,transactionId,amt,false);
 					payNote=response.GetFormattedNote(false);
 					if(response.XWebResponseCode==XWebResponseCodes.Approval) {// only continue if we got a approval code back from Edge Express
+						//This matches what we do for PaySimple. We return early for transactions from the FormClainPayEdit.cs window to prevent an error in HandleVoidPayment.
+						if(prepaidAmount!=0) {
+							return payNote;
+						}
 						textNote.Text+=payNote;
 						HandleVoidPayment(response.GetFormattedNote(false,true),response.Amount,EdgeExpress.CNP.BuildReceiptString(response,false),CreditCardSource.EdgeExpressCNP);
 					}
@@ -4026,7 +4030,7 @@ namespace OpenDental {
 			//Web entry - CNP
 			if(apiSelection==EdgeExpressApiType.Web) {
 				try {
-					note=MakeEdgeExpressTransactionCNP(transType,amt,doCreateToken,aliasToken,transactionId);
+					note=MakeEdgeExpressTransactionCNP(transType,amt,doCreateToken,aliasToken,transactionId,prepaidAmt);
 				}
 				catch(Exception ex) {
 					FormFriendlyException formFE=new FormFriendlyException("Error processing EdgeExpress request",ex,false);
