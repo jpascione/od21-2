@@ -92,6 +92,10 @@ namespace OpenDental {
 				MsgBox.Show(error);
 				return;
 			}
+			if(!textXPos.IsValid() || !textYPos.IsValid()) {
+				MsgBox.Show(this,"Please fix data entry errors first.");
+				return;
+			}
 			//don't save to database here.
 			SheetFieldDefCur.XPos=PIn.Int(textXPos.Text);
 			SheetFieldDefCur.YPos=PIn.Int(textYPos.Text);
