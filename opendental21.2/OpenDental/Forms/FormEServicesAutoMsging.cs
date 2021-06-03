@@ -46,6 +46,7 @@ namespace OpenDental {
 			butActivateConfirm.Enabled=allowEdit;
 			butActivateThanks.Enabled=allowEdit;
 			butActivateArrivals.Enabled=allowEdit;
+			butActivateInvites.Enabled=allowEdit;
 			butActivateGeneralMessages.Enabled=allowEdit;
 			butAddArrival.Enabled=allowEdit;
 			butAddReminder.Enabled=allowEdit;
