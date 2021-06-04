@@ -2542,18 +2542,18 @@ namespace OpenDental {
 			Init(doSelectAllSplits:doSelectAllSplits,doPreserveValues:true);
 		}
 
-		///<summary>Checks if the dynamic payment plan has any charges with overpaid interest. If it does, prompts the user to balance on prepay, principal, or return to payment page. Returns false if the user wants to stay in the Payment window.</summary>
+		///<summary>Checks if the dynamic payment plan has any charges with overpaid interest or principal. If it does, prompts the user to balance on prepay, principal, or return to payment page. Returns false if the user wants to stay in the Payment window.</summary>
 		private bool CheckDynamicPaymentPlanRebalance() {
 			List<PayPlanEdit.PayPlanRecalculationData> listRecalcData=GetRecalculationDataForDynamicPaymentPlans();
 			if(!listRecalcData.IsNullOrEmpty()) { //If listRecalcData is not empty, we know we have overpaid interest.
-				DialogResult result=MessageBox.Show(Lan.g(this,"One or more Current Payment Splits are overpaying interest for dynamic payment plans."
-					+"\r\n\r\nDo you want to apply the overpayment to principal?"
+				DialogResult result=MessageBox.Show(Lan.g(this,"One or more Current Payment Splits are overpaying interest or principal for dynamic payment plan charges."
+					+"\r\n\r\nDo you want to re-apply the overpayment to principal?"
 					+"\r\n\r\nYes pays on principal, No makes a prepayment, and Cancel returns to the Payment window."),Lan.g(this,"Interest Overpayment Detected"),MessageBoxButtons.YesNoCancel);
 				if(result==DialogResult.Cancel) {
 					return false;
 				}
 				bool isPrepay=(result!=DialogResult.Yes);
-				PayPlanEdit.BalanceOverpaidInterestForDynamicPaymentPlans(listRecalcData,isPrepay);
+				PayPlanEdit.BalanceOverpaidChargesForDynamicPaymentPlans(listRecalcData,isPrepay);
 			}
 			return true;
 		}
@@ -2577,9 +2577,9 @@ namespace OpenDental {
 				PayPlanTerms terms=PayPlanEdit.GetPayPlanTerms(payPlan,listPayPlanLinksForPlan);
 				List<PayPlanCharge> listPayPlanChargesForPlan=listPayPlanCharges.FindAll(x=>x.PayPlanNum==payPlan.PayPlanNum);
 				List<PaySplit> listPaySplitsForPlan=listPaySplits.FindAll(x=>x.PayPlanNum==payPlan.PayPlanNum);
-				bool isInterestOverPaid=PayPlanEdit.IsDynamicPaymentPlanInterestOverpaid(listPayPlanChargesForPlan,listPaySplitsForPlan);
+				bool areChargeOverPaid=PayPlanEdit.IsDynamicPaymentPlanInterestOrPrincipalOverpaid(listPayPlanChargesForPlan,listPaySplitsForPlan);
 				bool isPlanOverPaid=(terms.PrincipalAmount+listPayPlanChargesForPlan.Sum(x=>x.Interest)) < listPaySplitsForPlan.Sum(x=>x.SplitAmt);
-				if(isInterestOverPaid && !isPlanOverPaid) {
+				if(areChargeOverPaid && !isPlanOverPaid) {
 					PayPlanEdit.PayPlanRecalculationData recalcData=new PayPlanEdit.PayPlanRecalculationData();
 					recalcData.Pat=_patCur;
 					recalcData.Terms=terms;

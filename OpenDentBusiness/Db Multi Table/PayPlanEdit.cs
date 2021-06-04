@@ -970,9 +970,9 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Expects all PaySplits and PayPlanCharges to be linked to the same plan.</summary>
-		public static bool IsDynamicPaymentPlanInterestOverpaid(List<PayPlanCharge> listPayPlanCharges,List<PaySplit> listPaySplits) {
+		public static bool IsDynamicPaymentPlanInterestOrPrincipalOverpaid(List<PayPlanCharge> listPayPlanCharges,List<PaySplit> listPaySplits) {
 			DynamicPaymentPlanRecalculationBuckets buckets=GetDynamicPaymentPlanRecalculationBuckets(listPayPlanCharges,listPaySplits);
-			return CompareDouble.IsGreaterThan(buckets.InterestSplitAmtRem,0);
+			return CompareDouble.IsGreaterThan(buckets.InterestSplitAmtRem,0) || CompareDouble.IsGreaterThan(buckets.PrincipalSplitAmtRem,0);
 		}
 
 		///<summary>Returns the total of splits that are associated to the DynamicPayPlanPrepaymentUnearnedType.</summary>
@@ -1131,7 +1131,7 @@ namespace OpenDentBusiness {
 		///<summary>This will balance the dynamic payment plan. If isBalanceOnPrepay is true, interest that exceeds PayPlanCharge.Interest will be moved to hidden unearned via payment splits. 
 		///Otherwise, the overpaid interest will be allocated to new payment plan debits that are created from any outstanding production via payment splits and payment plan charges.
 		///Each recalcData object passed in should be filled with values corresponding to only one payment plan.</summary>
-		public static void BalanceOverpaidInterestForDynamicPaymentPlans(List<PayPlanRecalculationData> listRecalcData,bool isBalanceOnPrepay) {
+		public static void BalanceOverpaidChargesForDynamicPaymentPlans(List<PayPlanRecalculationData> listRecalcData,bool isBalanceOnPrepay) {
 			//No remoting role check; no call to db.
 			for(int i=0;i<listRecalcData.Count;i++) {
 				//Calculate the overall value of the payment plan; (Principal + Interest) - Patient Payments
@@ -1141,15 +1141,15 @@ namespace OpenDentBusiness {
 					//No-Touchie, this will include interest being overpaid when there is no more principal to apply to. ITM should handle this.
 					continue;
 				}
-				BalanceOverpaidInterestForDynamicPaymentPlan(listRecalcData[i],isBalanceOnPrepay);
+				BalanceOverpaidChargesForDynamicPaymentPlan(listRecalcData[i],isBalanceOnPrepay);
 			}
 		}
 
-		private static void BalanceOverpaidInterestForDynamicPaymentPlan(PayPlanRecalculationData recalcData,bool isBalanceOnPrepay) {
+		private static void BalanceOverpaidChargesForDynamicPaymentPlan(PayPlanRecalculationData recalcData,bool isBalanceOnPrepay) {
+			//No remoting role check; ref parameter used.
 			PayPlan payPlan=recalcData.PayPlan;
 			List<PaySplit> listSplits=recalcData.ListPaySplits;
 			List<PayPlanCharge> listPayPlanCharges=recalcData.ListPayPlanCharges;
-			//No remoting role check; ref parameter used.
 			long PrepayUnearnedType=PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType);
 			//Separate all of the charges up and keep track of the splits that are associated to said charges.
 			List<DynamicPaymentPlanRecalculationChargeSplits> listDppChargeSplits=listPayPlanCharges.Select(x => new DynamicPaymentPlanRecalculationChargeSplits() {
@@ -1158,49 +1158,30 @@ namespace OpenDentBusiness {
 					PayPlanChargeCur=x,
 				}).ToList();
 			//Get a list of all of the charges that are overpaid.
-			List<PayPlanCharge> listPayPlanChargesOverpaid=GetDynamicPaymentPlanChargesOverpaidInterest(listSplits,listPayPlanCharges);
+			List<PayPlanCharge> listPayPlanChargesOverpaid=GetDynamicPaymentPlanChargesOverpaid(listSplits,listPayPlanCharges);
 			//Create transfers for the splits associated to each charge that has been overpaid.
 			for(int i = 0;i<listPayPlanChargesOverpaid.Count;i++) {
 				DynamicPaymentPlanRecalculationChargeSplits chargeSplitsPairTakingFrom=listDppChargeSplits.FirstOrDefault(x=>x.PayPlanChargeCur==listPayPlanChargesOverpaid[i]);
 				DynamicPaymentPlanRecalculationBuckets bucket=GetDynamicPaymentPlanRecalculationBuckets(ListTools.FromSingle(chargeSplitsPairTakingFrom.PayPlanChargeCur),chargeSplitsPairTakingFrom.ListPaySplits);
 				//Get the amount available to be transfered from this charge.
-				double overpaidAmount=bucket.InterestSplitAmtRem;
 				if(isBalanceOnPrepay) { //Balancing on prepay simply create transfer splits to moves excess funds to Hidden Unearned
-					chargeSplitsPairTakingFrom.ListPaySplitsToTransfer=CreateTransferSplitsForPrepay(-overpaidAmount,listPayPlanChargesOverpaid[i],PayPlanDebitTypes.Interest,PrepayUnearnedType);
+					List<PaySplit> listPaySplitsForPrepay=CreateTransferSplitsForPrepay(-bucket.InterestSplitAmtRem,listPayPlanChargesOverpaid[i],PayPlanDebitTypes.Interest,PrepayUnearnedType);
+					listPaySplitsForPrepay.AddRange(CreateTransferSplitsForPrepay(-bucket.PrincipalSplitAmtRem,listPayPlanChargesOverpaid[i],PayPlanDebitTypes.Principal,PrepayUnearnedType));
+					chargeSplitsPairTakingFrom.ListPaySplitsToTransfer=listPaySplitsForPrepay;
 				}
-				else { //Balance on principal moves overpaid interest to principal debits.
-					while(CompareDouble.IsGreaterThan(overpaidAmount,0)) {
-						//Get a PayPlanCharge for the overpaid amount. Could be pre-existing, or a new charge.
-						PayPlanCharge chargeGivingTo=GetChargeForRebalancing(
-							overpaidAmount,
-							recalcData,
-							listDppChargeSplits);
-						//If no more charges can be created, the plan has maxed out its value, and has been entirely overpaid. We shouldn't reach this point.
-						if(chargeGivingTo==null){
-							return;
-						}
-						PayPlanProductionEntry entryGivingTo=recalcData.ListProductionEntry.FirstOrDefault(x=>x.LinkType==chargeGivingTo.LinkType && x.PriKey==chargeGivingTo.FKey);
-						if(entryGivingTo==null) { //This really shouldn't happen.
-							return;
-						}
-						DynamicPaymentPlanRecalculationChargeSplits chargeSplitsGivingTo=listDppChargeSplits.FirstOrDefault(x=>x.PayPlanChargeCur==chargeGivingTo);
-						if(chargeSplitsGivingTo==null) {//If we just created a new charge, add it to the overall list of charges for this plan. Will get inserted later. Also, more splits can be added later.
-							chargeSplitsGivingTo=new DynamicPaymentPlanRecalculationChargeSplits();
-							chargeSplitsGivingTo.ListPaySplits=new List<PaySplit>();
-							chargeSplitsGivingTo.ListPaySplitsToTransfer=new List<PaySplit>();
-							chargeSplitsGivingTo.PayPlanChargeCur=chargeGivingTo;
-							listDppChargeSplits.Add(chargeSplitsGivingTo);
-						} 
-						DynamicPaymentPlanRecalculationBuckets bucketsForCharge=GetDynamicPaymentPlanRecalculationBuckets(ListTools.FromSingle(chargeSplitsGivingTo.PayPlanChargeCur),chargeSplitsGivingTo.ListPaySplitsAll);
-						double splitAmount=Math.Min(overpaidAmount,bucketsForCharge.PrincipalChargedRem);
-						//Create negative split
-						PaySplit paySplitNegative=CreateTransferSplitForDynamicPaymentPlanCharge(-splitAmount,chargeSplitsPairTakingFrom.PayPlanChargeCur,PayPlanDebitTypes.Interest);
-						chargeSplitsPairTakingFrom.ListPaySplitsToTransfer.Add(paySplitNegative);
-						//Create positive split
-						PaySplit paySplitPositive=CreateTransferSplitForDynamicPaymentPlanCharge(splitAmount,chargeSplitsGivingTo.PayPlanChargeCur,PayPlanDebitTypes.Principal);
-						chargeSplitsGivingTo.ListPaySplitsToTransfer.Add(paySplitPositive);
-						overpaidAmount-=splitAmount;
+				else { //Balance on principal moves money from overpaid charges to principal debits.
+					#region Balance Interest
+					bool isChargeBalanced=BalanceOverpaidChargeForDynamicPaymentPlan(bucket.InterestSplitAmtRem,recalcData,PayPlanDebitTypes.Interest,ref listDppChargeSplits,chargeSplitsPairTakingFrom);
+					if(!isChargeBalanced) {
+						return;
 					}
+					#endregion
+					#region Balance Principal
+					isChargeBalanced=BalanceOverpaidChargeForDynamicPaymentPlan(bucket.PrincipalSplitAmtRem,recalcData,PayPlanDebitTypes.Principal,ref listDppChargeSplits,chargeSplitsPairTakingFrom);
+					if(!isChargeBalanced) {
+						return;
+					}
+					#endregion
 				}
 			}
 			//Insert new charges and set the PayPlanChargeNum field for all of its corresponding paysplits.
@@ -1210,7 +1191,7 @@ namespace OpenDentBusiness {
 					listDppChargeSplits[i].PayPlanChargeCur.PayPlanChargeNum=PayPlanCharges.Insert(listDppChargeSplits[i].PayPlanChargeCur);
 				}
 				listDppChargeSplits[i].ListPaySplitsToTransfer.ForEach(x=>x.PayPlanChargeNum=listDppChargeSplits[i].PayPlanChargeCur.PayPlanChargeNum);
-				listPaySplitsToInsert.AddRange(listDppChargeSplits[i].ListPaySplitsToTransfer);
+				listPaySplitsToInsert.AddRange(listDppChargeSplits[i].ListPaySplitsToTransfer.Where(x=>!CompareDouble.IsZero(x.SplitAmt)).ToList());
 			}
 			//Create Transfer Payments
 			if(listPaySplitsToInsert.Count>0) {
@@ -1242,11 +1223,47 @@ namespace OpenDentBusiness {
 			}
 		}
 
-		private static List<PayPlanCharge> GetDynamicPaymentPlanChargesOverpaidInterest(List<PaySplit> listSplits,List<PayPlanCharge> listPayPlanCharges) {
+		/// <summary>Returns false when the whole plan is over paid, and no more production can be charged out. Returns true if the charge was able to be balanced.</summary>
+		private static bool BalanceOverpaidChargeForDynamicPaymentPlan(double overpaidAmount,PayPlanRecalculationData recalcData,PayPlanDebitTypes payPlanDebitType,
+			ref List<DynamicPaymentPlanRecalculationChargeSplits> listDppChargeSplits,DynamicPaymentPlanRecalculationChargeSplits chargeSplitsPairTakingFrom) 
+		{
+			while(CompareDouble.IsGreaterThan(overpaidAmount,0)) {
+				//Get a PayPlanCharge for the overpaid amount. Could be pre-existing, or a new charge.
+				PayPlanCharge chargeGivingTo=GetChargeForRebalancing(overpaidAmount,recalcData,listDppChargeSplits);
+				//If no more charges can be created, the plan has maxed out its value, and has been entirely overpaid. We shouldn't reach this point.
+				if(chargeGivingTo==null){
+					return false;
+				}
+				PayPlanProductionEntry entryGivingTo=recalcData.ListProductionEntry.FirstOrDefault(x=>x.LinkType==chargeGivingTo.LinkType && x.PriKey==chargeGivingTo.FKey);
+				if(entryGivingTo==null) { //This really shouldn't happen.
+					return false;
+				}
+				DynamicPaymentPlanRecalculationChargeSplits chargeSplitsGivingTo=listDppChargeSplits.FirstOrDefault(x=>x.PayPlanChargeCur==chargeGivingTo);
+				if(chargeSplitsGivingTo==null) {//If we just created a new charge, add it to the overall list of charges for this plan. Will get inserted later. Also, more splits can be added later.
+					chargeSplitsGivingTo=new DynamicPaymentPlanRecalculationChargeSplits();
+					chargeSplitsGivingTo.ListPaySplits=new List<PaySplit>();
+					chargeSplitsGivingTo.ListPaySplitsToTransfer=new List<PaySplit>();
+					chargeSplitsGivingTo.PayPlanChargeCur=chargeGivingTo;
+					listDppChargeSplits.Add(chargeSplitsGivingTo);
+				} 
+				DynamicPaymentPlanRecalculationBuckets bucketsForCharge=GetDynamicPaymentPlanRecalculationBuckets(ListTools.FromSingle(chargeSplitsGivingTo.PayPlanChargeCur),chargeSplitsGivingTo.ListPaySplitsAll);
+				double splitAmount=Math.Min(overpaidAmount,bucketsForCharge.PrincipalChargedRem);
+				//Create negative split
+				PaySplit paySplitNegative=CreateTransferSplitForDynamicPaymentPlanCharge(-splitAmount,chargeSplitsPairTakingFrom.PayPlanChargeCur,payPlanDebitType);
+				chargeSplitsPairTakingFrom.ListPaySplitsToTransfer.Add(paySplitNegative);
+				//Create positive split
+				PaySplit paySplitPositive=CreateTransferSplitForDynamicPaymentPlanCharge(splitAmount,chargeSplitsGivingTo.PayPlanChargeCur,PayPlanDebitTypes.Principal);
+				chargeSplitsGivingTo.ListPaySplitsToTransfer.Add(paySplitPositive);
+				overpaidAmount-=splitAmount;
+			}
+			return true;
+		}
+
+		private static List<PayPlanCharge> GetDynamicPaymentPlanChargesOverpaid(List<PaySplit> listSplits,List<PayPlanCharge> listPayPlanCharges) {
 			List<PayPlanCharge> listPayPlanChargesOverpaid=new List<PayPlanCharge>();
 			for(int i = 0;i<listPayPlanCharges.Count;i++) {
 				PayPlanCharge payPlanCharge=listPayPlanCharges[i];
-				if(IsDynamicPaymentPlanInterestOverpaid(ListTools.FromSingle(payPlanCharge),listSplits.FindAll(x => x.PayPlanChargeNum==payPlanCharge.PayPlanChargeNum))) {
+				if(IsDynamicPaymentPlanInterestOrPrincipalOverpaid(ListTools.FromSingle(payPlanCharge),listSplits.FindAll(x => x.PayPlanChargeNum==payPlanCharge.PayPlanChargeNum))) {
 					listPayPlanChargesOverpaid.Add(payPlanCharge);
 				}
 			}
