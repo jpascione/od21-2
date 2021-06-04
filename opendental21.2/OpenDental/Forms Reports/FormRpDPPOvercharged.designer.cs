@@ -217,7 +217,6 @@
 			this.butFix.TabIndex = 78;
 			this.butFix.Text = "Fix";
 			this.butFix.UseVisualStyleBackColor = true;
-			this.butFix.Visible = false;
 			this.butFix.Click += new System.EventHandler(this.butFix_Click);
 			// 
 			// FormRpDPPOvercharged
