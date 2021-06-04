@@ -54,6 +54,7 @@ namespace OpenDental{
 			this.checkIsRefundable = new System.Windows.Forms.CheckBox();
 			this.label57 = new System.Windows.Forms.Label();
 			this.comboTpUnearnedType = new OpenDental.UI.ComboBoxOD();
+			this.label4 = new System.Windows.Forms.Label();
 			this.groupBoxOD1.SuspendLayout();
 			this.groupBoxOD2.SuspendLayout();
 			this.groupBox5.SuspendLayout();
@@ -125,7 +126,7 @@ namespace OpenDental{
 			// 
 			this.butSimple.Location = new System.Drawing.Point(21, 145);
 			this.butSimple.Name = "butSimple";
-			this.butSimple.Size = new System.Drawing.Size(75, 24);
+			this.butSimple.Size = new System.Drawing.Size(109, 24);
 			this.butSimple.TabIndex = 300;
 			this.butSimple.Text = "Simple";
 			this.butSimple.Click += new System.EventHandler(this.butSimple_Click);
@@ -154,6 +155,7 @@ namespace OpenDental{
 			this.groupBoxOD1.Name = "groupBoxOD1";
 			this.groupBoxOD1.Size = new System.Drawing.Size(546, 130);
 			this.groupBoxOD1.TabIndex = 305;
+			this.groupBoxOD1.TabStop = false;
 			this.groupBoxOD1.Text = "Paysplits";
 			// 
 			// label3
@@ -164,7 +166,8 @@ namespace OpenDental{
 			this.label3.Size = new System.Drawing.Size(405, 30);
 			this.label3.TabIndex = 317;
 			this.label3.Text = "Highlight procedures before entering a payment to automatically split the payment" +
-    " to those procedures.  Otherwise, LIFO is used and history is ignored.";
+    " to those procedures.  Otherwise, splits will be created for the oldest unpaid p" +
+    "roduction.";
 			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// label2
@@ -239,6 +242,7 @@ namespace OpenDental{
 			this.groupBoxOD2.Name = "groupBoxOD2";
 			this.groupBoxOD2.Size = new System.Drawing.Size(462, 113);
 			this.groupBoxOD2.TabIndex = 318;
+			this.groupBoxOD2.TabStop = false;
 			this.groupBoxOD2.Text = "Adjustments";
 			// 
 			// label7
@@ -311,7 +315,7 @@ namespace OpenDental{
 			// 
 			this.butDefault.Location = new System.Drawing.Point(21, 112);
 			this.butDefault.Name = "butDefault";
-			this.butDefault.Size = new System.Drawing.Size(75, 24);
+			this.butDefault.Size = new System.Drawing.Size(109, 24);
 			this.butDefault.TabIndex = 320;
 			this.butDefault.Text = "Default";
 			this.butDefault.Click += new System.EventHandler(this.butDefault_Click);
@@ -340,6 +344,7 @@ namespace OpenDental{
 			this.groupBox5.Name = "groupBox5";
 			this.groupBox5.Size = new System.Drawing.Size(715, 129);
 			this.groupBox5.TabIndex = 322;
+			this.groupBox5.TabStop = false;
 			this.groupBox5.Text = "Treatment Planned Prepayments";
 			// 
 			// labelRefundable
@@ -393,10 +398,21 @@ namespace OpenDental{
 			this.comboTpUnearnedType.Size = new System.Drawing.Size(163, 21);
 			this.comboTpUnearnedType.TabIndex = 15;
 			// 
+			// label4
+			// 
+			this.label4.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label4.Location = new System.Drawing.Point(356, 416);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(392, 18);
+			this.label4.TabIndex = 324;
+			this.label4.Text = "Not recommended.  It\'s good to see the splits even if you don\'t change them.";
+			this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// FormAllocationsSetup
 			// 
 			this.CancelButton = this.butCancel;
 			this.ClientSize = new System.Drawing.Size(827, 537);
+			this.Controls.Add(this.label4);
 			this.Controls.Add(this.groupBox5);
 			this.Controls.Add(this.labelPermission);
 			this.Controls.Add(this.butDefault);
@@ -453,5 +469,6 @@ namespace OpenDental{
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label labelRefundable;
 		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label4;
 	}
 }
