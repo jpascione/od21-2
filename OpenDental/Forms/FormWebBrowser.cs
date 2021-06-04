@@ -25,7 +25,7 @@ namespace OpenDental {
 		///</summary>
 		public bool IsUrlSingleUse;
 
-		///<summary>Used when opening a new browser window via a link or to display html content.
+		///<summary> DO NOT USE. Use FormWebView.cs instead. Used when opening a new browser window via a link or to display html content.
 		///If html content and url specified, url will be used and given content ignored. postData and additionalHeaders will only be used if url is 
 		///passed in.</summary>
 		public FormWebBrowser(string url="",string htmlContent="",string postData=null,string additionalHeaders="",bool canWrapNewWindow=true) {
