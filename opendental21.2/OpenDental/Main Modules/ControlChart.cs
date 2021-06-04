@@ -8576,12 +8576,13 @@ namespace OpenDental {
 						return;
 					}
 					//The user is either a provider with granted access, or a proxy clinician
-					FormErx formErx=new FormErx(false);
+					FormErx formErx=new FormErx();
 					formErx.PatCur=_patCur;
 					formErx.PostDataBytes=arrayPostData;
+					formErx.StringSSOQuery=queryString;
 					formErx.ErxOptionCur=erxOption;
-					formErx.Show();//Non-modal so user can browse OD while writing prescription.  When form is closed, ErxBrowserClosed() is called below.
 					_dictFormErxSessions[_patCur.PatNum]=formErx;
+					formErx.Show();//Non-modal so user can browse OD while writing prescription.  When form is closed, ErxBrowserClosed() is called below.
 				}
 				ErxLog erxDoseSpotLog=new ErxLog();
 				erxDoseSpotLog.PatNum=_patCur.PatNum;
@@ -8700,8 +8701,8 @@ namespace OpenDental {
 				formErx.PostDataBytes=arrayPostDataBytes;
 				formErx.ErxOptionCur=erxOption;
 				if(isAccessAllowed) {
-					formErx.Show();//Non-modal so user can browse OD while writing prescription.  When form is closed, ErxBrowserClosed() is called below.
 					_dictFormErxSessions[_patCur.PatNum]=formErx;
+					formErx.Show();//Non-modal so user can browse OD while writing prescription.  When form is closed, ErxBrowserClosed() is called below.
 				}
 				else {
 					//This is how we send the provider information to NewCrop without allowing the provider to use NewCrop.

@@ -237,6 +237,14 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.865.0, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Required dlls\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms, Version=1.0.865.0, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Required dlls\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    </Reference>
     <Reference Include="MigraDoc.DocumentObjectModel, Version=1.2.2546.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Required dlls\MigraDoc.DocumentObjectModel.dll</HintPath>
@@ -707,6 +715,9 @@
     </Compile>
     <Compile Include="Forms\FormAllocationsSetup.Designer.cs">
       <DependentUpon>FormAllocationsSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormErx.designer.cs">
+      <DependentUpon>FormErx.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\FormTextPaySetup.cs">
       <SubType>Form</SubType>
@@ -1778,6 +1789,12 @@
     </Compile>
     <Compile Include="Forms\FormActivityLog.Designer.cs">
       <DependentUpon>FormActivityLog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormWebView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormWebView.designer.cs">
+      <DependentUpon>FormWebView.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\FormXchargeSetup.designer.cs">
       <DependentUpon>FormXchargeSetup.cs</DependentUpon>
@@ -7232,6 +7249,9 @@
     <EmbeddedResource Include="Forms\FormAllocationsSetup.resx">
       <DependentUpon>FormAllocationsSetup.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormErx.resx">
+      <DependentUpon>FormErx.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormTextPaySetup.resx">
       <DependentUpon>FormTextPaySetup.cs</DependentUpon>
     </EmbeddedResource>
@@ -7348,6 +7368,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormActivityLog.resx">
       <DependentUpon>FormActivityLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormWebView.resx">
+      <DependentUpon>FormWebView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormZoom.resx">
       <DependentUpon>FormZoom.cs</DependentUpon>
