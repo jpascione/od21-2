@@ -27,6 +27,7 @@ namespace OpenDental{
 		}
 
 		private void FormProgramProperty_Load(object sender, System.EventArgs e) {
+			textValue.Select();
 			textProperty.Text=ProgramPropertyCur.PropertyDesc;
 			if(_isPassword && ProgramPropertyCur.PropertyValue!="") {
 				string decryptedText;

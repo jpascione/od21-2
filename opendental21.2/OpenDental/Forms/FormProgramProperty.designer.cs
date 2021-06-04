@@ -50,7 +50,7 @@ namespace OpenDental {
 			this.butCancel.Location = new System.Drawing.Point(406,180);
 			this.butCancel.Name = "butCancel";
 			this.butCancel.Size = new System.Drawing.Size(75,26);
-			this.butCancel.TabIndex = 0;
+			this.butCancel.TabIndex = 1;
 			this.butCancel.Text = "&Cancel";
 			this.butCancel.Click += new System.EventHandler(this.butCancel_Click);
 			// 
@@ -60,7 +60,7 @@ namespace OpenDental {
 			this.butOK.Location = new System.Drawing.Point(295,180);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75,26);
-			this.butOK.TabIndex = 1;
+			this.butOK.TabIndex = 0;
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
@@ -79,21 +79,21 @@ namespace OpenDental {
 			this.textProperty.Name = "textProperty";
 			this.textProperty.ReadOnly = true;
 			this.textProperty.Size = new System.Drawing.Size(319,20);
-			this.textProperty.TabIndex = 3;
+			this.textProperty.TabIndex = 2;
 			// 
 			// textValue
 			// 
 			this.textValue.Location = new System.Drawing.Point(162,74);
 			this.textValue.Name = "textValue";
 			this.textValue.Size = new System.Drawing.Size(319,20);
-			this.textValue.TabIndex = 5;
+			this.textValue.TabIndex = 3;
 			// 
 			// label2
 			// 
 			this.label2.Location = new System.Drawing.Point(6,71);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(152,21);
-			this.label2.TabIndex = 4;
+			this.label2.TabIndex = 3;
 			this.label2.Text = "Value";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
