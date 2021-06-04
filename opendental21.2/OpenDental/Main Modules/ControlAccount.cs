@@ -2643,18 +2643,23 @@ namespace OpenDental {
 			_gridUnearnedBreakdown.BeginUpdate();
 			_gridUnearnedBreakdown.ListGridColumns.Clear();
 			GridColumn col=new GridColumn(Lan.g(this,"Type"),100,HorizontalAlignment.Center);
-			_gridUnearnedBreakdown.ListGridColumns.Add(col);
+			_gridUnearnedBreakdown.ListGridColumns.Add(col); 
 			col=new GridColumn(Lan.g(this,"Bal"),100,HorizontalAlignment.Center);
 			_gridUnearnedBreakdown.ListGridColumns.Add(col);
 			_gridUnearnedBreakdown.ListGridRows.Clear();
+			_gridUnearnedBreakdown.Height=7;
 			for(int i = 0;i<listUnearnedDefs.Count;i++) {
 				GridRow row=new GridRow();
 				row.Cells.Add(listUnearnedDefs[i].ItemName);
 				row.Cells.Add(dictUnearnedTotals[listUnearnedDefs[i].DefNum]);
 				_gridUnearnedBreakdown.ListGridRows.Add(row);
+				_gridUnearnedBreakdown.Height+=20;
+				if(listUnearnedDefs[i].ItemName.Length > 16) {
+					_gridUnearnedBreakdown.Height+=11;
+				}
 			}
 			_gridUnearnedBreakdown.EndUpdate();
-			_gridUnearnedBreakdown.Height=_gridUnearnedBreakdown.ListGridRows.Count() * 20;
+			//_gridUnearnedBreakdown.Height+=5;
 			_gridUnearnedBreakdown.Width=_gridUnearnedBreakdown.ListGridColumns.Count * 100;
 			LayoutManager.MoveSize(_gridUnearnedBreakdown,new Size(_gridUnearnedBreakdown.Width+8,_gridUnearnedBreakdown.Height+8));//8 extra pixels for padding
 			LayoutManager.MoveLocation(_gridUnearnedBreakdown,new Point(labelUnearnedAmt.Right-_gridUnearnedBreakdown.Width-4,groupBoxFamilyIns.Top));
