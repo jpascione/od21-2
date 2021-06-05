@@ -29,6 +29,8 @@ namespace OpenDental.UI {
 		private static SolidBrush _brushBackground=(SolidBrush)Brushes.White;
 		private LinearGradientBrush _brushButtonPanel=null;
 		private static Pen _penOutline=new Pen(Color.FromArgb(47,70,117));
+		///<summary>Ignore the public font.  We want to control font internally.</summary>
+		private Font _font;
 
 		#region EventHandlers
 		///<summary></summary>
@@ -54,7 +56,11 @@ namespace OpenDental.UI {
 		///<summary></summary>
 		protected override void OnResize(EventArgs e) {
 			base.OnResize(e);
-			Font=new Font(FontFamily.GenericSansSerif,LayoutManager.ScaleF(8.5f));
+		}
+
+		protected override void OnSizeChanged(EventArgs e) {
+			base.OnSizeChanged(e);
+			_font=new Font(FontFamily.GenericSansSerif,LayoutManager.ScaleF(8.5f));
 			_heightRow=LayoutManager.Scale(18);
 			_brushButtonPanel?.Dispose();
 			_brushButtonPanel=new LinearGradientBrush(new Point(0,0),new Point(0,_heightRow),Color.FromArgb(255,255,255),Color.FromArgb(205,212,215));
@@ -145,13 +151,13 @@ namespace OpenDental.UI {
 				item.Location.X,item.Location.Y,
 				item.ItemWidth,_heightRow);
 			g.FillRectangle(_brushLabelBackground,itemRect);
-			g.DrawString(item.Text,Font,_brushLabel,itemRect,
+			g.DrawString(item.Text,_font,_brushLabel,itemRect,
 				new StringFormat { Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center });
 		}
 
 		private void DrawItemBut(Graphics g,ODPanelItem odPanelItem) {
 			Rectangle recOutline=new Rectangle(odPanelItem.Location.X,odPanelItem.Location.Y,odPanelItem.ItemWidth-1,_heightRow-1);
-			Button.DrawSimpleButton(g,recOutline,odPanelItem.Text,Font,_brushButtonPanel);
+			Button.DrawSimpleButton(g,recOutline,odPanelItem.Text,_font,_brushButtonPanel);
 		}
 
 		///<summary>Draws outline around entire control.</summary>

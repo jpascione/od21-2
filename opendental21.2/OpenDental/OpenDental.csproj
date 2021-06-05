@@ -10370,6 +10370,9 @@
     <EmbeddedResource Include="UI\ListBoxOD.resx">
       <DependentUpon>ListBoxOD.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\ODButtonPanel.resx">
+      <DependentUpon>ODButtonPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ODCodeRangeFilter.resx">
       <DependentUpon>ODCodeRangeFilter.cs</DependentUpon>
     </EmbeddedResource>
