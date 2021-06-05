@@ -96,7 +96,7 @@ namespace OpenDental {
 			// 
 			// labelEdit
 			// 
-			this.labelEdit.Location = new System.Drawing.Point(326, 244);
+			this.labelEdit.Location = new System.Drawing.Point(326, 259);
 			this.labelEdit.Name = "labelEdit";
 			this.labelEdit.Size = new System.Drawing.Size(235, 72);
 			this.labelEdit.TabIndex = 204;
@@ -108,7 +108,7 @@ namespace OpenDental {
 			this.panelQuickButtons.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
 			this.panelQuickButtons.Location = new System.Drawing.Point(326, 59);
 			this.panelQuickButtons.Name = "panelQuickButtons";
-			this.panelQuickButtons.Size = new System.Drawing.Size(195, 182);
+			this.panelQuickButtons.Size = new System.Drawing.Size(199, 192);
 			this.panelQuickButtons.TabIndex = 203;
 			this.panelQuickButtons.RowDoubleClick += new OpenDental.UI.ODButtonPanelEventHandler(this.panelQuickButtons_RowDoubleClick);
 			// 

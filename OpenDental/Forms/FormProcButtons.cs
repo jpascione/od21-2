@@ -53,20 +53,7 @@ namespace OpenDental{
 
 		///<summary>Make the QuickButtonGrid exactly the same size as it will display in the chart module.</summary>
 		private void ResizeControls() {
-			try {
-				Control[] controlArray=this.Owner.Controls.Find("ContrChart",true);
-				//force redraw and resize of control, Also deselects current patient.
-				((ControlChart)controlArray[0]).ModuleSelected(0);
-				controlArray=this.Owner.Controls.Find("panelQuickButtons",true);
-				//set display size to actual size in from the control module. This is a dynamically sized control.
-				panelQuickButtons.Size=controlArray[0].Size;
-				labelEdit.Location=new Point(panelQuickButtons.Location.X,panelQuickButtons.Bounds.Bottom+20);
-			}
-			catch(Exception ex) {
-				ex.DoNothing();
-				//could not locate the gridquickbuttons control.
-			}
-
+			
 		}
 
 		private void fillPanelQuickButtons() {
