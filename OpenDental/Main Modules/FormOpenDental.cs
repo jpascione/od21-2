@@ -1472,13 +1472,13 @@ namespace OpenDental{
 				}
 				LayoutControls();
 			}
-			else if(arrayITypes.Contains(InvalidType.Sheets) && userControlDashboard.IsInitialized) {
+			if(arrayITypes.Contains(InvalidType.Sheets) && userControlDashboard.IsInitialized) {
 				LayoutControls();//The current dashboard may have changed.
 				userControlDashboard.RefreshDashboard();
 				ResizeDashboard();
 				RefreshMenuDashboards();
 			}
-			else if(arrayITypes.Contains(InvalidType.Security) || isAll) {
+			if(arrayITypes.Contains(InvalidType.Security) || isAll) {
 				RefreshMenuDashboards();
 			}
 			#endregion
@@ -1868,7 +1868,7 @@ namespace OpenDental{
 			}
 			LayoutManager.MoveLocation(lightSignalGrid1,new Point(0,LayoutManager.Scale(489)));
 			LayoutManager.MoveWidth(lightSignalGrid1,moduleBar.Width-1);
-			LayoutManager.SynchRecursive(userControlDashboard);
+			//LayoutManager.SynchRecursive(userControlDashboard);
 			Point position=new Point(moduleBar.Width,ToolBarMain.Bottom);
 			int width=ClientSize.Width-position.X;
 			int height=ClientSize.Height-position.Y;
@@ -6086,6 +6086,9 @@ namespace OpenDental{
 				this.Size=new Size(LayoutManager.Scale(size96Old.Width),LayoutManager.Scale(size96Old.Height));
 			}
 			Plugins.HookAddCode(this,"FormOpenDental.menuItemZoom_Click_end",this.Menu);
+			if(userControlDashboard.Visible){
+				MsgBox.Show("Please restart to fix the Dashboard layout.");
+			}
 		}
 		
 
@@ -6225,7 +6228,13 @@ namespace OpenDental{
 				return;
 			}
 			SheetDef widgetNew=(SheetDef)((MenuItemOD)sender).Tag;
-			TryLaunchPatientDashboard(widgetNew);//Open the newly selected Patient Dashboard.
+			bool opened=TryLaunchPatientDashboard(widgetNew);//Open the newly selected Patient Dashboard.
+			if(opened){
+				MsgBox.Show(this,"You will probably need to restart to set the layout of the new Dashboard.");
+			}
+			else{
+				//closed existing.
+			}
 		}
 
 		///<summary>Opens a UserControlDashboardWidget.  The user's permissions should be validated prior to calling this method.</summary>
@@ -6245,7 +6254,7 @@ namespace OpenDental{
 				for(int w=0;w<listOpenWidgets.Count;w++){
 					listOpenWidgets[w].CloseWidget();
 				}
-				ResizeDashboard();//Resize the splitter/Patient Dashboard container appropriately.
+				ResizeDashboard();
 				userPrefDashboard.Fkey=sheetDefWidget.SheetDefNum;
 				UserOdPrefs.Update(userPrefDashboard);
 				RefreshMenuDashboards();
@@ -6272,7 +6281,7 @@ namespace OpenDental{
 					throw new Exception("Unexpected error loading Patient Dashboard: "+ex.Message,ex);//So we get bug submission.
 				}
 			}
-			LayoutManager.SynchRecursive(userControlDashboard);//We accept the bounds of every single child at this point, passing them all to the LayoutManager so that we can handle resizes.
+			//LayoutManager.SynchRecursive(userControlDashboard);//We accept the bounds of every single child at this point, passing them all to the LayoutManager so that we can handle resizes.
 			//LayoutManager.LayoutFormBoundsAndFonts(this);//splitContainerNoFlickerDashboard);
 			//LayoutControls();
 			OnResizeEnd(new EventArgs());

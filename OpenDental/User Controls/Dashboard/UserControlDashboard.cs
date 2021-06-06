@@ -18,6 +18,7 @@ namespace OpenDental {
 		private const string PATIENT_DASHBOARD_LOG_DIRECTORY="PatientDashboard";
 		private const string REFRESH_THREAD_NAME="DashboardRefresh_Thread";
 		private const string SET_THREAD_NAME="DashboardSet_Thread";
+		public LayoutManagerForms LayoutManager=new LayoutManagerForms();
 
 		public List<UserControlDashboardWidget> ListOpenWidgets {
 			get {
@@ -61,17 +62,17 @@ namespace OpenDental {
 		}
 
 		/// <summary>Initializes a Dashboard.</summary>
-		/// <param name="sheetDefDashboard">SheetDef for the Patient Dashboard to open.</param>
-		/// <param name="actionOnDashboardContentsChanged">Action is fired when the contents of the Dashboard change.</param>
-		/// <param name="actionOnDashboardClosing">Action is fired when the Dashboard is closing.</param>
+		/// <param name="sheetDef">SheetDef for the Patient Dashboard to open.</param>
+		/// <param name="actionDashboardContentsChanged">Action is fired when the contents of the Dashboard change.</param>
+		/// <param name="actionDashboardClosing">Action is fired when the Dashboard is closing.</param>
 		/// in the Appointment Edit window. </param>
-		public void Initialize(SheetDef sheetDefDashboard,Action actionOnDashboardContentsChanged,Action actionOnDashboardClosing) {
-			if(sheetDefDashboard==null) {
+		public void Initialize(SheetDef sheetDef,Action actionDashboardContentsChanged,Action actionDashboardClosing) {
+			if(sheetDef==null) {
 				return;
 			}
-			AddWidget(sheetDefDashboard);
-			_actionDashboardContentsChanged=actionOnDashboardContentsChanged;
-			_actionDashboardClosing=actionOnDashboardClosing;
+			AddWidget(sheetDef);
+			_actionDashboardContentsChanged=actionDashboardContentsChanged;
+			_actionDashboardClosing=actionDashboardClosing;
 			//Failed to open any of the previously attached widgets, likely due to user no longer having permissions to widgets.
 			//Continue if initializing Dashboard for the first time so that a widget can be added later.
 			if(ListOpenWidgets.Count==0) {
@@ -151,17 +152,17 @@ namespace OpenDental {
 		}
 
 		///<summary>Adds a new Widget to the current Dashboard container.</summary>
-		public bool AddWidget(SheetDef sheetDefWidget) {
-			if(sheetDefWidget==null || !Security.IsAuthorized(Permissions.DashboardWidget,sheetDefWidget.SheetDefNum,true)) {
+		public bool AddWidget(SheetDef sheetDef) {
+			if(sheetDef==null || !Security.IsAuthorized(Permissions.DashboardWidget,sheetDef.SheetDefNum,true)) {
 				return false;
 			}
 			UserControlDashboardWidget widget=null;
 			this.InvokeIfRequired(() => { 
 				//Trying to open a widget that is already open.
-				if(ListOpenWidgets.Any(x => x.SheetDefWidget.SheetDefNum==sheetDefWidget.SheetDefNum)) {
+				if(ListOpenWidgets.Any(x => x.SheetDefWidget.SheetDefNum==sheetDef.SheetDefNum)) {
 					return;
 				}
-				widget=new UserControlDashboardWidget(sheetDefWidget);
+				widget=new UserControlDashboardWidget(sheetDef,LayoutManager);
 				widget.WidgetClosed+=CloseWidget;
 				widget.RefreshClicked+=UserControlDashboardWidget_RefreshClicked;
 				widget.Anchor=((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left));
@@ -173,7 +174,10 @@ namespace OpenDental {
 				this.InvokeIfRequired(() => {
 					widget.Location=new Point(0,0);
 					widget.Anchor=(System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left);
+					Size size=widget.Size;
+					//widget.Size will change on the next line, presumably because it's cross thread
 					this.Controls.Add(widget);
+					widget.Size=size;
 					widget.BringToFront();
 				});
 			}

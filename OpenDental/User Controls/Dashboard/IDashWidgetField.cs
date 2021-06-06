@@ -15,5 +15,7 @@ namespace OpenDental {
 
 		///<summary>Refreshes the view.  Must be implemented in a way to safely invoke back to the UI thread.</summary>
 		void RefreshView();
+
+		void PassLayoutManager(LayoutManagerForms layoutManager);
 	}
 }

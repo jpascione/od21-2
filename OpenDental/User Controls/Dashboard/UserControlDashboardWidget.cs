@@ -15,30 +15,39 @@ using System.Drawing.Drawing2D;
 
 namespace OpenDental {
 	public partial class UserControlDashboardWidget:UserControl {
-		private SheetDef _sheetDefWidget;
-		private Sheet _sheetWidget;
+		private SheetDef _sheetDef;
+		private Sheet _sheet;
 		private Patient _pat;
-		private List<SheetField> _listFieldsDrawnToGraphics=new List<SheetField>();
+		private List<SheetField> _listSheetFields=new List<SheetField>();
 		///<summary>Event is fired when the 'Close' context menu item is clicked.</summary>
 		public event WidgetClosedHandler WidgetClosed=null;
 		///<summary>Event is fired when the 'Refresh' context menu item is clicked.</summary>
 		public event RefreshClickedHandler RefreshClicked=null;
+		///<summary></summary>
+		public LayoutManagerForms LayoutManager=new LayoutManagerForms();
 
 		public SheetDef SheetDefWidget {
 			get {
-				return _sheetDefWidget;
+				return _sheetDef;
 			}
 			set {
-				_sheetDefWidget=value;
+				_sheetDef=value;
 				Invalidate();
 			}
 		}
 
-		public UserControlDashboardWidget(SheetDef sheetDefWidget) {
+		protected override void OnSizeChanged(EventArgs e) {
+			base.OnSizeChanged(e);
+			Size size=this.Size;
+		}
+
+		public UserControlDashboardWidget(SheetDef sheetDefWidget,LayoutManagerForms layoutManager) {
 			InitializeComponent();
-			_sheetDefWidget=sheetDefWidget;
-			Size=new Size(_sheetDefWidget.Width,_sheetDefWidget.Height);
-			Name=POut.Long(_sheetDefWidget.SheetDefNum);
+			LayoutManager=layoutManager;
+			_sheetDef=sheetDefWidget;
+			float scale=LayoutManager.ScaleMy();
+			Size=new Size(LayoutManager.Scale(_sheetDef.Width),LayoutManager.Scale(_sheetDef.Height));
+			Name=POut.Long(_sheetDef.SheetDefNum);
 			ContextMenuStrip=contextMenu;
 		}
 
@@ -53,7 +62,7 @@ namespace OpenDental {
 		}
 
 		public bool TrySetData(PatientDashboardDataEventArgs data) {
-			if(_sheetDefWidget==null || data==null) {//Hasn't been through initialize, or unexpected data.
+			if(_sheetDef==null || data==null) {//Hasn't been through initialize, or unexpected data.
 				return false;
 			}
 			if(data.StaticTextData!=null) {//Only change static text fields if the required data is available.
@@ -64,7 +73,7 @@ namespace OpenDental {
 		}
 
 		public bool TryRefreshData() {
-			if(_sheetDefWidget==null) {
+			if(_sheetDef==null) {
 				return false;
 			}
 			RefreshPatient();//Patient is used in RefreshDefAndFields.
@@ -76,10 +85,11 @@ namespace OpenDental {
 		}
 
 		private void SetOrRefreshData(Action<IDashWidgetField,SheetField> actionSetOrRefresh) {
-			foreach(Control ctr in UIHelper.GetAllControls(this)) {
-				SheetField sheetField=_sheetWidget.SheetFields.FirstOrDefault(x => GetSheetFieldID(x)==ctr.Name);
-				if(ctr is IDashWidgetField) {
-					actionSetOrRefresh((IDashWidgetField)ctr,sheetField);
+			foreach(Control control in UIHelper.GetAllControls(this)) {
+				SheetField sheetField=_sheet.SheetFields.FirstOrDefault(x => GetSheetFieldID(x)==control.Name);
+				if(control is IDashWidgetField dashWidgetField) {
+					dashWidgetField.PassLayoutManager(LayoutManager);
+					actionSetOrRefresh(dashWidgetField,sheetField);
 				}
 			}
 		}
@@ -90,7 +100,7 @@ namespace OpenDental {
 
 		private bool RefreshDefAndFields() {
 			try {
-				_sheetDefWidget=SheetDefs.GetSheetDef(_sheetDefWidget.SheetDefNum);
+				_sheetDef=SheetDefs.GetSheetDef(_sheetDef.SheetDefNum);
 			}
 			catch(Exception ex) {
 				ex.DoNothing();
@@ -102,19 +112,19 @@ namespace OpenDental {
 		}
 
 		private void SetStaticFields(Patient pat,Family fam=null,StaticTextData staticTextData=null) {
-			_sheetWidget=SheetUtil.CreateSheet(_sheetDefWidget,pat?.PatNum??0);
-			SheetFiller.FillFields(_sheetWidget,pat:pat,fam:fam,staticTextData:staticTextData);
+			_sheet=SheetUtil.CreateSheet(_sheetDef,pat?.PatNum??0);
+			SheetFiller.FillFields(_sheet,pat:pat,fam:fam,staticTextData:staticTextData);
 		}
 
 		public void RefreshView() {
 			this.InvokeIfRequired(() => {
 				RefreshDimensions();
-				_listFieldsDrawnToGraphics.Clear();
-				foreach(SheetField sheetField in _sheetWidget.SheetFields) {
+				_listSheetFields.Clear();
+				foreach(SheetField sheetField in _sheet.SheetFields) {
 					ODException.SwallowAnyException(() => RefreshSheetField(sheetField));
 				}
 				CleanupDisplay();
-				if(!_listFieldsDrawnToGraphics.IsNullOrEmpty()) {
+				if(!_listSheetFields.IsNullOrEmpty()) {
 					Invalidate();
 				}
 			});
@@ -126,7 +136,7 @@ namespace OpenDental {
 				//_sheetDefWidget=null, before this method executes.
 				return;
 			}
-			Size=new Size(_sheetDefWidget.Width,_sheetDefWidget.Height);
+			Size=new Size(LayoutManager.Scale(_sheetDef.Width),LayoutManager.Scale(_sheetDef.Height));
 		}
 
 		///<summary>Handles how each type of SheetField should be drawn to the control.</summary>
@@ -137,37 +147,39 @@ namespace OpenDental {
 				return;
 			}
 			if(IsSheetFieldDrawnDirectlyToGraphics(field)) {
-				_listFieldsDrawnToGraphics.Add(field);
+				_listSheetFields.Add(field);
 				return;
 			}
 			Type type=GetControlTypeForDisplay(field);
-			Control ctr=UIHelper.GetAllControls(this).FirstOrDefault(x => x.Name==GetSheetFieldID(field) && x.GetType()==type);
-			if(ctr==null) {
-				ctr=CreateControl(field,type);
+			Control control=UIHelper.GetAllControls(this).FirstOrDefault(x => x.Name==GetSheetFieldID(field) && x.GetType()==type);
+			if(control==null) {
+				control=CreateControl(field,type);
 			}
-			ctr.Location=new Point(field.XPos,field.YPos);
-			ctr.Text=field.FieldValue;
-			ctr.ForeColor=field.ItemColor;
-			ctr.Size=new Size(field.Width,field.Height);
-			if(ctr is IDashWidgetField) {
-				((IDashWidgetField)ctr).RefreshView();
+			control.Location=new Point(LayoutManager.Scale(field.XPos),LayoutManager.Scale(field.YPos));
+			control.Text=field.FieldValue;
+			control.ForeColor=field.ItemColor;
+			control.Size=new Size(LayoutManager.Scale(field.Width),LayoutManager.Scale(field.Height));
+			if(control is IDashWidgetField) {
+				((IDashWidgetField)control).RefreshView();
 			}
-			ctr.Visible=true;
+			control.Visible=true;
 		}
 
 		protected override void OnPaint(PaintEventArgs e) {
 			base.OnPaint(e);
 			//Shapes need to be drawn directly to the hosting UserContrlDashboardWidget to support overlapping control transparency.
-			foreach(SheetField field in _listFieldsDrawnToGraphics) {
+			foreach(SheetField field in _listSheetFields) {
 				using(Pen pen=new Pen(field.ItemColor)) {
 					switch(field.FieldType) {
 						case SheetFieldType.Line:
-							Point p1=new Point(field.XPos,field.YPos);
-							Point p2=new Point(field.XPos+field.Width,field.YPos+field.Height);
+							Point p1=new Point(LayoutManager.Scale(field.XPos),LayoutManager.Scale(field.YPos));
+							Point p2=new Point(LayoutManager.Scale(field.XPos+field.Width),LayoutManager.Scale(field.YPos+field.Height));
 							e.Graphics.DrawLine(pen,p1,p2);
 							break;
 						case SheetFieldType.Rectangle:
-							e.Graphics.DrawRectangle(pen,field.XPos,field.YPos,field.Width,field.Height);
+							e.Graphics.DrawRectangle(pen,
+								LayoutManager.Scale(field.XPos),LayoutManager.Scale(field.YPos),
+								LayoutManager.Scale(field.Width),LayoutManager.Scale(field.Height));
 							break;
 						default:
 							continue;
@@ -246,7 +258,7 @@ namespace OpenDental {
 			}
 			for(int i=Controls.Count-1;i>=0;i--) {
 				Control ctr=Controls[i];
-				if(!ListTools.In(ctr.Name,_sheetWidget.SheetFields.Select(x => GetSheetFieldID(x)))) {
+				if(!ListTools.In(ctr.Name,_sheet.SheetFields.Select(x => GetSheetFieldID(x)))) {
 					CloseControl(ctr);//Old sheetfield/def that was removed from the SheetDef in between refreshes.
 					continue;
 				}
@@ -275,17 +287,17 @@ namespace OpenDental {
 
 		///<summary>Creates a new Control of Type type, setting its Name as a unique identifier corresponding to properties in field.
 		///Hooks up appropriate events so that drag/drop on the control causes the UserControlDashboardWidget to be dragged/dropped.</summary>
-		private Control CreateControl(SheetField field, Type type) {
-			Control ctr=(Control)Activator.CreateInstance(type);
+		private Control CreateControl(SheetField sheetField, Type type) {
+			Control control=(Control)Activator.CreateInstance(type);
 			//Since field has not been inserted into the db, field.SheetFieldNum=0.  It's possible to have two fields with the same FieldName.
 			//Use NameXPosYPos as a likely unique id.
-			ctr.Name=GetSheetFieldID(field);
-			Lan.C(this,new Control[] { ctr });
-			Controls.Add(ctr);
-			if(ctr is IDashWidgetField) {
-				((IDashWidgetField)ctr).RefreshData(_pat,field);
+			control.Name=GetSheetFieldID(sheetField);
+			Lan.C(this,new Control[] { control });
+			Controls.Add(control);
+			if(control is IDashWidgetField) {
+				((IDashWidgetField)control).RefreshData(_pat,sheetField);
 			}
-			return ctr;
+			return control;
 		}
 		
 		private void closeToolStripMenuItem_Click(object sender,EventArgs e) {
@@ -303,7 +315,7 @@ namespace OpenDental {
 		}
 
 		private bool IsWidgetClosed() {
-			if(_sheetDefWidget==null && _sheetWidget==null) {
+			if(_sheetDef==null && _sheet==null) {
 				return true;
 			}
 			return false;
@@ -314,8 +326,8 @@ namespace OpenDental {
 				CloseControl(ctr);
 			}
 			WidgetClosed?.Invoke(this,new EventArgs());
-			_sheetDefWidget=null;
-			_sheetWidget=null;
+			_sheetDef=null;
+			_sheet=null;
 		}
 
 		public delegate void WidgetClosedHandler(UserControlDashboardWidget sender,EventArgs e);

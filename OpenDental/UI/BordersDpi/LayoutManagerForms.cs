@@ -407,6 +407,7 @@ namespace OpenDental{
 			LayoutControlBoundsAndFonts(control);
 		}
 
+		/*
 		///<summary>Jordan needs to do these. Rare. Recursive version of Synch, which is probably not what we want.  The layout of children are normally under control of the LayoutManager, and we don't want to run this unless we're sure we are happy with the exact current position and size of each child.  Normally, we would instead use Synch, which internally performs a layout of children.</summary>
 		public void SynchRecursive(Control control){
 			if(IsLayoutMS){
@@ -435,7 +436,7 @@ namespace OpenDental{
 			for(int i=0;i<control.Controls.Count;i++){
 				SynchRecursive(control.Controls[i]);
 			}
-		}
+		}*/
 		#endregion Methods - Add Move
 
 		#region Methods - Public
@@ -858,6 +859,9 @@ namespace OpenDental{
 				//and we will continue to troubleshoot the minor annoyance in FormSheetDefEdit that seems to be unrelated to this.
 				//This is also likely to cause a new bug, so we will always make notes here about each possible scrollable control that we run across.
 			}
+			if(control is UserControlDashboard){
+				return true;
+			}
 			return false;
 		}
 
@@ -976,6 +980,14 @@ namespace OpenDental{
 				contrTable.LayoutManager=this;
 				return;
 			}
+			if(control is DashFamilyInsurance dashFamilyInsurance){//only gets hit during non-dashboard, in controlTreat
+				dashFamilyInsurance.LayoutManager=this;
+				return;
+			}
+			if(control is DashIndividualInsurance dashIndividualInsurance){//only gets hit during non-dashboard, in controlTreat
+				dashIndividualInsurance.LayoutManager=this;
+				return;
+			}
 			if(control is EmailPreviewControl emailPreviewControl){
 				emailPreviewControl.LayoutManager=this;
 				return;
@@ -1057,6 +1069,10 @@ namespace OpenDental{
 			}
 			if(control is UI.ToolBarOD toolBarOD){
 				toolBarOD.LayoutManager=this;
+				return;
+			}
+			if(control is UserControlDashboard userControlDashboard){
+				userControlDashboard.LayoutManager=this;
 				return;
 			}
 			if(control is UserControlPhoneSmall userControlPhoneSmall){

@@ -15,9 +15,14 @@ namespace OpenDental {
 	public partial class DashPatPicture:ODPictureBox,IDashWidgetField {
 		private Bitmap _patPicture;
 		private Document _docPatPicture;
+		public LayoutManagerForms LayoutManager;
 
 		public DashPatPicture() {
 			InitializeComponent();
+		}
+
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
 		}
 
 		public void SetData(PatientDashboardDataEventArgs data,SheetField sheetField) {
