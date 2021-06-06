@@ -3133,14 +3133,14 @@ namespace OpenDental{
 				//Annual Family Max--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Family Maximum"));
-				row.Cells.Add(POut.Double(userControlFamIns.FamPriMax));
-				row.Cells.Add(POut.Double(userControlFamIns.FamSecMax));
+				row.Cells.Add(userControlFamIns.GetFamPriMax());
+				row.Cells.Add(userControlFamIns.GetFamSecMax());
 				gridFamIns.ListGridRows.Add(row);
 				//Family Deductible--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Family Deductible"));
-				row.Cells.Add(POut.Double(userControlFamIns.FamPriDed));
-				row.Cells.Add(POut.Double(userControlFamIns.FamSecDed));
+				row.Cells.Add(userControlFamIns.GetFamPriDed());
+				row.Cells.Add(userControlFamIns.GetFamSecDed());
 				gridFamIns.ListGridRows.Add(row);
 				//Print Family Insurance-----------------------
 				MigraDocHelper.InsertSpacer(section,15);
@@ -3166,38 +3166,38 @@ namespace OpenDental{
 				//Annual Max--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Annual Maximum"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriMax));
-				row.Cells.Add(POut.Double(userControlIndIns.SecMax));
+				row.Cells.Add(userControlIndIns.GetPriMax());
+				row.Cells.Add(userControlIndIns.GetSecMax());
 				gridIns.ListGridRows.Add(row);
 				//Deductible--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Deductible"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriDed));
-				row.Cells.Add(POut.Double(userControlIndIns.SecDed));
+				row.Cells.Add(userControlIndIns.GetPriDed());
+				row.Cells.Add(userControlIndIns.GetSecDed());
 				gridIns.ListGridRows.Add(row);
 				//Deductible Remaining--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Deductible Remaining"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriDedRem));
-				row.Cells.Add(POut.Double(userControlIndIns.SecDedRem));
+				row.Cells.Add(userControlIndIns.GetPriDedRem());
+				row.Cells.Add(userControlIndIns.GetSecDedRem());
 				gridIns.ListGridRows.Add(row);
 				//Insurance Used--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Insurance Used"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriUsed));
-				row.Cells.Add(POut.Double(userControlIndIns.SecUsed));
+				row.Cells.Add(userControlIndIns.GetPriUsed());
+				row.Cells.Add(userControlIndIns.GetSecUsed());
 				gridIns.ListGridRows.Add(row);
 				//Pending--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Pending"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriPend));
-				row.Cells.Add(POut.Double(userControlIndIns.SecPend));
+				row.Cells.Add(userControlIndIns.GetPriPend());
+				row.Cells.Add(userControlIndIns.GetSecPend());
 				gridIns.ListGridRows.Add(row);
 				//Remaining--------------------------
 				row=new GridRow();
 				row.Cells.Add(Lan.g(this,"Remaining"));
-				row.Cells.Add(POut.Double(userControlIndIns.PriRem));
-				row.Cells.Add(POut.Double(userControlIndIns.SecRem));
+				row.Cells.Add(userControlIndIns.GetPriRem());
+				row.Cells.Add(userControlIndIns.GetSecRem());
 				gridIns.ListGridRows.Add(row);
 				gridIns.EndUpdate();
 				//Print Individual Insurance-------------------------

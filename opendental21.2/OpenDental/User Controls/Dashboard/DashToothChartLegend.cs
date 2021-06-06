@@ -9,9 +9,14 @@ namespace OpenDental {
 		public const int DefaultHeight=14;
 		private SheetField _sheetField;
 		private List<Def> _listDefs;
+		public LayoutManagerForms LayoutManager;
 
 		public DashToothChartLegend() {
 			InitializeComponent();
+		}
+
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
 		}
 
 		///<summary></summary>

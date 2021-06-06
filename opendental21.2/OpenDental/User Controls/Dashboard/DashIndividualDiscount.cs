@@ -5,6 +5,7 @@ using CodeBase;
 using OpenDentBusiness;
 
 namespace OpenDental {
+	///<summary>Doesn't look like it's actually possible to use from dashboard.</summary>
 	public partial class DashIndividualDiscount:UserControl,IDashWidgetField {
 		///<summary>The subscriber for the discount plan. Can be an newly instantiated sub with no valid values if no discount plan.</summary>
 		private DiscountPlanSub _discountPlanSub;
@@ -13,9 +14,14 @@ namespace OpenDental {
 		private Patient _pat;
 		///<summary>The total of all discount plan adjustments for the current date range segment for DateTime.Now.</summary>
 		private double _discountAmtUsed;
+		public LayoutManagerForms LayoutManager;
 
 		public DashIndividualDiscount() {
 			InitializeComponent();
+		}
+
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
 		}
 
 		public void RefreshData(Patient pat,SheetField sheetField) {

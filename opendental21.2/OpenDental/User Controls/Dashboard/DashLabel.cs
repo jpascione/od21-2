@@ -5,9 +5,14 @@ using OpenDentBusiness;
 namespace OpenDental {
 	public partial class DashLabel:Label,IDashWidgetField {
 		private SheetField _sheetField;
+		public LayoutManagerForms LayoutManager=new LayoutManagerForms();
 
 		public DashLabel() {
 			InitializeComponent();
+		}
+
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
 		}
 
 		public void SetData(PatientDashboardDataEventArgs data,SheetField sheetField) {
@@ -24,11 +29,19 @@ namespace OpenDental {
 		public void RefreshView() {
 			Text=_sheetField.FieldValue;
 			TextAlign=ConvertToContentAlignment(_sheetField.TextAlign);
-			string fontName=_sheetField.FontName;
-			if(string.IsNullOrWhiteSpace(fontName)) {//sheet did not have a properly set FontName
-				fontName=Font.FontFamily?.Name;//Use the control's default font.
+			string fontName="Microsoft Sans Serif";
+			if(!string.IsNullOrWhiteSpace(_sheetField.FontName)){
+				fontName=_sheetField.FontName;
 			}
-			Font=new Font(fontName,_sheetField.FontSize>0 ? _sheetField.FontSize : 8,_sheetField.FontIsBold ? FontStyle.Bold : FontStyle.Regular);
+			FontStyle fontStyle=FontStyle.Regular;
+			if(_sheetField.FontIsBold){
+				fontStyle=FontStyle.Bold;
+			}
+			float fontSize=LayoutManager.ScaleF(8);
+			if(_sheetField.FontSize>0){
+				fontSize=LayoutManager.ScaleF(_sheetField.FontSize);
+			}
+			Font=new Font(fontName,fontSize,fontStyle);
 		}
 
 		private ContentAlignment ConvertToContentAlignment(HorizontalAlignment align) {

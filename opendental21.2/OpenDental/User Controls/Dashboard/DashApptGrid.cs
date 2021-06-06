@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using CodeBase;
@@ -11,6 +12,7 @@ namespace OpenDental {
 	public partial class DashApptGrid:UserControl,IDashWidgetField {
 		//if the name of this changes, it also will need to be changed manually in OpenDentBusiness.SheetUtil.GetGridColumnsAvailable:353
 		public const string SheetFieldName="ApptsGrid";
+		public LayoutManagerForms LayoutManager=new LayoutManagerForms();
 
 		public Patient PatCur;
 		private List<ApptOther> _listApptOthers=new List<ApptOther>();
@@ -44,6 +46,10 @@ namespace OpenDental {
 			InitializeComponent();
 		}
 
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
+		}
+
 		private void DashApptGrid_Load(object sender,EventArgs e) {
 			AppointmentEvent.Fired+=AppointmentEvent_Fired;//Only subscribe to this event if actually showing.
 			//Need to be able to unsubscribe when the Parent's handle is destroyed, otherwise this subscription sticks around, i.e. memory leak that will 
@@ -51,6 +57,11 @@ namespace OpenDental {
 			//subscription).
 			this.Parent.HandleDestroyed+=UnsubscribeApptEvent;
 			this.Disposed+=UnsubscribeApptEvent;
+			gridMain.ScaleMy=LayoutManager.ScaleMy();
+		}
+
+		private void DashApptGrid_SizeChanged(object sender,EventArgs e) {
+			gridMain.SetBounds(0,0,Width,Height);
 		}
 
 		private void UnsubscribeApptEvent(object sender,EventArgs e) {
@@ -194,6 +205,7 @@ namespace OpenDental {
 		}
 
 		private void FillGrid() {
+			gridMain.ScaleMy=LayoutManager.ScaleMy();
 			long selectedApptOtherNum=SelectedApptOther?.AptNum??-1;
 			int selectedIndex=-1;
 			gridMain.BeginUpdate();
@@ -320,8 +332,10 @@ namespace OpenDental {
 				gridMain.SetSelected(selectedIndex,true);
 			}
 		}
+
+		
 	}
-	
+
 	public class PinBoardArgs {
 		public ApptOther ApptOther;
 		public List<ApptOther> ListApptOthers;

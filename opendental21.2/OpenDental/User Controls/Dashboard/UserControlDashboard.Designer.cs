@@ -36,19 +36,19 @@
             this.menuItemClose,
             this.menuItemRefresh});
 			this.contextMenu.Name = "contextMenu";
-			this.contextMenu.Size = new System.Drawing.Size(181, 70);
+			this.contextMenu.Size = new System.Drawing.Size(114, 48);
 			// 
 			// menuItemClose
 			// 
 			this.menuItemClose.Name = "menuItemClose";
-			this.menuItemClose.Size = new System.Drawing.Size(180, 22);
+			this.menuItemClose.Size = new System.Drawing.Size(113, 22);
 			this.menuItemClose.Text = "Close";
 			this.menuItemClose.Click += new System.EventHandler(this.menuItemClose_Click);
 			// 
 			// menuItemRefresh
 			// 
 			this.menuItemRefresh.Name = "menuItemRefresh";
-			this.menuItemRefresh.Size = new System.Drawing.Size(180, 22);
+			this.menuItemRefresh.Size = new System.Drawing.Size(113, 22);
 			this.menuItemRefresh.Text = "Refresh";
 			this.menuItemRefresh.Click += new System.EventHandler(this.MenuItemRefresh_Click);
 			// 
@@ -56,7 +56,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.SystemColors.Control;
+			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(253)))), ((int)(((byte)(254)))));
 			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.Name = "UserControlDashboard";
 			this.Size = new System.Drawing.Size(148, 148);

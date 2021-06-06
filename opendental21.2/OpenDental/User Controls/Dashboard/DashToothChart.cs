@@ -13,19 +13,30 @@ using CodeBase;
 
 namespace OpenDental {
 	public partial class DashToothChart:PictureBox,IDashWidgetField {
+		///<summary>Disposed</summary>
 		private Image _imgToothChart;
 		private SheetField _sheetField;
+		public LayoutManagerForms LayoutManager;
+
 		public DashToothChart() {
 			InitializeComponent();
+		}
+
+		public void PassLayoutManager(LayoutManagerForms layoutManager){
+			LayoutManager=layoutManager;
 		}
 
 		public void SetData(PatientDashboardDataEventArgs data,SheetField sheetField) {
 			if(!IsNecessaryDataAvailable(data)) {
 				return;
 			}
-			Image imgToothChart=ExtractToothChart(data);
 			_imgToothChart?.Dispose();
-			_imgToothChart=imgToothChart;
+			if(data.ImageToothChart==null) {//Check for this first, since it will be quicker than creating an image from the active treatment plan.
+				_imgToothChart=null;
+			}
+			else{
+				_imgToothChart=(Image)data.ImageToothChart.Clone();
+			}
 		}
 
 		private bool IsNecessaryDataAvailable(PatientDashboardDataEventArgs data) {
@@ -47,9 +58,8 @@ namespace OpenDental {
 			_sheetField=sheetField;
 			TreatPlan treatPlan=TreatPlans.GetActiveForPat(patNum);
 			List<Appointment> listAppts=Appointments.GetTodaysApptsForPat(patNum);
-			Image imgToothChart=GetToothChart(pat,treatPlan,listAppts:listAppts);
 			_imgToothChart?.Dispose();
-			_imgToothChart=imgToothChart;
+			_imgToothChart=GetToothChart(pat,treatPlan,listAppts:listAppts);
 		}
 
 		private Image GetToothChart(Patient pat,TreatPlan treatPlan,List<Procedure> listProcs=null,List<Appointment> listAppts=null) {
@@ -87,15 +97,12 @@ namespace OpenDental {
 			if(_imgToothChart is null) {
 				return;
 			}
-			Image img=new Bitmap(_sheetField.Width,_sheetField.Height);
-			using(Graphics g = Graphics.FromImage(img)) {
-				g.SmoothingMode=SmoothingMode.HighQuality;
-				OpenDentBusiness.SheetPrinting.DrawScaledImage(0,0,_sheetField.Width,_sheetField.Height,g,null,_imgToothChart);
-				if(Image!=null) {
-					Image.Dispose();
-				}
-				Image=img;
-			}
+			Image img=new Bitmap(Width,Height);
+			using Graphics g = Graphics.FromImage(img);
+			g.SmoothingMode=SmoothingMode.HighQuality;
+			OpenDentBusiness.SheetPrinting.DrawScaledImage(0,0,Width,Height,g,null,_imgToothChart);
+			Image?.Dispose();
+			Image=img;
 		}
 	}
 }

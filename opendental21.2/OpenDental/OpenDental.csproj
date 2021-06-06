@@ -7135,13 +7135,13 @@
       <DependentUpon>UserControlDashboard.cs</DependentUpon>
     </Compile>
     <Compile Include="User Controls\Dashboard\DashIndividualInsurance.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="User Controls\Dashboard\DashIndividualInsurance.Designer.cs">
       <DependentUpon>DashIndividualInsurance.cs</DependentUpon>
     </Compile>
     <Compile Include="User Controls\Dashboard\DashFamilyInsurance.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="User Controls\Dashboard\DashFamilyInsurance.Designer.cs">
       <DependentUpon>DashFamilyInsurance.cs</DependentUpon>
