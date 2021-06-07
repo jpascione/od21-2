@@ -3576,7 +3576,7 @@ namespace OpenDental{
 					return;
 				}
 				else if(ClaimSendQueueItemsArray[0].MissingData!="") {
-					if(MessageBox.Show(Lan.g(this,"Cannot send claim until missing data is fixed:")+"\r\n"+ClaimSendQueueItemsArray[0].MissingData+"\r\n\r\nContinue anyway?",
+					if(MessageBox.Show(Lan.g(this,"Cannot send claim until missing/invalid data is fixed:")+"\r\n"+ClaimSendQueueItemsArray[0].MissingData+"\r\n\r\nContinue anyway?",
 						"",MessageBoxButtons.OKCancel)==DialogResult.OK)
 					{
 						DialogResult=DialogResult.OK;
