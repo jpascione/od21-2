@@ -243,7 +243,15 @@ namespace OpenDental{
 			if(control is FormODBase){
 				throw new ApplicationException("Don't pass in the form.  Form size can simply be changed without using this.  The only restriction is that you can't change form size in constructor. Do that in Load.");
 			}
-			if(_listControl96Infos==null){
+			if(_listControl96Infos==null){//this is here to keep it from crashing further down.
+				if(control.TopLevelControl is null){
+					return;
+				}
+				if(control.TopLevelControl.GetType() != typeof(FormODBase)){
+					//But if the control is on a windows form instead of a FormODBase, then the resize still needs to work.
+					//Example: CEMT FormCentralReportSetup --> UserControlSecurityGroup --> listAssociatedUsers --> vScroll move.
+					control.Bounds=boundsScaled;
+				}
 				return;
 			}
 			if(control.Parent==null){
