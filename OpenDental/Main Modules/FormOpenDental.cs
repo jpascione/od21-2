@@ -4160,6 +4160,11 @@ namespace OpenDental{
 					//I did not add feature to put planned or unsched apt on pinboard.
 					MsgBox.Show(this,"Cannot navigate to appointment.  Use the Other Appointments button.");
 					//return;
+					DateTime dateTemp = controlAppt.GetDateSelected();
+					if(dateTemp == null || dateTemp == DateTime.MinValue) {
+						dateSelected=DateTime.Now;
+					}
+					dateSelected=dateTemp;
 				}
 				else {
 					dateSelected=apt.AptDateTime;
