@@ -37,7 +37,7 @@ namespace OpenDental {
 		
 		private void FormEtrans835s_Load(object sender,EventArgs e) {
 			base.SetFilterControlsAndAction((() => FilterAndFillGrid())
-				,dateRangePicker,textRangeMin,textRangeMax,textControlId,textCarrier,
+				,textRangeMin,textRangeMax,textControlId,textCarrier,
 				textCheckTrace,comboClinics
 			);
 			dateRangePicker.SetDateTimeFrom(DateTime.Today.AddDays(-7));
@@ -395,6 +395,10 @@ namespace OpenDental {
 			}
 			EtransL.ViewFormForEra(et,this);
 			Cursor=Cursors.Default;
+		}
+
+		private void dateRangePicker_CalendarSelectionChanged(object sender,EventArgs e) {
+			FilterAndFillGrid(isRefreshNeeded:true);
 		}
 
 		private void butClose_Click(object sender,EventArgs e) {
