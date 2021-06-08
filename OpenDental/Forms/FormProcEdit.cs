@@ -235,6 +235,8 @@ namespace OpenDental {
 				butChange.Enabled=false;
 				butEditAnyway.Visible=true;
 				butSetComplete.Enabled=false;
+				textCanadaLabFee1.Enabled=false;
+				textCanadaLabFee2.Enabled=false;
 			}
 			if(Procedures.IsAttachedToClaim(_procedure,_listClaimProcsForProc,false)) {
 				butDelete.Enabled=false;
