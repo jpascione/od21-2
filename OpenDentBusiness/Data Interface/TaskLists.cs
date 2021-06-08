@@ -577,17 +577,13 @@ namespace OpenDentBusiness{
 			return taskListPath.ToString();
 		}
 
-		///<summary>DateType and ObjectType to None, the TaskListStatus to 1 - Archived,
-		///and set all Task List Inboxes that reference this Task List to 0.</summary>
+		///<summary>TaskListStatus to 1 - Archived, and set all Task List Inboxes that reference this Task List to 0.</summary>
 		public static void Archive(TaskList taskList) {
 			//No need to check RemotingRole; no call to db.
 			if(taskList.TaskListStatus!=TaskListStatusEnum.Active) {
 				return;
 			}
 			TaskList taskListOld=taskList.Copy();
-			taskList.DateType=TaskDateType.None;
-			taskList.DateTL=DateTime.MinValue;
-			taskList.ObjectType=TaskObjectType.None;
 			taskList.TaskListStatus=TaskListStatusEnum.Archived;
 			Update(taskList,taskListOld);
 			Userods.DisassociateTaskListInBox(taskList.TaskListNum);
