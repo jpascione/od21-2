@@ -178,10 +178,10 @@ namespace OpenDental {
 						_listButtons[i].Caption=Lan.g(this,"Tx Plan");
 						break;
 					case EnumModuleType.Chart:
+						_listButtons[i].Caption=Lan.g(this,"Chart");
 						if(PrefC.GetBool(PrefName.EasyHideClinical)) {
 							_listButtons[i].Caption=Lan.g(this,"Procs");
 						}
-						_listButtons[i].Caption=Lan.g(this,"Chart");
 						if(!isMedical){
 							_listButtons[i].Icon2=EnumIcons.Chart32W;
 						}
