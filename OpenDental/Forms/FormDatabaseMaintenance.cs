@@ -208,7 +208,7 @@ namespace OpenDental {
 			row=new GridRow(Lan.g(this,"Balance Families"),Lan.g(this,"Runs income transfer logic for multiple familes at once to zero out family balances."));
 			row.Tag=new Action(FamilyBalanceFix);
 			gridTools.ListGridRows.Add(row);
-			row=new GridRow(Lan.g(this,"Redundant Indexes"),Lan.g(this,"Removes redundant/unecessary indexes from all tables in the database."));
+			row=new GridRow(Lan.g(this,"Redundant Indexes"),Lan.g(this,"Removes redundant/unnecessary indexes from all tables in the database."));
 			row.Tag=new Action(RedundantIndexesFix);
 			gridTools.ListGridRows.Add(row);
 			row=new GridRow(Lan.g(this,"Patient Missing"),Lan.g(this,"Helps to fix database corruption with loss of patients."));
