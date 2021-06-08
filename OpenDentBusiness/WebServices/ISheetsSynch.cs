@@ -21,5 +21,6 @@ namespace OpenDentBusiness {
 		string UploadSheetDefChunk(string officeData);
 		string UploadSheetDefFromFile(string officeData);
 		string UpdateSheetDefFromFile(string officeData);
+		string CheckWebFormsDb();
 	}
 }
