@@ -429,13 +429,16 @@ namespace OpenDental {
 				gridMain.SetSelected(indicesNew,true);
 			}
 		}
+
+		private void timerFillGrid_Tick(object sender=null,EventArgs e=null) {
+			timerFillGrid.Stop();//Stop the timer, otherwise the timer tick will just fire this again.
+			FillGrid();
+		}
 		
 		private void textFind_TextChanged(object sender,EventArgs e) {
-			//_listSelectedSupplies.Clear();
-			//foreach(int index in gridMain.SelectedIndices) {
-			//	_listSelectedSupplies.Add((Supply)gridMain.ListGridRows[index].Tag);
-			//}
-			//FillGrid();
+			//Does not get hit when opening.
+			timerFillGrid.Stop();//So that typing more letters resets with each letter.
+			timerFillGrid.Start();
 		}
 
 		private void butSearch_Click(object sender, EventArgs e){
@@ -615,6 +618,8 @@ namespace OpenDental {
 			DialogResult=DialogResult.Cancel;
 		}
 
-		
+		private void FormSupplies_FormClosing(object sender,FormClosingEventArgs e) {
+			timerFillGrid?.Dispose();//Dispose of the timer if it is not null.
+		}
 	}
 }

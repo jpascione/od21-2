@@ -23,6 +23,7 @@ namespace OpenDental{
 		/// the contents of this method with the code editor.
 		/// </summary>
 		private void InitializeComponent() {
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormSupplies));
 			this.textFind = new System.Windows.Forms.TextBox();
 			this.butUp = new OpenDental.UI.Button();
@@ -36,7 +37,6 @@ namespace OpenDental{
 			this.checkShowHidden = new System.Windows.Forms.CheckBox();
 			this.butAdd = new OpenDental.UI.Button();
 			this.gridMain = new OpenDental.UI.GridOD();
-			this.butSearch = new OpenDental.UI.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this.comboCategories = new OpenDental.UI.ComboBoxOD();
 			this.labelPrint = new System.Windows.Forms.Label();
@@ -46,6 +46,7 @@ namespace OpenDental{
 			this.butCreateOrdersQty = new OpenDental.UI.Button();
 			this.label3 = new System.Windows.Forms.Label();
 			this.checkEnterQty = new System.Windows.Forms.CheckBox();
+			this.timerFillGrid = new System.Windows.Forms.Timer(this.components);
 			this.groupCreateOrders.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -156,7 +157,7 @@ namespace OpenDental{
 			this.butAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.butAdd.Icon = OpenDental.UI.EnumIcons.Add;
 			this.butAdd.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butAdd.Location = new System.Drawing.Point(657, 26);
+			this.butAdd.Location = new System.Drawing.Point(657, 23);
 			this.butAdd.Name = "butAdd";
 			this.butAdd.Size = new System.Drawing.Size(93, 24);
 			this.butAdd.TabIndex = 11;
@@ -168,25 +169,15 @@ namespace OpenDental{
 			this.gridMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.gridMain.Location = new System.Drawing.Point(12, 56);
+			this.gridMain.Location = new System.Drawing.Point(12, 51);
 			this.gridMain.Name = "gridMain";
 			this.gridMain.SelectionMode = OpenDental.UI.GridSelectionMode.MultiExtended;
-			this.gridMain.Size = new System.Drawing.Size(738, 482);
+			this.gridMain.Size = new System.Drawing.Size(738, 490);
 			this.gridMain.TabIndex = 5;
 			this.gridMain.Title = "Supplies";
 			this.gridMain.TranslationName = "TableSupplies";
 			this.gridMain.CellDoubleClick += new OpenDental.UI.ODGridClickEventHandler(this.gridMain_CellDoubleClick);
 			this.gridMain.CellLeave += new OpenDental.UI.ODGridClickEventHandler(this.gridMain_CellLeave);
-			// 
-			// butSearch
-			// 
-			this.butSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butSearch.Location = new System.Drawing.Point(400, 26);
-			this.butSearch.Name = "butSearch";
-			this.butSearch.Size = new System.Drawing.Size(71, 24);
-			this.butSearch.TabIndex = 30;
-			this.butSearch.Text = "Search";
-			this.butSearch.Click += new System.EventHandler(this.butSearch_Click);
 			// 
 			// label2
 			// 
@@ -237,15 +228,15 @@ namespace OpenDental{
 			// groupCreateOrders
 			// 
 			this.groupCreateOrders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupCreateOrders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(252)))), ((int)(((byte)(253)))), ((int)(((byte)(254)))));
 			this.groupCreateOrders.Controls.Add(this.butCreateOrdersQty);
 			this.groupCreateOrders.Controls.Add(this.label3);
 			this.groupCreateOrders.Controls.Add(this.butCreateOrders);
 			this.groupCreateOrders.Controls.Add(this.labelCreateOrder);
 			this.groupCreateOrders.Location = new System.Drawing.Point(115, 544);
 			this.groupCreateOrders.Name = "groupCreateOrders";
-			this.groupCreateOrders.Size = new System.Drawing.Size(309, 72);
+			this.groupCreateOrders.Size = new System.Drawing.Size(316, 72);
 			this.groupCreateOrders.TabIndex = 36;
-			this.groupCreateOrders.TabStop = false;
 			this.groupCreateOrders.Text = "Create new Orders, one for each supplier";
 			// 
 			// butCreateOrdersQty
@@ -268,13 +259,18 @@ namespace OpenDental{
 			// 
 			// checkEnterQty
 			// 
-			this.checkEnterQty.Location = new System.Drawing.Point(477, 32);
+			this.checkEnterQty.Location = new System.Drawing.Point(477, 26);
 			this.checkEnterQty.Name = "checkEnterQty";
 			this.checkEnterQty.Size = new System.Drawing.Size(121, 18);
 			this.checkEnterQty.TabIndex = 37;
 			this.checkEnterQty.Text = "Enter Quantities";
 			this.checkEnterQty.UseVisualStyleBackColor = true;
 			this.checkEnterQty.Click += new System.EventHandler(this.checkEnterQty_Click);
+			// 
+			// timerFillGrid
+			// 
+			this.timerFillGrid.Interval = 1000;
+			this.timerFillGrid.Tick += new System.EventHandler(this.timerFillGrid_Tick);
 			// 
 			// FormSupplies
 			// 
@@ -284,7 +280,6 @@ namespace OpenDental{
 			this.Controls.Add(this.labelPrint);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.comboCategories);
-			this.Controls.Add(this.butSearch);
 			this.Controls.Add(this.textFind);
 			this.Controls.Add(this.butUp);
 			this.Controls.Add(this.butDown);
@@ -301,6 +296,7 @@ namespace OpenDental{
 			this.Name = "FormSupplies";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Supplies";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormSupplies_FormClosing);
 			this.Load += new System.EventHandler(this.FormSupplies_Load);
 			this.groupCreateOrders.ResumeLayout(false);
 			this.ResumeLayout(false);
@@ -322,7 +318,6 @@ namespace OpenDental{
 		private UI.Button butCancel;
 		private UI.Button butUp;
 		private UI.Button butDown;
-		private UI.Button butSearch;
 		private System.Windows.Forms.Label label2;
 		private UI.ComboBoxOD comboCategories;
 		private System.Windows.Forms.Label labelPrint;
@@ -332,5 +327,6 @@ namespace OpenDental{
 		private UI.Button butCreateOrdersQty;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.CheckBox checkEnterQty;
+		private System.Windows.Forms.Timer timerFillGrid;
 	}
 }
