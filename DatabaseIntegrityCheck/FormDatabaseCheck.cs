@@ -338,7 +338,7 @@ namespace DatabaseIntegrityCheck {
 					_corruptTables.Clear();
 				}
 				if(_patientRowsLost) {
-					MessageBox.Show("Rows have been lost in the patient table. Please call support and escalate to a conversions engineer or a senior engineer.");
+					MessageBox.Show("Rows have been lost in the patient table. Please call support and escalate to a conversions engineer or a senior engineer.","Warning",MessageBoxButtons.OK, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly);
 				}
 				textResults.AppendText("Finished table repair. Check information in 'RepairLog_"+backupDateTime+".txt' to verify that tables are not corrupt."
 					+"\r\n\r\nResults:\r\n"+results+"\r\n");
