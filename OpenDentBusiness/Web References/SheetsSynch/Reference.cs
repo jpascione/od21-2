@@ -23,7 +23,7 @@ namespace OpenDentBusiness.SheetsSynch {
     
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Web.Services.WebServiceBindingAttribute(Name="SheetsSynchSoap", Namespace="http://opendental.com/")]
@@ -55,11 +55,13 @@ namespace OpenDentBusiness.SheetsSynch {
         
         private System.Threading.SendOrPostCallback UpdateSheetDefFromFileOperationCompleted;
         
+        private System.Threading.SendOrPostCallback CheckWebFormsDbOperationCompleted;
+        
         private bool useDefaultCredentialsSetExplicitly;
         
         /// <remarks/>
         public SheetsSynch() {
-            this.Url = "http://localhost:2923/SheetsSynch.asmx";
+            this.Url = global::OpenDentBusiness.Properties.Settings.Default.OpenDentBusiness_SheetsSynch_SheetsSynch;
             if ((this.IsLocalFileSystemWebService(this.Url) == true)) {
                 this.UseDefaultCredentials = true;
                 this.useDefaultCredentialsSetExplicitly = false;
@@ -131,6 +133,9 @@ namespace OpenDentBusiness.SheetsSynch {
         
         /// <remarks/>
         public event UpdateSheetDefFromFileCompletedEventHandler UpdateSheetDefFromFileCompleted;
+        
+        /// <remarks/>
+        public event CheckWebFormsDbCompletedEventHandler CheckWebFormsDbCompleted;
         
         /// <remarks/>
         [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://opendental.com/SetPreferences", RequestNamespace="http://opendental.com/", ResponseNamespace="http://opendental.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
@@ -510,6 +515,33 @@ namespace OpenDentBusiness.SheetsSynch {
         }
         
         /// <remarks/>
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://opendental.com/CheckWebFormsDb", RequestNamespace="http://opendental.com/", ResponseNamespace="http://opendental.com/", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        public string CheckWebFormsDb() {
+            object[] results = this.Invoke("CheckWebFormsDb", new object[0]);
+            return ((string)(results[0]));
+        }
+        
+        /// <remarks/>
+        public void CheckWebFormsDbAsync() {
+            this.CheckWebFormsDbAsync(null);
+        }
+        
+        /// <remarks/>
+        public void CheckWebFormsDbAsync(object userState) {
+            if ((this.CheckWebFormsDbOperationCompleted == null)) {
+                this.CheckWebFormsDbOperationCompleted = new System.Threading.SendOrPostCallback(this.OnCheckWebFormsDbOperationCompleted);
+            }
+            this.InvokeAsync("CheckWebFormsDb", new object[0], this.CheckWebFormsDbOperationCompleted, userState);
+        }
+        
+        private void OnCheckWebFormsDbOperationCompleted(object arg) {
+            if ((this.CheckWebFormsDbCompleted != null)) {
+                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
+                this.CheckWebFormsDbCompleted(this, new CheckWebFormsDbCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
+            }
+        }
+        
+        /// <remarks/>
         public new void CancelAsync(object userState) {
             base.CancelAsync(userState);
         }
@@ -529,11 +561,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void SetPreferencesCompletedEventHandler(object sender, SetPreferencesCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class SetPreferencesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -555,11 +587,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void GetPreferencesCompletedEventHandler(object sender, GetPreferencesCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetPreferencesCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -581,11 +613,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void GetWebFormSheetsCompletedEventHandler(object sender, GetWebFormSheetsCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetWebFormSheetsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -607,11 +639,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void DeleteSheetDataCompletedEventHandler(object sender, DeleteSheetDataCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DeleteSheetDataCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -633,11 +665,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void GetDentalOfficeIDCompletedEventHandler(object sender, GetDentalOfficeIDCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetDentalOfficeIDCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -659,11 +691,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void GetSheetDefAddressCompletedEventHandler(object sender, GetSheetDefAddressCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class GetSheetDefAddressCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -685,11 +717,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void DownloadSheetDefsCompletedEventHandler(object sender, DownloadSheetDefsCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DownloadSheetDefsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -711,11 +743,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void DeleteSheetDefCompletedEventHandler(object sender, DeleteSheetDefCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class DeleteSheetDefCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -737,11 +769,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void UpLoadSheetDefCompletedEventHandler(object sender, UpLoadSheetDefCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class UpLoadSheetDefCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -763,11 +795,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void UploadSheetDefChunkCompletedEventHandler(object sender, UploadSheetDefChunkCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class UploadSheetDefChunkCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -789,11 +821,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void UploadSheetDefFromFileCompletedEventHandler(object sender, UploadSheetDefFromFileCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class UploadSheetDefFromFileCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -815,11 +847,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void UpdateSheetDefCompletedEventHandler(object sender, UpdateSheetDefCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class UpdateSheetDefCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -841,11 +873,11 @@ namespace OpenDentBusiness.SheetsSynch {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     public delegate void UpdateSheetDefFromFileCompletedEventHandler(object sender, UpdateSheetDefFromFileCompletedEventArgs e);
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.3752.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     public partial class UpdateSheetDefFromFileCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
@@ -853,6 +885,32 @@ namespace OpenDentBusiness.SheetsSynch {
         private object[] results;
         
         internal UpdateSheetDefFromFileCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        /// <remarks/>
+        public string Result {
+            get {
+                this.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
+    public delegate void CheckWebFormsDbCompletedEventHandler(object sender, CheckWebFormsDbCompletedEventArgs e);
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.8.4084.0")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class CheckWebFormsDbCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        internal CheckWebFormsDbCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
                 base(exception, cancelled, userState) {
             this.results = results;
         }

@@ -184,6 +184,16 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="CheckWebFormsDb">
+        <s:complexType />
+      </s:element>
+      <s:element name="CheckWebFormsDbResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckWebFormsDbResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="SetPreferencesSoapIn">
@@ -264,6 +274,12 @@
   <wsdl:message name="UpdateSheetDefFromFileSoapOut">
     <wsdl:part name="parameters" element="tns:UpdateSheetDefFromFileResponse" />
   </wsdl:message>
+  <wsdl:message name="CheckWebFormsDbSoapIn">
+    <wsdl:part name="parameters" element="tns:CheckWebFormsDb" />
+  </wsdl:message>
+  <wsdl:message name="CheckWebFormsDbSoapOut">
+    <wsdl:part name="parameters" element="tns:CheckWebFormsDbResponse" />
+  </wsdl:message>
   <wsdl:portType name="SheetsSynchSoap">
     <wsdl:operation name="SetPreferences">
       <wsdl:input message="tns:SetPreferencesSoapIn" />
@@ -316,6 +332,10 @@
     <wsdl:operation name="UpdateSheetDefFromFile">
       <wsdl:input message="tns:UpdateSheetDefFromFileSoapIn" />
       <wsdl:output message="tns:UpdateSheetDefFromFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckWebFormsDb">
+      <wsdl:input message="tns:CheckWebFormsDbSoapIn" />
+      <wsdl:output message="tns:CheckWebFormsDbSoapOut" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="SheetsSynchSoap" type="tns:SheetsSynchSoap">
@@ -437,6 +457,15 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="CheckWebFormsDb">
+      <soap:operation soapAction="http://opendental.com/CheckWebFormsDb" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="SheetsSynchSoap12" type="tns:SheetsSynchSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -550,6 +579,15 @@
     </wsdl:operation>
     <wsdl:operation name="UpdateSheetDefFromFile">
       <soap12:operation soapAction="http://opendental.com/UpdateSheetDefFromFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckWebFormsDb">
+      <soap12:operation soapAction="http://opendental.com/CheckWebFormsDb" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
