@@ -43,9 +43,9 @@ namespace OpenDental {
 			return true;
 		}
 
-		private InputBox GetAmountInput(string labelText = "Please enter an amount: ") {
+		private double GetAmountInput() {
 			List<InputBoxParam> listInputBoxParams=new List<InputBoxParam>();
-			InputBoxParam inputBoxParam=new InputBoxParam(InputBoxType.ValidDouble,Lan.g(this,labelText));
+			InputBoxParam inputBoxParam=new InputBoxParam(InputBoxType.ValidDouble,Lan.g(this,"Please enter an estimated fee amount: "));
 			listInputBoxParams.Add(inputBoxParam);
 			Func<string,bool> funcOkClick = new Func<string,bool>((text) => {
 				if(text=="" || !double.TryParse(text,out double res) || res<1) {
@@ -55,7 +55,10 @@ namespace OpenDental {
 				return true;//Allow user to the payment window.
 			});
 			using InputBox inputBox=new InputBox(listInputBoxParams,funcOkClick);
-			return inputBox;
+			if(inputBox.ShowDialog()!=DialogResult.OK) {
+				return -1; // use as cancel/close click signifier
+			}
+			return PIn.Double(inputBox.textResult.Text);
 		}
 
 		private void butApply_Click(object sender,EventArgs e) {
@@ -89,12 +92,12 @@ namespace OpenDental {
 			if(!IsValid()) {
 				return;
 			}
-			using InputBox inputBox=GetAmountInput("Please enter an estimated fee amount: ");
-			if(inputBox.ShowDialog()!=DialogResult.OK) {
+			double inputAmount=GetAmountInput();
+			if(inputAmount < 0) {// input box was cancelled/closed
 				return;
 			}
 			CareCreditL.LaunchQuickScreenIndividualPage(_patient,comboProviders.GetSelectedProvNum(),comboClinics.SelectedClinicNum,
-				estimatedFeeAmt:PIn.Double(inputBox.textResult.Text));
+				estimatedFeeAmt:inputAmount);
 			DialogResult=DialogResult.None;//Don't close the form yet.
 		}
 
