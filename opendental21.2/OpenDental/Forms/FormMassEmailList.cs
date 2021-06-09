@@ -292,7 +292,7 @@ namespace OpenDental {
 
 		private void checkUserQuery_Click(object sender,EventArgs e) {
 			//TODO - Might want to check user preferences or permissions
-			groupBoxCustomQuery.Visible=checkUserQuery.Checked;
+			groupBoxUserQuery.Visible=checkUserQuery.Checked;
 			groupBoxFilters.Visible=!checkUserQuery.Checked;
 		}
 
