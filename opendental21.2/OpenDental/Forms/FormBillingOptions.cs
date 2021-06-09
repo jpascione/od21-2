@@ -643,6 +643,7 @@ namespace OpenDental{
 			}
 			if(countAllClinics==0){
 				Cursor=Cursors.Default;
+				MsgBox.Show(this,"List of created bills is empty for the specified filters.");
 				return 0;
 			}
 			using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(_popUpMessage);
