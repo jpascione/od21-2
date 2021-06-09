@@ -13,6 +13,7 @@ namespace OpenDental {
 		private List<Clinic> _listClinics;
 		private List<Provider> _listProviders;
 		private List<Def> _listBillingTypeDefs;
+		private List<PatientStatus> _listPatientStatuses = new List<PatientStatus>();
 
 		public FormRpActivePatients() {
 			InitializeComponent();
@@ -27,6 +28,14 @@ namespace OpenDental {
 			listBillingTypes.Items.AddList(_listBillingTypeDefs,x => x.ItemName);
 			_listProviders=Providers.GetListReports();
 			listProv.Items.AddList(_listProviders,x => x.GetLongDesc());
+			foreach(PatientStatus patientStatus in Enum.GetValues(typeof(PatientStatus))) {
+				if(patientStatus==PatientStatus.Deleted) {
+					continue;
+				}
+				_listPatientStatuses.Add(patientStatus);
+				listPatientStatuses.Items.Add(Lan.g("enumPatientStatus",patientStatus.ToString()));
+			}
+			checkAllPatStatus.Checked=true;
 			if(!PrefC.HasClinicsEnabled) {
 				listClin.Visible=false;
 				labelClin.Visible=false;
@@ -63,6 +72,18 @@ namespace OpenDental {
 			}
 		}
 
+		private void checkAllPatStatus_CheckedChanged(object sender,EventArgs e) {
+			if(checkAllPatStatus.Checked) {
+				listPatientStatuses.ClearSelected();
+			}
+		}
+
+		private void listPatientStatuses_Click(object sender,EventArgs e) {
+			if(listPatientStatuses.SelectedIndices.Count>0) {
+				checkAllPatStatus.Checked=false;
+			}
+		}
+
 		private void checkAllClin_CheckedChanged(object sender,EventArgs e) {
 			if(checkAllClin.Checked) {
 				listClin.ClearSelected();
@@ -92,6 +113,10 @@ namespace OpenDental {
 				MsgBox.Show(this,"At least one Billing Type must be selected.");
 				return;
 			}
+			if(!checkAllPatStatus.Checked && listPatientStatuses.SelectedIndices.Count==0) {
+				MsgBox.Show(this,"At least one Patient Status must be selected.");
+				return;
+			}
 			if(!checkAllProv.Checked && listProv.SelectedIndices.Count==0) {
 				MsgBox.Show(this,"At least one Provider must be selected.");
 				return;
@@ -106,6 +131,7 @@ namespace OpenDental {
 			List<long> listProvNums=new List<long>();
 			List<long> listClinicNums=new List<long>();
 			List<long> listBillingTypeDefNums=new List<long>();
+			List<long> listPatientStatusEnums=new List<long>();
 			if(checkAllProv.Checked) {
 				for(int i=0;i<_listProviders.Count;i++) {
 					listProvNums.Add(_listProviders[i].ProvNum);
@@ -153,11 +179,22 @@ namespace OpenDental {
 					listBillingTypeDefNums.Add(_listBillingTypeDefs[listBillingTypes.SelectedIndices[i]].DefNum);
 				}
 			}
+			if(checkAllPatStatus.Checked) {
+				for(int i = 0;i<_listPatientStatuses.Count;++i) {
+					listPatientStatusEnums.Add((long)_listPatientStatuses[i]);
+				}
+			}
+			else {
+				for(int i = 0;i<listPatientStatuses.SelectedIndices.Count;++i) {
+					listPatientStatusEnums.Add((long)_listPatientStatuses[listPatientStatuses.SelectedIndices[i]]);
+				}
+			}
 			DataTable tablePats=RpActivePatients.GetActivePatientTable(dateStart.SelectionStart,dateEnd.SelectionStart,listProvNums,listClinicNums
-				,listBillingTypeDefNums,checkAllProv.Checked,checkAllClin.Checked,checkAllBilling.Checked);
+				,listBillingTypeDefNums,listPatientStatusEnums,checkAllProv.Checked,checkAllClin.Checked,checkAllBilling.Checked);
 			string subtitleProvs="";
 			string subtitleClinics="";
 			string subtitleBilling="";
+			string subtitlePatStatus="";
 			if(checkAllProv.Checked) {
 				subtitleProvs=Lan.g(this,"All Providers");
 			}
@@ -203,6 +240,17 @@ namespace OpenDental {
 					subtitleBilling+=Defs.GetValue(DefCat.BillingTypes,_listBillingTypeDefs[listBillingTypes.SelectedIndices[i]].DefNum);
 				}
 			}
+			if(checkAllPatStatus.Checked) {
+				subtitlePatStatus=Lan.g(this,"All Patient Statuses");
+			}
+			else {
+				for(int i = 0;i<listPatientStatuses.SelectedIndices.Count;++i) {
+					if(i>0) {
+						subtitlePatStatus+=", ";
+					}
+					subtitlePatStatus+=_listPatientStatuses[listPatientStatuses.SelectedIndices[i]].ToString();
+				}
+			}
 			report.ReportName=Lan.g(this,"Active Patients");
 			report.AddTitle("Title",Lan.g(this,"Active Patients"));
 			report.AddSubTitle("Date",dateStart.SelectionStart.ToShortDateString()+" - "+dateEnd.SelectionStart.ToShortDateString());
@@ -211,6 +259,7 @@ namespace OpenDental {
 				report.AddSubTitle("Clinics",subtitleClinics);
 			}
 			report.AddSubTitle("Billing",subtitleBilling);
+			report.AddSubTitle("Patient Status",subtitlePatStatus);
 			QueryObject query;
 			if(PrefC.HasClinicsEnabled) {
 				query=report.AddQuery(tablePats,"","clinic",SplitByKind.Value,0);

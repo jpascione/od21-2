@@ -9,9 +9,9 @@ namespace OpenDentBusiness {
 	public class RpActivePatients {
 
 		///<summary>If not using clinics then supply an empty list of clinicNums. dateStart and dateEnd can be MinVal/MaxVal to indicate "forever".</summary>
-		public static DataTable GetActivePatientTable(DateTime dateStart,DateTime dateEnd,List<long> listProvNums,List<long> listClinicNums,List<long> listBillingTypes,bool hasAllProvs,bool hasAllClinics,bool hasAllBilling) {
+		public static DataTable GetActivePatientTable(DateTime dateStart,DateTime dateEnd,List<long> listProvNums,List<long> listClinicNums,List<long> listBillingTypes,List<long> listPatientStatuses,bool hasAllProvs,bool hasAllClinics,bool hasAllBilling) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateStart,dateEnd,listProvNums,listClinicNums,listBillingTypes,hasAllProvs,hasAllClinics,hasAllBilling);
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateStart,dateEnd,listProvNums,listClinicNums,listBillingTypes,listPatientStatuses,hasAllProvs,hasAllClinics,hasAllBilling);
 			}
 			bool hasClinicsEnabled=ReportsComplex.RunFuncOnReportServer(() => Prefs.HasClinicsEnabledNoCache);
 			List<Provider> listProvs=ReportsComplex.RunFuncOnReportServer(() => Providers.GetAll());
@@ -33,11 +33,11 @@ namespace OpenDentBusiness {
 			table.Columns.Add("secProv");
 			table.Columns.Add("clinic");
 			DataRow row;
-			string command=@"
+			string command=$@"
 				SELECT patient.PatNum,patient.LName,patient.FName,patient.MiddleI,patient.Preferred,carrier.CarrierName,patient.BillingType,patient.PriProv,patient.SecProv,
 							patient.HmPhone,patient.WkPhone,patient.WirelessPhone,patient.Address,patient.Address2,patient.City,patient.State,patient.Zip,patient.ClinicNum,provider.Abbr
 				FROM procedurelog 
-				INNER JOIN patient ON patient.PatNum=procedurelog.PatNum AND PatStatus="+POut.Int((int)PatientStatus.Patient)+@"
+				INNER JOIN patient ON patient.PatNum=procedurelog.PatNum AND PatStatus IN ({String.Join(",",listPatientStatuses)})
 				LEFT JOIN patplan ON patplan.PatNum=patient.PatNum AND patplan.Ordinal=1
 				LEFT JOIN inssub ON inssub.InsSubNum=patplan.InsSubNum
 				LEFT JOIN insplan ON insplan.PlanNum=inssub.PlanNum

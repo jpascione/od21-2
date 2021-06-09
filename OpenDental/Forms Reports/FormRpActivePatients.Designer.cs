@@ -39,12 +39,15 @@ namespace OpenDental{
 			this.label2 = new System.Windows.Forms.Label();
 			this.checkAllBilling = new System.Windows.Forms.CheckBox();
 			this.label3 = new System.Windows.Forms.Label();
+			this.checkAllPatStatus = new System.Windows.Forms.CheckBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.listPatientStatuses = new OpenDental.UI.ListBoxOD();
 			this.SuspendLayout();
 			// 
 			// butOK
 			// 
 			this.butOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butOK.Location = new System.Drawing.Point(349, 454);
+			this.butOK.Location = new System.Drawing.Point(511, 454);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 3;
@@ -54,7 +57,7 @@ namespace OpenDental{
 			// butCancel
 			// 
 			this.butCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butCancel.Location = new System.Drawing.Point(430, 454);
+			this.butCancel.Location = new System.Drawing.Point(592, 454);
 			this.butCancel.Name = "butCancel";
 			this.butCancel.Size = new System.Drawing.Size(75, 24);
 			this.butCancel.TabIndex = 2;
@@ -73,7 +76,7 @@ namespace OpenDental{
 			// checkAllClin
 			// 
 			this.checkAllClin.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkAllClin.Location = new System.Drawing.Point(350, 221);
+			this.checkAllClin.Location = new System.Drawing.Point(519, 221);
 			this.checkAllClin.Name = "checkAllClin";
 			this.checkAllClin.Size = new System.Drawing.Size(154, 16);
 			this.checkAllClin.TabIndex = 68;
@@ -82,7 +85,7 @@ namespace OpenDental{
 			// 
 			// listClin
 			// 
-			this.listClin.Location = new System.Drawing.Point(350, 240);
+			this.listClin.Location = new System.Drawing.Point(519, 240);
 			this.listClin.Name = "listClin";
 			this.listClin.SelectionMode = OpenDental.UI.SelectionMode.MultiExtended;
 			this.listClin.Size = new System.Drawing.Size(154, 199);
@@ -91,7 +94,7 @@ namespace OpenDental{
 			// 
 			// labelClin
 			// 
-			this.labelClin.Location = new System.Drawing.Point(347, 203);
+			this.labelClin.Location = new System.Drawing.Point(516, 203);
 			this.labelClin.Name = "labelClin";
 			this.labelClin.Size = new System.Drawing.Size(104, 16);
 			this.labelClin.TabIndex = 66;
@@ -103,7 +106,7 @@ namespace OpenDental{
 			this.checkAllProv.Checked = true;
 			this.checkAllProv.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkAllProv.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkAllProv.Location = new System.Drawing.Point(181, 221);
+			this.checkAllProv.Location = new System.Drawing.Point(350, 221);
 			this.checkAllProv.Name = "checkAllProv";
 			this.checkAllProv.Size = new System.Drawing.Size(95, 16);
 			this.checkAllProv.TabIndex = 61;
@@ -112,7 +115,7 @@ namespace OpenDental{
 			// 
 			// listProv
 			// 
-			this.listProv.Location = new System.Drawing.Point(181, 240);
+			this.listProv.Location = new System.Drawing.Point(350, 240);
 			this.listProv.Name = "listProv";
 			this.listProv.SelectionMode = OpenDental.UI.SelectionMode.MultiExtended;
 			this.listProv.Size = new System.Drawing.Size(163, 199);
@@ -121,7 +124,7 @@ namespace OpenDental{
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(178, 203);
+			this.label1.Location = new System.Drawing.Point(347, 203);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(104, 16);
 			this.label1.TabIndex = 59;
@@ -180,10 +183,42 @@ namespace OpenDental{
     " date range.";
 			this.label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
 			// 
+			// checkAllPatStatus
+			// 
+			this.checkAllPatStatus.Checked = true;
+			this.checkAllPatStatus.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkAllPatStatus.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkAllPatStatus.Location = new System.Drawing.Point(181, 222);
+			this.checkAllPatStatus.Name = "checkAllPatStatus";
+			this.checkAllPatStatus.Size = new System.Drawing.Size(95, 16);
+			this.checkAllPatStatus.TabIndex = 75;
+			this.checkAllPatStatus.Text = "All";
+			this.checkAllPatStatus.CheckedChanged += new System.EventHandler(this.checkAllPatStatus_CheckedChanged);
+			// 
+			// label4
+			// 
+			this.label4.Location = new System.Drawing.Point(178, 203);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(110, 16);
+			this.label4.TabIndex = 74;
+			this.label4.Text = "Patient Status";
+			this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			// 
+			// listPatStatus
+			// 
+			this.listPatientStatuses.Location = new System.Drawing.Point(181, 240);
+			this.listPatientStatuses.Name = "listPatStatus";
+			this.listPatientStatuses.SelectionMode = OpenDental.UI.SelectionMode.MultiExtended;
+			this.listPatientStatuses.Size = new System.Drawing.Size(163, 199);
+			this.listPatientStatuses.TabIndex = 73;
+			this.listPatientStatuses.Click += new System.EventHandler(this.listPatientStatuses_Click);
+			// 
 			// FormRpActivePatients
 			// 
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-			this.ClientSize = new System.Drawing.Size(517, 490);
+			this.ClientSize = new System.Drawing.Size(679, 490);
+			this.Controls.Add(this.checkAllPatStatus);
+			this.Controls.Add(this.label4);
+			this.Controls.Add(this.listPatientStatuses);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.checkAllBilling);
 			this.Controls.Add(this.label2);
@@ -201,7 +236,6 @@ namespace OpenDental{
 			this.Controls.Add(this.butCancel);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "FormRpActivePatients";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Active Patients Report";
 			this.Load += new System.EventHandler(this.FormRpActivePatients_Load);
 			this.ResumeLayout(false);
@@ -225,5 +259,8 @@ namespace OpenDental{
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.CheckBox checkAllBilling;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.CheckBox checkAllPatStatus;
+		private System.Windows.Forms.Label label4;
+		private UI.ListBoxOD listPatientStatuses;
 	}
 }
