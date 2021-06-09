@@ -198,7 +198,7 @@ namespace OpenDental {
 			row=new GridRow(Lan.g(this,"Email Attaches"),Lan.g(this,"Moves email attachment files into the correct In or Out folders."));
 			row.Tag=new Action(EmailAttachesFix);
 			gridTools.ListGridRows.Add(row);
-			row=new GridRow(Lan.g(this,"Recalc Esitmates"),Lan.g(this,"Recalc estimates that are associated to non active coverage for the patient."));
+			row=new GridRow(Lan.g(this,"Recalc Estimates"),Lan.g(this,"Recalc estimates that are associated to non active coverage for the patient."));
 			row.Tag=new Action(RecalcEstFix);
 			gridTools.ListGridRows.Add(row);
 			row=new GridRow(Lan.g(this,"Pay Plan Payments"),Lan.g(this,"Detaches patient payments attached to insurance payment plans and insurance payments "
