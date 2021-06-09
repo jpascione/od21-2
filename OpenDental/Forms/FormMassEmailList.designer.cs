@@ -56,7 +56,7 @@ namespace OpenDental{
 			this.listBoxPatStatus = new OpenDental.UI.ListBoxOD();
 			this.listBoxContactMethod = new OpenDental.UI.ListBoxOD();
 			this.groupBoxFilters = new System.Windows.Forms.GroupBox();
-			this.groupBoxCustomQuery = new System.Windows.Forms.GroupBox();
+			this.groupBoxUserQuery = new System.Windows.Forms.GroupBox();
 			this.label5 = new System.Windows.Forms.Label();
 			this.textUserQuery = new OpenDental.ODtextBox();
 			this.comboEmailHostingTemplate = new OpenDental.UI.ComboBoxOD();
@@ -71,7 +71,7 @@ namespace OpenDental{
 			this.groupBox1.SuspendLayout();
 			this.groupBoxRecipients.SuspendLayout();
 			this.groupBoxFilters.SuspendLayout();
-			this.groupBoxCustomQuery.SuspendLayout();
+			this.groupBoxUserQuery.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// butClose
@@ -402,17 +402,17 @@ namespace OpenDental{
 			this.groupBoxFilters.TabStop = false;
 			this.groupBoxFilters.Text = "Filters";
 			// 
-			// groupBoxCustomQuery
+			// groupBoxUserQuery
 			// 
-			this.groupBoxCustomQuery.Controls.Add(this.label5);
-			this.groupBoxCustomQuery.Controls.Add(this.textUserQuery);
-			this.groupBoxCustomQuery.Location = new System.Drawing.Point(3, 34);
-			this.groupBoxCustomQuery.Name = "groupBoxCustomQuery";
-			this.groupBoxCustomQuery.Size = new System.Drawing.Size(509, 275);
-			this.groupBoxCustomQuery.TabIndex = 225;
-			this.groupBoxCustomQuery.TabStop = false;
-			this.groupBoxCustomQuery.Text = "Custom User Query";
-			this.groupBoxCustomQuery.Visible = false;
+			this.groupBoxUserQuery.Controls.Add(this.label5);
+			this.groupBoxUserQuery.Controls.Add(this.textUserQuery);
+			this.groupBoxUserQuery.Location = new System.Drawing.Point(3, 34);
+			this.groupBoxUserQuery.Name = "groupBoxUserQuery";
+			this.groupBoxUserQuery.Size = new System.Drawing.Size(509, 275);
+			this.groupBoxUserQuery.TabIndex = 225;
+			this.groupBoxUserQuery.TabStop = false;
+			this.groupBoxUserQuery.Text = "User Query";
+			this.groupBoxUserQuery.Visible = false;
 			// 
 			// label5
 			// 
@@ -420,8 +420,8 @@ namespace OpenDental{
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(473, 19);
 			this.label5.TabIndex = 225;
-			this.label5.Text = "You would not normally use a custom query.  If you do, you must include a PatNum " +
-    "column.";
+			this.label5.Text = "You would not normally use a user query.  If you do, you must include a PatNum co" +
+    "lumn.";
 			this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// textUserQuery
@@ -556,7 +556,7 @@ namespace OpenDental{
 			this.Controls.Add(this.labelNumberPats);
 			this.Controls.Add(this.labelPatsSelected);
 			this.Controls.Add(this.groupBoxFilters);
-			this.Controls.Add(this.groupBoxCustomQuery);
+			this.Controls.Add(this.groupBoxUserQuery);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "FormMassEmailList";
 			this.Text = "Mass Email List";
@@ -566,7 +566,7 @@ namespace OpenDental{
 			this.groupBoxRecipients.ResumeLayout(false);
 			this.groupBoxRecipients.PerformLayout();
 			this.groupBoxFilters.ResumeLayout(false);
-			this.groupBoxCustomQuery.ResumeLayout(false);
+			this.groupBoxUserQuery.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -607,7 +607,7 @@ namespace OpenDental{
 		private UI.ComboBoxOD comboEmailHostingTemplate;
 		private System.Windows.Forms.Label label2;
 		private ODtextBox textEmailPreview;
-		private System.Windows.Forms.GroupBox groupBoxCustomQuery;
+		private System.Windows.Forms.GroupBox groupBoxUserQuery;
 		private ODtextBox textUserQuery;
 		private System.Windows.Forms.CheckBox checkUserQuery;
 		private UI.Button butSetSelected;
