@@ -196,6 +196,7 @@ namespace OpenDental {
 		}
 
 		private void comboClinicPatient_SelectionChangeCommitted(object sender,EventArgs e) {
+			userControlEmailTemplate.RefreshView("","",EmailType.Html);
 			FillGrid();
 			UpdateClinicIsSignedUp();
 		}
