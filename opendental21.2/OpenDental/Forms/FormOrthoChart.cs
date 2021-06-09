@@ -582,7 +582,7 @@ namespace OpenDental {
 			string keyData;
 			//Get the "translated" name for the signature column.
 			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
-			List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts.FindAll(x=>x.FieldName!=sigColumnName);
+			List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts.FindAll(x => x.FieldName != sigColumnName  && x.FieldValue!="");
 				//_dictOrthoCharts[date]
 				//.FindAll(x => x.DateService==date && x.FieldValue!="" && x.FieldName!=sigColumnName);
 			keyData=OrthoCharts.GetKeyDataForSignatureSaving(listOrthoCharts,date);
