@@ -6520,6 +6520,9 @@ namespace OpenDental{
 					}
 					break;
 				case FormType.FormWebForms:
+					if(!Security.IsAuthorized(Permissions.WebFormAccess)) {
+						break;
+					}
 					using(FormWebForms formWebForms=new FormWebForms()) {
 						formWebForms.FormClosed+=this.alertFormClosingHelper;
 						formWebForms.ShowDialog();
