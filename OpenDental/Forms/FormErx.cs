@@ -55,7 +55,11 @@ namespace OpenDental {
 				Close();//For when we launch the window in a non-modal manner.
 				return;
 			}
-			await webViewMain.EnsureCoreWebView2Async();
+			// Create the cache directory 
+			string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			string cacheFolder = ODFileUtils.CombinePaths(localAppData, "WindowsFormsWebView2");
+			CoreWebView2Environment environment=await CoreWebView2Environment.CreateAsync(null,cacheFolder);
+			await webViewMain.EnsureCoreWebView2Async(environment);
 			Text=Lan.g(this,"Loading")+"...";
 			LayoutToolBars();
 			if(ErxOptionCur==ErxOption.Legacy) {
