@@ -1273,10 +1273,10 @@ namespace OpenDentBusiness {
 		private static List<PaySplit> CreateTransferSplitsForPrepay(double splitAmount,PayPlanCharge charge,PayPlanDebitTypes debitType,long unearnedType) {
 			long procNum=0;
 			long adjNum=0;
-			if(charge.LinkType==PayPlanLinkType.Procedure) {
+			if(charge.LinkType==PayPlanLinkType.Procedure && debitType!=PayPlanDebitTypes.Interest) {
 				procNum=charge.FKey;
 			}
-			else if(charge.LinkType==PayPlanLinkType.Adjustment) {
+			else if(charge.LinkType==PayPlanLinkType.Adjustment && debitType!=PayPlanDebitTypes.Interest) {
 				adjNum=charge.FKey;
 			}
 			PaymentEdit.IncomeTransferData notUsed=new PaymentEdit.IncomeTransferData();
