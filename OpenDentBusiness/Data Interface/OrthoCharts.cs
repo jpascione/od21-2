@@ -157,22 +157,27 @@ namespace OpenDentBusiness{
 					idxDB++;
 					continue;
 				}
-				else if(fieldNew.DateService<fieldDB.DateService) {//newPK less than dbPK, newItem is 'next'
+				else if(fieldNew.DateService<fieldDB.DateService && fieldNew.ProvNum==fieldDB.ProvNum) {//newPK less than dbPK, newItem is 'next'
 					listIns.Add(fieldNew);
 					idxNew++;
 					continue;
 				}
-				else if(fieldNew.DateService>fieldDB.DateService) {//dbPK less than newPK, dbItem is 'next'
+				else if(fieldNew.DateService>fieldDB.DateService && fieldNew.ProvNum==fieldDB.ProvNum) {//dbPK less than newPK, dbItem is 'next'
 					listDel.Add(fieldDB);
 					idxDB++;
 					continue;
 				}
-				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)<0) {//New Fieldname Comes First
+				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)<0 && fieldNew.ProvNum==fieldDB.ProvNum) {//New Fieldname Comes First
 					listIns.Add(fieldNew);
 					idxNew++;
 					continue;
 				}
-				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)>0) {//DB Fieldname Comes First
+				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)>0 && fieldNew.ProvNum==fieldDB.ProvNum) {//DB Fieldname Comes First
+					listDel.Add(fieldDB);
+					idxDB++;
+					continue;
+				}
+				else if(fieldNew.ProvNum!=fieldDB.ProvNum) {
 					listDel.Add(fieldDB);
 					idxDB++;
 					continue;
@@ -285,6 +290,9 @@ namespace OpenDentBusiness{
 		public static int SortDateField(OrthoChart x,OrthoChart y) {
 			if(x.DateService!=y.DateService) {
 				return x.DateService.CompareTo(y.DateService);
+			}
+			if(x.ProvNum!=y.ProvNum) {
+				return x.ProvNum.CompareTo(y.ProvNum);
 			}
 			return x.FieldName.CompareTo(y.FieldName);
 		}
