@@ -5390,6 +5390,12 @@ namespace OpenDental {
 				}
 				return false;
 			}
+			List<ClaimProc> listClaimProcsForProc = ClaimProcs.RefreshForProc(procNumsReg[0]);
+			Procedure procedure = Procedures.GetOneProc(procNumsReg[0],false);
+			if(Procedures.IsAttachedToClaim(procedure,listClaimProcsForProc)) {
+				MsgBox.Show(this,Lan.g(this,"Cannot attach a lab fee to a procedure already on a claim."));
+				return false;
+			}
 			return true;
 		}
 
