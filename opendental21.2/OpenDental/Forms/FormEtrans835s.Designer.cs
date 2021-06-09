@@ -93,6 +93,7 @@
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(240, 40);
 			this.groupBox2.TabIndex = 104;
+			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Amount Range (leave both blank to show all)";
 			// 
 			// textRangeMin
@@ -176,6 +177,7 @@
 			this.dateRangePicker.Name = "dateRangePicker";
 			this.dateRangePicker.Size = new System.Drawing.Size(453, 24);
 			this.dateRangePicker.TabIndex = 108;
+			this.dateRangePicker.CalendarSelectionChanged += new OpenDental.UI.CalendarSelectionHandler(this.dateRangePicker_CalendarSelectionChanged);
 			// 
 			// labelControlId
 			// 
