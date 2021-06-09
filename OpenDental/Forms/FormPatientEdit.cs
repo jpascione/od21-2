@@ -1530,7 +1530,7 @@ namespace OpenDental{
 		private bool IsBirthdateValid() {
 			//We do it this way to maintain the very useful behavior where it adds /'s for you when leaving.
 			ValidDate textBirthdayCheck=new ValidDate();
-			textBirthdayCheck.Text=odDatePickerBirthDate.GetDateTime().ToString();
+			textBirthdayCheck.Text=odDatePickerBirthDate.GetTextDate();//Use text date for slash validation and formatting
 			textBirthdayCheck.Validate();
 			if(!textBirthdayCheck.IsValid()) {
 				return false;
@@ -1551,7 +1551,7 @@ namespace OpenDental{
 				MsgBox.Show(this,"Patient's Birthdate is not a valid or allowed date.");
 				return;
 			}
-			DateTime dateTimeBirthdate=PIn.Date(odDatePickerBirthDate.GetDateTime().ToString());
+			DateTime dateTimeBirthdate=PIn.Date(odDatePickerBirthDate.Text);
 			odDatePickerBirthDate.SetDateTime(dateTimeBirthdate);//Need to update UI because odDatePickerBirthDate is what is used in OK click to fill column.
 			DateTime dateTimeTo=DateTime.Now;
 			if(!string.IsNullOrWhiteSpace(dateTimePickerDateDeceased.Text)) { 
