@@ -1556,7 +1556,9 @@ namespace OpenDental {
 				headingPrintH=yPos;
 			}
 #endregion
+			_gridCur.ScaleMy=1;//Temporarily set scale to normal 96dpi for printing
 			yPos=_gridCur.PrintPage(g,pagesPrinted,bounds,headingPrintH);
+			_gridCur.ScaleMy=LayoutManager.ScaleMy();//Change the grid back to normal zoom setting
 			pagesPrinted++;
 			if(yPos==-1) {
 				e.HasMorePages=true;
