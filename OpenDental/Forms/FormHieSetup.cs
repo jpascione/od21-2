@@ -21,6 +21,7 @@ namespace OpenDental {
 			_listHieClinics=HieClinics.Refresh();
 			AddNeededHieClinic(0);
 			if(PrefC.HasClinicsEnabled) {
+				comboClinic.SelectedClinicNum=0;
 				_previouslySelectedClinicNum=comboClinic.SelectedClinicNum;
 			}
 			FillUIFromFields();
