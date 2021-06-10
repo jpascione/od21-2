@@ -61,7 +61,7 @@ namespace OpenDental {
 			//Confirmation---------------------------------------------------------------------------------------------
 			row=new GridRow();
 			row.Cells.Add(Lan.g(this,"Postcard"));
-			row.Cells.Add(Lan.g(this,"Confirmation message.  Use [date]  and [time] where you want those values to be inserted"));
+			row.Cells.Add(Lan.g(this,"Confirmation message. Use [NameF], [date], and [time] where you want those values to be inserted"));
 			row.Cells.Add(PrefC.GetString(PrefName.ConfirmPostcardMessage));
 			row.Tag=PrefName.ConfirmPostcardMessage;
 			gridMain.ListGridRows.Add(row);
