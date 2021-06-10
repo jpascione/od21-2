@@ -4897,12 +4897,16 @@ namespace OpenDentBusiness {
 				&& (TxtMsgOk==YN.Yes || (TxtMsgOk==YN.Unknown&&!isUnknownNo))
 				//Patient has a valid phone number.
 				&& !string.IsNullOrWhiteSpace(SmsPhone)
+				//Patient is not deceased
+				&& PatStatus!=PatientStatus.Deceased
 				//Clinic linked to this PatComm supports texting.
 				&& isTextingEnabledForClinic;
 			IsTextingEnabledForClinic=isTextingEnabledForClinic;	
 			IsEmailAnOption=
 				//Patient has a valid email.
 				EmailAddresses.IsValidEmail(Email)
+				//Patient is not deceased
+				&& PatStatus!=PatientStatus.Deceased
 				//Clinic linked to this PatComm has a valid email.
 				&& isEmailValidForClinic;
 			IsEmailValidForClinic=isEmailValidForClinic;
