@@ -116,6 +116,10 @@ namespace OpenDentBusiness.WebTypes {
 		///<summary>Removes the MobileAppDeviceNum from the treatment plan as well.</summary>
 		public static void CI_RemoveTreatmentPlan(long mobileDeviceNum,TreatPlan treatPlan){
 			SendPushBackground(PushType.CI_RemoveTreatmentPlan,mobileDeviceNum,listPrimaryKeys:new List<long>() { treatPlan.PatNum,treatPlan.TreatPlanNum });
+			//TreatPlanParams are only inserted into the database if this pref is true
+			if(PrefC.GetBool(PrefName.TreatPlanSaveSignedToPdf)) {
+				TreatPlanParams.DeleteByTreatPlanNum(treatPlan.TreatPlanNum);
+			}
 			//Treatment plan is being removed from device, so the MobileAppDeviceNum needs to be 0
 			TreatPlans.UpdateMobileAppDeviceNum(treatPlan,0);
 			Signalods.SetInvalid(InvalidType.TPModule,KeyType.PatNum,treatPlan.PatNum);

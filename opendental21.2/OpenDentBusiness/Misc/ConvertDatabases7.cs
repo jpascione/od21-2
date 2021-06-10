@@ -1210,5 +1210,26 @@ namespace OpenDentBusiness {
 			command=$"INSERT INTO preference(PrefName,ValueString) VALUES('DynamicPayPlanPrepaymentUnearnedType','{defNum}')";
 			Db.NonQ(command);
 		}//End of 21_2_2() method
+
+		private static void To21_2_7() {
+			string command;
+			command="DROP TABLE IF EXISTS treatplanparam";
+			Db.NonQ(command);
+			command=@"CREATE TABLE treatplanparam (
+				TreatPlanParamNum bigint NOT NULL auto_increment PRIMARY KEY,
+				PatNum bigint NOT NULL,
+				TreatPlanNum bigint NOT NULL,
+				ShowDiscount tinyint NOT NULL,
+				ShowMaxDed tinyint NOT NULL,
+				ShowSubTotals tinyint NOT NULL,
+				ShowTotals tinyint NOT NULL,
+				ShowCompleted tinyint NOT NULL,
+				ShowFees tinyint NOT NULL,
+				ShowIns tinyint NOT NULL,
+				INDEX(PatNum),
+				INDEX(TreatPlanNum)
+				) DEFAULT CHARSET=utf8";
+			Db.NonQ(command);
+		}//End of 21_2_7() method
 	}
 }

@@ -379,6 +379,7 @@
     <Compile Include="Crud\SessionTokenCrud.cs" />
     <Compile Include="Crud\StatementProdCrud.cs" />
     <Compile Include="Crud\TransactionInvoiceCrud.cs" />
+    <Compile Include="Crud\TreatPlanParamCrud.cs" />
     <Compile Include="Crud\WebChatMessageCrud.cs" />
     <Compile Include="Crud\WebChatPrefCrud.cs" />
     <Compile Include="Crud\WebChatSessionCrud.cs" />
@@ -420,6 +421,7 @@
     <Compile Include="Data Interface\HieClinics.cs" />
     <Compile Include="Data Interface\HieQueues.cs" />
     <Compile Include="Data Interface\TransactionInvoices.cs" />
+    <Compile Include="Data Interface\TreatPlanParams.cs" />
     <Compile Include="Email\BasicEmailAttachment.cs" />
     <Compile Include="Email\EmailHosting\Account\Models\CreateSignedS3LinksRequest.cs" />
     <Compile Include="Email\EmailHosting\Account\Models\CreateSignedS3LinksResponse.cs" />
@@ -697,6 +699,7 @@
     <Compile Include="TableTypes\SessionToken.cs" />
     <Compile Include="TableTypes\StatementProd.cs" />
     <Compile Include="TableTypes\TransactionInvoice.cs" />
+	<Compile Include="TableTypes\TreatPlanParam.cs" />
     <Compile Include="UI\DpiScale.cs" />
     <Compile Include="UI\ODGridPageNav.cs">
       <SubType>UserControl</SubType>
