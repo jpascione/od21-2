@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="OpenDentalDocumentation.xsl"?>
-<database version="21.2.2.0">
+<database version="21.2.7.0">
     <table name="account">
         <summary>Used in the accounting section in chart of accounts.  Not related to patient accounts in any way.</summary>
         <column order="0" name="AccountNum" type="bigint(20)">
@@ -16136,6 +16136,40 @@
         <column order="3" name="Priority" type="bigint(20)" fk="definition">
             <summary>FK to definition.DefNum, which contains the text of the priority. Identical to Procedure.Priority but used to allow different priorities
              for the same procedure depending on which TP it is a part of.</summary>
+        </column>
+    </table>
+    <table name="treatplanparam">
+        <summary>Stores check box information for each treatment plan, so that when a signed treatment plan PDF needs to be saved from
+            eClipboard, it can correctly save and generate the PDF.</summary>
+        <column order="0" name="TreatPlanParamNum" type="bigint(20)">
+            <summary></summary>
+        </column>
+        <column order="1" name="PatNum" type="bigint(20)" fk="patient">
+            <summary>FK to Patient.</summary>
+        </column>
+        <column order="2" name="TreatPlanNum" type="bigint(20)" fk="treatplan">
+            <summary>FK to TreatPlan.</summary>
+        </column>
+        <column order="3" name="ShowDiscount" type="tinyint(4)">
+            <summary>Value is set by the Discount check box in the Tx Module.</summary>
+        </column>
+        <column order="4" name="ShowMaxDed" type="tinyint(4)">
+            <summary>Value is set by the Use Ins Max and Deduct check box in the Tx Module.</summary>
+        </column>
+        <column order="5" name="ShowSubTotals" type="tinyint(4)">
+            <summary>Value is set by the Subtotals check box in the Tx Module.</summary>
+        </column>
+        <column order="6" name="ShowTotals" type="tinyint(4)">
+            <summary>Value is set by the Totals check box in the Tx Module.</summary>
+        </column>
+        <column order="7" name="ShowCompleted" type="tinyint(4)">
+            <summary>Value is set by the Graphical Completed Tx check box in the Tx Module.</summary>
+        </column>
+        <column order="8" name="ShowFees" type="tinyint(4)">
+            <summary>Value is set by the Fees check box in the Tx Module.</summary>
+        </column>
+        <column order="9" name="ShowIns" type="tinyint(4)">
+            <summary>Value is set by the Insurances Estimates check box in the Tx Module.</summary>
         </column>
     </table>
     <table name="tsitranslog">
