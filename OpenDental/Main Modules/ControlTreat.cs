@@ -983,6 +983,8 @@ namespace OpenDental{
 							Signalods.SetInvalid(InvalidType.EClipboard);
 						}
 					}
+					//Patient isn't on a device, so there shouldn't be any TreatPlanParams for the pat.
+					TreatPlanParams.RemoveAllByPatNum(PatCur.PatNum);
 				}
 			}
 			_listTreatPlans=_listTreatPlans
@@ -2039,6 +2041,7 @@ namespace OpenDental{
 				if(PushNotificationUtils.CI_SendTreatmentPlan(document,treatPlan,hasPracticeSig,mobileAppDevice.MobileAppDeviceNum
 					,out string errorMsg,out long mobileDataByeNum)) 
 				{
+					SendTreatPlanParam(treatPlan);
 					//The treatment plan's MobileAppDeviceNum needs to be updated so that we know it is on a device
 					FillPlans();
 					MsgBox.Show($"Treatment Plan sent to device: {mobileAppDevice.DeviceName}");
@@ -2047,7 +2050,7 @@ namespace OpenDental{
 					//It failed to send to device, so clear out what ever device num was there
 					TreatPlans.UpdateMobileAppDeviceNum(treatPlan,0);
 					Signalods.SetInvalid(InvalidType.TPModule,KeyType.PatNum,treatPlan.PatNum);
-				Signalods.SetInvalid(InvalidType.EClipboard);
+					Signalods.SetInvalid(InvalidType.EClipboard);
 					MsgBox.Show($"Error sending Treatment Plan: {errorMsg}");
 				}
 			}
@@ -2055,9 +2058,11 @@ namespace OpenDental{
 
 		///<summary>Opens a FormMobileCode window with the currently selected TP.</summary>
 		private void OpenUnlockCodeForTP(){
+			long treatPlanParamNum=0;
 			MobileDataByte funcInsertDataForUnlockCode(string unlockCode) {
 				using(PdfDocument doc=GetTreatPlanPDF(out TreatPlan treatPlan,out bool hasPracticeSig)) {
 					if(MobileDataBytes.TryInsertTreatPlanPDF(doc,treatPlan,hasPracticeSig,unlockCode,out string errorMsg,out MobileDataByte mobileDataByte)){
+						treatPlanParamNum=SendTreatPlanParam(treatPlan);
 						return mobileDataByte;
 					}
 					//Failed to insert mobile data byte and won't be retrievable in eClipboard so clear out mobile app device num
@@ -2070,7 +2075,31 @@ namespace OpenDental{
 			}
 			using(FormMobileCode formMobileCode=new FormMobileCode(funcInsertDataForUnlockCode)) {
 				formMobileCode.ShowDialog();
+				if(formMobileCode.DialogResult==DialogResult.Cancel && treatPlanParamNum>0) {
+					//A TreatPlanParam was inserted into the DB already, so it needs to be removed if the unlock code isn't used.
+					TreatPlanParams.Delete(treatPlanParamNum);
+				}
 			}
+		}
+
+		///<summary>Inserts a new TreatPlanParam into the database if PrefName.TreatPlanSaveSignedToPdf is true.
+		///This will be used when they save from eClipboard and it needs to create a signed treatment plan PDF based on these check boxes.</summary>
+		private long SendTreatPlanParam(TreatPlan treatPlan) {
+			if(!PrefC.GetBool(PrefName.TreatPlanSaveSignedToPdf)) {//no need to create a treatPlanParam if not saving PDF
+				return 0;
+			}
+			return TreatPlanParams.Insert(new TreatPlanParam() {
+				IsNew=true,
+				PatNum=treatPlan.PatNum,
+				TreatPlanNum=treatPlan.TreatPlanNum,
+				ShowCompleted=checkShowCompleted.Checked,
+				ShowDiscount=checkShowDiscount.Checked,
+				ShowFees=checkShowFees.Checked,
+				ShowIns=checkShowIns.Checked,
+				ShowMaxDed=checkShowMaxDed.Checked,
+				ShowSubTotals=checkShowSubtotals.Checked,
+				ShowTotals=checkShowTotals.Checked
+			});
 		}
 
 		///<summary>Returns a PDF for the currently selected TreatmentPlan and sets out TreatmentPlan to selected TreatmentPlan.

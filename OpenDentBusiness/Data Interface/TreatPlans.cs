@@ -472,17 +472,20 @@ namespace OpenDentBusiness{
 		///<summary>To be used when you need a sheet for a TreatPlan and you don't have a reference to OpenDental.</summary>
 		public static Sheet CreateSheetFromTreatmentPlan(TreatPlan treatPlan) {
 			treatPlan.ListProcTPs=ProcTPs.RefreshForTP(treatPlan.TreatPlanNum);
+			//Get the TreatPlanParams associated with the current treatment plan and then delete it. It is only used once to set the parameters here.
+			TreatPlanParam treatPlanSheetParam=TreatPlanParams.GetOneByTreatPlanNum(treatPlan.TreatPlanNum);
+			TreatPlanParams.Delete(treatPlanSheetParam.TreatPlanParamNum);
 			Sheet sheet=SheetUtil.CreateSheet(SheetDefs.GetSheetsDefault(SheetTypeEnum.TreatmentPlan,Clinics.ClinicNum),treatPlan.PatNum);
 			//These are all of the different sheet parameters that can be added to a treatment plan
 			sheet.Parameters.Add(new SheetParameter(true,"TreatPlan") { ParamValue=treatPlan });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscountNotAutomatic") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscount") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowMaxDed") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowSubTotals") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowTotals") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowCompleted") { ParamValue=PrefC.GetBool(PrefName.TreatPlanShowCompleted) });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowFees") { ParamValue=true });
-			sheet.Parameters.Add(new SheetParameter(true,"checkShowIns") { ParamValue=!PrefC.GetBool(PrefName.EasyHideInsurance) });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscountNotAutomatic") { ParamValue=treatPlanSheetParam.ShowDiscount });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowDiscount") { ParamValue=treatPlanSheetParam.ShowDiscount });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowMaxDed") { ParamValue=treatPlanSheetParam.ShowMaxDed });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowSubTotals") { ParamValue=treatPlanSheetParam.ShowSubTotals });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowTotals") { ParamValue=treatPlanSheetParam.ShowTotals });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowCompleted") { ParamValue=treatPlanSheetParam.ShowCompleted });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowFees") { ParamValue=treatPlanSheetParam.ShowFees });
+			sheet.Parameters.Add(new SheetParameter(true,"checkShowIns") { ParamValue=treatPlanSheetParam.ShowIns });
 			sheet.Parameters.Add(new SheetParameter(true,"toothChartImg") { ParamValue=SheetFramework.ToothChartHelper.GetImage(treatPlan.PatNum,
 				PrefC.GetBool(PrefName.TreatPlanShowCompleted),treatPlan) 
 			});
