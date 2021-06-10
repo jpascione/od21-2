@@ -99,7 +99,8 @@ namespace OpenDental {
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Title"),70));
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Specialty"),60));
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Patient"),45));
-			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Note"),250));
+			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Business Name"),150));
+			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableSelectRefferal","Note"),0));
 			gridMain.ListGridRows.Clear();
 			GridRow row;
 			int indexSelectedRef=-1;
@@ -111,6 +112,7 @@ namespace OpenDental {
 				row.Cells.Add(refCur.Title);
 				row.Cells.Add(refCur.IsDoctor?Lan.g("enumDentalSpecialty",Defs.GetName(DefCat.ProviderSpecialties,refCur.Specialty)):"");
 				row.Cells.Add(refCur.PatNum>0?"X":"");
+				row.Cells.Add(refCur.BusinessName);
 				row.Cells.Add(refCur.Note);
 				if(refCur.IsHidden) {
 					row.ColorText=Color.Gray;
