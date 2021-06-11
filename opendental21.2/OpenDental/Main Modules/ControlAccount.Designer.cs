@@ -168,6 +168,7 @@
 			this.gridTpSplits = new OpenDental.UI.GridOD();
 			this.gridComm = new OpenDental.UI.GridOD();
 			this.ToolBarMain = new OpenDental.UI.ToolBarOD();
+			this.menuItemDeletePayPlanCharge = new System.Windows.Forms.MenuItem();
 			this.panelAging.SuspendLayout();
 			this.panelTotalOwes.SuspendLayout();
 			this.tabControlShow.SuspendLayout();
@@ -1291,9 +1292,8 @@
 			// 
 			this.contextMenuAcctGrid.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemAddAdj,
-            this.menuItemAddRefundOverpayment});
-				    //Disabled until formAdjMulti is overhauled
- //         this.menuItemAddRefundWorkNotPerformed});
+            this.menuItemAddRefundOverpayment,
+            this.menuItemDeletePayPlanCharge});
 			this.contextMenuAcctGrid.Popup += new System.EventHandler(this.contextMenuAcctGrid_Popup);
 			// 
 			// menuItemAddAdj
@@ -1302,17 +1302,16 @@
 			this.menuItemAddAdj.Text = "Add Adjustment";
 			this.menuItemAddAdj.Click += new System.EventHandler(this.menuItemAddAdj_Click);
 			// 
-			// menuItemOverPayment
+			// menuItemAddRefundOverpayment
 			// 
 			this.menuItemAddRefundOverpayment.Index = 1;
 			this.menuItemAddRefundOverpayment.Text = "Refund (overpayment)";
 			this.menuItemAddRefundOverpayment.Click += new System.EventHandler(this.menuItemAddRefund_Click);
 			// 
-			// menuItemWorkNotPerformed
+			// menuItemAddRefundWorkNotPerformed
 			// 
-			this.menuItemAddRefundWorkNotPerformed.Index = 2;
+			this.menuItemAddRefundWorkNotPerformed.Index = -1;
 			this.menuItemAddRefundWorkNotPerformed.Text = "Refund (work not performed)";
-			this.menuItemAddRefundWorkNotPerformed.Name = "menuItemAddRefundWorkNotPerformed";
 			this.menuItemAddRefundWorkNotPerformed.Click += new System.EventHandler(this.menuItemAddRefund_Click);
 			// 
 			// gridPatInfo
@@ -1706,6 +1705,13 @@
 			this.ToolBarMain.TabIndex = 47;
 			this.ToolBarMain.ButtonClick += new OpenDental.UI.ODToolBarButtonClickEventHandler(this.ToolBarMain_ButtonClick);
 			// 
+			// menuItemDeletePayPlanCharge
+			// 
+			this.menuItemDeletePayPlanCharge.Index = 2;
+			this.menuItemDeletePayPlanCharge.Text = "Delete Charge";
+			this.menuItemDeletePayPlanCharge.Visible = false;
+			this.menuItemDeletePayPlanCharge.Click += new System.EventHandler(this.menuItemDeletePayPlanCharge_Click);
+			// 
 			// ControlAccount
 			// 
 			this.Controls.Add(this.groupBoxIndDis);
@@ -1920,5 +1926,6 @@
 		private System.Windows.Forms.MenuItem menuItemAllocateUnearned;
 		private System.Windows.Forms.Label labelDisRem;
 		private DashIndividualDiscount groupBoxIndDis;
+		private System.Windows.Forms.MenuItem menuItemDeletePayPlanCharge;
 	}
 }
