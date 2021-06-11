@@ -1271,6 +1271,12 @@ namespace OpenDental {
 			if(!CanAttachLabFee(isSilent:false,listProcNumsReg,listProcNumsLab)) {
 				return;
 			}
+			List<ClaimProc> listClaimProcsForProc = ClaimProcs.RefreshForProc(listProcNumsReg[0]);
+			Procedure procedure = Procedures.GetOneProc(listProcNumsReg[0],false);
+			if(Procedures.IsAttachedToClaim(procedure,listClaimProcsForProc)) {
+				MsgBox.Show(this,Lan.g(this,"Cannot attach a lab fee to a procedure already on a claim."));
+				return;
+			}
 			//We only alter the lab procedure(s), not the regular procedure.
 			Procedure procLab=null;
 			Procedure procOld;
@@ -5388,12 +5394,6 @@ namespace OpenDental {
 				if(!isSilent) {
 					MsgBox.Show(this,"Only one of the selected procedures may be a regular non-lab procedure as defined in Procedure Codes.");
 				}
-				return false;
-			}
-			List<ClaimProc> listClaimProcsForProc = ClaimProcs.RefreshForProc(procNumsReg[0]);
-			Procedure procedure = Procedures.GetOneProc(procNumsReg[0],false);
-			if(Procedures.IsAttachedToClaim(procedure,listClaimProcsForProc)) {
-				MsgBox.Show(this,Lan.g(this,"Cannot attach a lab fee to a procedure already on a claim."));
 				return false;
 			}
 			return true;
