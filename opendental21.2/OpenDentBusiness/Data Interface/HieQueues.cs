@@ -77,7 +77,7 @@ namespace OpenDentBusiness {
 				return "No HIE queues to process.";
 			}
 			List<long> listPatNumsDistinct=listHieQueuesToProcess.Select(x => x.PatNum).Distinct().ToList();
-			List<Patient> listPatients=Patients.GetLimForPats(listPatNumsDistinct,doIncludeClinicNum:true);
+			List<Patient> listPatients=Patients.GetMultPats(listPatNumsDistinct).ToList();
 			List<PatPlan> listPatPlans=PatPlans.GetPatPlansForPats(listPatNumsDistinct);
 			List<InsSub> listInsSubs=InsSubs.GetMany(listPatPlans.Select(x => x.InsSubNum).ToList());
 			List<InsPlan> listInsPlans=InsPlans.GetPlans(listInsSubs.Select(x => x.PlanNum).ToList());
