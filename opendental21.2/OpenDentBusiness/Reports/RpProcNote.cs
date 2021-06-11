@@ -38,10 +38,10 @@ namespace OpenDentBusiness {
 			}
 			if(includeUnsignedNotes) {
 				if(includeNoNotes) {
-					whereNotesClause="AND (n1.ProcNum IS NOT NULL OR hasNotes.PatNum IS NULL OR unsignedNotes.ProcNum IS NOT NULL)";
+					whereNotesClause+="AND (n1.ProcNum IS NOT NULL OR hasNotes.PatNum IS NULL OR unsignedNotes.ProcNum IS NOT NULL)";
 				}
 				else {
-					whereNotesClause="AND (n1.ProcNum IS NOT NULL OR unsignedNotes.ProcNum IS NOT NULL)";
+					whereNotesClause+="AND (n1.ProcNum IS NOT NULL OR unsignedNotes.ProcNum IS NOT NULL)";
 				}
 				whereUnsignedNote=@"
 					LEFT JOIN procnote unsignedNotes ON unsignedNotes.ProcNum=procedurelog.ProcNum
