@@ -1389,7 +1389,7 @@ namespace OpenDental{
 					for(int i=1;i<=GetListLabsForProc(procedure.ProcNum,claimProc).Count;i++) {
 						gridProc.SetSelected(index+i,true);//Labs are grouped with their parent procedure. See FillGrids().
 					}
-					return;
+					continue;
 				}
 				else if(procedure.ProcNumLab!=0) {//This is a lab procedure.
 					gridProc.SetSelected(index-1,true);//Guaranteed the row above is either a parent or another lab.  See FillGrids().
@@ -1403,6 +1403,7 @@ namespace OpenDental{
 					}
 				}
 			}
+			return;
 		}
 
 		///<summary>Takes in the appropriate ProcNum and current claimproc to get the number of claimprocs associated with that procedure</summary>
@@ -1893,6 +1894,11 @@ namespace OpenDental{
 					for(int i=0;i<formClaimPayTotal.ClaimProcsToEdit.Length;i++){
 						ClaimProcs.Update(formClaimPayTotal.ClaimProcsToEdit[i]);
 					}
+				}
+			}
+			if(!areAllReceived()) {
+				if(MsgBox.Show(MsgBoxButtons.YesNo, "Not all claim procedures on the claim are marked received. Would you like to mark them all as received?")) {
+					markAllReceived();
 				}
 			}
 			_isPaymentEntered=true;
@@ -3508,35 +3514,43 @@ namespace OpenDental{
 			Claims.Delete(_claimCur,list835Attaches);
 		}
 
+		private bool areAllReceived() {
+			bool areAllReceived=true;
+			for(int i = 0;i<_listClaimProcsForClaim.Count;i++) {
+				if(((ClaimProc)_listClaimProcsForClaim[i]).Status==ClaimProcStatus.NotReceived) {
+					areAllReceived=false;
+				}
+			}
+			return areAllReceived;
+		}
+
+		private void markAllReceived() {
+			for(int i = 0;i<_listClaimProcsForClaim.Count;i++) {
+				if(_listClaimProcsForClaim[i].Status==ClaimProcStatus.NotReceived) {
+					//ClaimProcs.Cur=(ClaimProc)ClaimProcs.ForClaim[i];
+					_listClaimProcsForClaim[i].Status=ClaimProcStatus.Received;
+					//We set the DateCP to Today's date when the user presses the buttons By Total, By Proc or Supplemental.
+					//When there is a no payment claim, the user might simply change the claim status to received and press OK instead of entering payments the normal way, since there is no check.
+					//Logically, we are changing claimproc status to received, and the claimproc will now be treated as a payment in the reports.
+					//If we did not update DateCP, then DateCP for a zero payment claim would still be the procedure treatment planned date as much as a year ago, so the claimproc writeoffs (if present) would be accidentally back dated.
+					_listClaimProcsForClaim[i].DateCP=DateTime.Today;
+					_listClaimProcsForClaim[i].DateEntry=DateTime.Now;//date it was set rec'd
+					ClaimProcs.Update(_listClaimProcsForClaim[i]);
+				}
+			}
+		}
+
 		private void butOK_Click(object sender, System.EventArgs e) {
 			if(!ClaimIsValid()){
 				return;
 			}
 			//if status is received, all claimprocs must also be received.
 			if(comboClaimStatus.SelectedIndex==_listClaimStatus.IndexOf(ClaimStatus.Received)) {
-				bool areAllReceived=true;
-				for(int i=0;i<_listClaimProcsForClaim.Count;i++){
-					if(((ClaimProc)_listClaimProcsForClaim[i]).Status==ClaimProcStatus.NotReceived){
-						areAllReceived=false;
-					}
-				}
-				if(!areAllReceived){
+				if(!areAllReceived()){
 					if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"All items will be marked received.  Continue?")){
 						return;
 					}
-					for(int i=0;i<_listClaimProcsForClaim.Count;i++){
-						if(_listClaimProcsForClaim[i].Status==ClaimProcStatus.NotReceived){
-							//ClaimProcs.Cur=(ClaimProc)ClaimProcs.ForClaim[i];
-							_listClaimProcsForClaim[i].Status=ClaimProcStatus.Received;
-							//We set the DateCP to Today's date when the user presses the buttons By Total, By Proc or Supplemental.
-							//When there is a no payment claim, the user might simply change the claim status to received and press OK instead of entering payments the normal way, since there is no check.
-							//Logically, we are changing claimproc status to received, and the claimproc will now be treated as a payment in the reports.
-							//If we did not update DateCP, then DateCP for a zero payment claim would still be the procedure treatment planned date as much as a year ago, so the claimproc writeoffs (if present) would be accidentally back dated.
-							_listClaimProcsForClaim[i].DateCP=DateTime.Today;
-							_listClaimProcsForClaim[i].DateEntry=DateTime.Now;//date it was set rec'd
-							ClaimProcs.Update(_listClaimProcsForClaim[i]);
-						}
-					}
+					markAllReceived();
 				}
 			}
 			else{//claim is any status except received
