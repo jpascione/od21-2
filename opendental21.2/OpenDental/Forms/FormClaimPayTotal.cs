@@ -305,7 +305,7 @@ namespace OpenDental {
 			}
 		}
 
-		private bool SaveGridChanges(){
+		private bool SaveGridChanges(bool skipChecks=false){
 			//validate all grid cells
 			double dbl=0;
 			int deductIdx=gridMain.ListGridColumns.GetIndex(Lan.g("TableClaimProc","Deduct"));
@@ -343,11 +343,13 @@ namespace OpenDental {
 					return false;
 				}
 			}
-			if(IsWriteOffGreaterThanProcFee()) {
-				return false;
-			}
-			if(!isClaimProcGreaterThanProcFee()) {
-				return false;
+			if(!skipChecks) {
+				if(IsWriteOffGreaterThanProcFee()) {
+					return false;
+				}
+				if(!isClaimProcGreaterThanProcFee()) {
+					return false;
+				}
 			}
 			for(int i=0;i<ClaimProcsToEdit.Length;i++) {
 				ClaimProcsToEdit[i].DedApplied=PIn.Double(gridMain.ListGridRows[i].Cells[deductIdx].Text);
@@ -519,7 +521,7 @@ namespace OpenDental {
 					return;
 				}
 			}
-			if(!SaveGridChanges()) {
+			if(!SaveGridChanges(skipChecks:true)) {
 				return;
 			}
 			bool isCanadian=CultureInfo.CurrentCulture.Name.EndsWith("CA");//Canadian. en-CA or fr-CA 
@@ -587,9 +589,10 @@ namespace OpenDental {
 					//((Procedure)Procedures.HList[ClaimProcsToEdit[i].ProcNum]).ProcFee
 					-ClaimProcsToEdit[i].DedApplied
 					-ClaimProcsToEdit[i].InsPayAmt;
-				if(unpaidAmt > 0){
-					ClaimProcsToEdit[i].WriteOff=unpaidAmt;
+				if(unpaidAmt <= 0) { // clear out the writeoff if determined to be negative or 0
+					ClaimProcsToEdit[i].WriteOff = 0;
 				}
+					ClaimProcsToEdit[i].WriteOff=unpaidAmt;
 			}
 			FillGrid();
 		}
