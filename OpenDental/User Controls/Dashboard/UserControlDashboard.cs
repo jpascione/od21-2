@@ -206,6 +206,8 @@ namespace OpenDental {
 				_actionDashboardContentsChanged?.Invoke();
 				if(!_isLoggingOff) {
 					_actionDashboardClosing?.Invoke();
+					_actionDashboardContentsChanged=null;
+					_actionDashboardClosing=null;
 				}
 				_threadRefresh?.QuitSync(100);
 			}
