@@ -236,11 +236,13 @@ namespace OpenDentBusiness{
 			List<PayPlan> listPayPlans=PayPlans.GetAllForCharges(listCharges);
 			foreach(PayPlanCharge chargeCur in listCharges) {
 				PayPlan planForCharge=listPayPlans.FirstOrDefault(x=>x.PayPlanNum==chargeCur.PayPlanNum);
+				if(planForCharge.IsDynamic) { //Dynamic payment plan charges only get issued when they're due, thus should not have their dates changed.
+					continue;
+				}
 				chargeCur.ChargeDate=DateTime.MaxValue;
 				//Since Dynamic PaymentPlans only create charge debits that are explicitly linked to procs,
 				//we need to check for Procs going back to treatment planned, otherwise the debit will be removed.
-				if(proc.ProcStatus==ProcStat.C 
-					|| (proc.ProcStatus==ProcStat.TP && planForCharge.IsDynamic)) 
+				if(proc.ProcStatus==ProcStat.C) 
 				{
 					chargeCur.ChargeDate=proc.ProcDate;
 				}
