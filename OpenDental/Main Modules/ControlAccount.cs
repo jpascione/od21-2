@@ -308,6 +308,15 @@ namespace OpenDental {
 				menuItemAddRefundOverpayment.Enabled=false;
 				menuItemAddRefundWorkNotPerformed.Enabled=false;
 			}
+			//Delete PayPlan Charge--------------------------------------------------------------------------------------------
+			menuItemDeletePayPlanCharge.Visible=false;
+			for(int i = 0;i<listSelectedRows.Count;i++) {
+				long payPlanChargeNum=PIn.Long(table.Rows[listSelectedRows[i]]["PayPlanChargeNum"].ToString());
+				if(payPlanChargeNum==0) {
+					continue;
+				}
+				menuItemDeletePayPlanCharge.Visible=true;
+			}
 		}
 
 		private void contextMenuPayment_Popup(object sender, EventArgs e){
@@ -1049,6 +1058,33 @@ namespace OpenDental {
 
 		private void menuItemAllocateUnearned_Click(object sender,EventArgs e) {
 			toolBarButPay_Click(0,isPrePay:true,isIncomeTransfer:true);
+		}
+
+		private void menuItemDeletePayPlanCharge_Click(object sender,EventArgs e) {
+			DataTable table=_dataSetMain.Tables["account"];
+			List<int> listSelectedRows=gridAccount.SelectedIndices.ToList();
+			List<long> listSelectedPayPlanChargeNums=new List<long>();
+			List<long> listPayPlanNums=listSelectedRows
+				.FindAll(x=>PIn.Long(table.Rows[x]["PayPlanChargeNum"].ToString())!=0)
+				.Select(x=>PIn.Long(table.Rows[x]["PayPlanNum"].ToString())).ToList();
+			List<long> listDynamicPayPlanNums=PayPlans.GetMany(listPayPlanNums.Distinct().ToArray()).FindAll(x=>x.IsDynamic).Select(x => x.PayPlanNum).ToList();
+			listSelectedRows
+				.FindAll(x=>PIn.Long(table.Rows[x]["PayPlanChargeNum"].ToString())!=0 && ListTools.In(PIn.Long(table.Rows[x]["PayPlanNum"].ToString()),listDynamicPayPlanNums))
+				.ForEach(x=>listSelectedPayPlanChargeNums.Add(PIn.Long(table.Rows[x]["PayPlanChargeNum"].ToString())));
+			List<PaySplit> listSplitsForCharges=PaySplits.GetForPayPlanCharges(listSelectedPayPlanChargeNums);
+			List<long> listPayPlanChargeNumsDeleting=new List<long>();
+			for(int i = 0;i<listSelectedPayPlanChargeNums.Count;i++) {
+				if(!listSplitsForCharges.Any(x => x.PayPlanChargeNum==listSelectedPayPlanChargeNums[i])) {
+					listPayPlanChargeNumsDeleting.Add(listSelectedPayPlanChargeNums[i]);
+				}
+			}
+			if(listSelectedPayPlanChargeNums.Count > listPayPlanChargeNumsDeleting.Count) {
+				MsgBox.Show(Lan.g(this,"One or more of the selected charges have payments attached. Only charges without splits will be deleted."));
+			}
+			PayPlanCharges.DeleteMany(listPayPlanChargeNumsDeleting);
+			if(listPayPlanChargeNumsDeleting.Count > 0) {
+				ModuleSelected(_patCur.PatNum);
+			}
 		}
 
 		private void MenuItemDynamicPayPlan_Click(object sender,EventArgs e) {
@@ -4104,6 +4140,7 @@ namespace OpenDental {
 				}
 			}
 		}
+
 
 
 		#endregion Methods - Helpers
