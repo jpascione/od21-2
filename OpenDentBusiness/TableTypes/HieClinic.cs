@@ -44,11 +44,14 @@ namespace OpenDentBusiness {
 
 		}
 
-		public HieClinic(long clinicNum,TimeSpan timeOfDateExportCCD,bool isEnabled=true,HieCarrierFlags carrierFlags=HieCarrierFlags.AllCarriers) {
+		public HieClinic(long clinicNum,TimeSpan timeOfDateExportCCD,bool isEnabled=true,
+			HieCarrierFlags carrierFlags=HieCarrierFlags.AllCarriers,string pathExportCCD="") 
+		{
 			ClinicNum=clinicNum;
 			TimeOfDayExportCCD=timeOfDateExportCCD;
 			IsEnabled=isEnabled;
 			SupportedCarrierFlags=carrierFlags;
+			PathExportCCD=pathExportCCD;
 		}
 	}
 
