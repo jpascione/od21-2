@@ -29,8 +29,14 @@ namespace OpenDental {
 
 		private void AddNeededHieClinic(long clinicNum) {
 			if(!_listHieClinics.Any(x => x.ClinicNum==clinicNum)) {
-				//Default to 9pm and enabled
-				_listHieClinics.Add(new HieClinic(clinicNum,TimeSpan.FromHours(21),isEnabled:true));
+				HieClinic hieClinicHQ=_listHieClinics.FirstOrDefault(x => x.ClinicNum==0);
+				if(hieClinicHQ==null) {
+					//Default HQ Time of day export to 9pm and enabled
+					hieClinicHQ=new HieClinic(clinicNum,TimeSpan.FromHours(21),isEnabled:true);
+				}
+				//Default new HIE clinics to the HQ values.
+				_listHieClinics.Add(new HieClinic(clinicNum,hieClinicHQ.TimeOfDayExportCCD,
+					isEnabled:true,carrierFlags:hieClinicHQ.SupportedCarrierFlags,pathExportCCD:hieClinicHQ.PathExportCCD));
 			}
 		}
 

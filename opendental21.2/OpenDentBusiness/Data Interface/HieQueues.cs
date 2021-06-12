@@ -82,6 +82,7 @@ namespace OpenDentBusiness {
 			List<InsSub> listInsSubs=InsSubs.GetMany(listPatPlans.Select(x => x.InsSubNum).ToList());
 			List<InsPlan> listInsPlans=InsPlans.GetPlans(listInsSubs.Select(x => x.PlanNum).ToList());
 			List<Carrier> listCarriers=Carriers.GetCarriers(listInsPlans.Select(x => x.CarrierNum).ToList());
+			HieClinic hieClinicHQ=listHieClinicEnabled.FirstOrDefault(x => x.ClinicNum==0);
 			List<long> listPatNumsProcessed=new List<long>();
 			//Hie queue rows should only be valid for one day. This list will keep track of patnums that could not be processed.
 			List<long> listPatNumsFiltered=new List<long>();
@@ -95,10 +96,10 @@ namespace OpenDentBusiness {
 						continue;
 					}
 					//Get HIE clinic that is associated to the patient's clinic
-					HieClinic hieClinicForPat=listHieClinicEnabled.FirstOrDefault(x => x.ClinicNum==patCur.ClinicNum);
+					HieClinic hieClinicForPat=listHieClinicEnabled.FirstOrDefault(x => x.ClinicNum==patCur.ClinicNum)??hieClinicHQ;
 					if(hieClinicForPat==null) {
 						listPatNumsFiltered.Add(listHieQueuesToProcess[i].PatNum);
-						listLogMsgs.Add($"No HIE clinic found for ClinicNum '{patCur.ClinicNum}'.");
+						listLogMsgs.Add($"No HIE clinic found for ClinicNum '{patCur.ClinicNum}' or HQ.");
 						continue;
 					}
 					if(!hieClinicForPat.IsTimeToProcess()) {
