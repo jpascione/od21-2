@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Xml.Serialization;
 
 namespace OpenDentBusiness {
-	///<summary>ActiveInstances are used to track OD Cloud sessions.</summary>
+	///<summary>ActiveInstances are used to track OD sessions.</summary>
 	[Serializable]
 	public class ActiveInstance:TableBase {
 		///<summary>Primary key</summary>
