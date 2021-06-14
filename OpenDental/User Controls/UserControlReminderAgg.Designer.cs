@@ -117,7 +117,7 @@
 			this.groupBoxEmailSubjAggShared.Size = new System.Drawing.Size(625, 66);
 			this.groupBoxEmailSubjAggShared.TabIndex = 12;
 			this.groupBoxEmailSubjAggShared.TabStop = false;
-			this.groupBoxEmailSubjAggShared.Text = "Aggregated E-mail Subject";
+			this.groupBoxEmailSubjAggShared.Text = "Aggregated Email Subject";
 			// 
 			// labelEmailSubjAggShared
 			// 
@@ -152,7 +152,7 @@
 			this.groupBoxEmailAggShared.Size = new System.Drawing.Size(625, 227);
 			this.groupBoxEmailAggShared.TabIndex = 14;
 			this.groupBoxEmailAggShared.TabStop = false;
-			this.groupBoxEmailAggShared.Text = "Aggregated E-mail Template";
+			this.groupBoxEmailAggShared.Text = "Aggregated Email Template";
 			// 
 			// butEditEmail
 			// 
@@ -196,7 +196,7 @@
 			this.groupBoxEmailAggPerAppt.Size = new System.Drawing.Size(625, 134);
 			this.groupBoxEmailAggPerAppt.TabIndex = 16;
 			this.groupBoxEmailAggPerAppt.TabStop = false;
-			this.groupBoxEmailAggPerAppt.Text = "Aggregated E-mail Template Per Appointment";
+			this.groupBoxEmailAggPerAppt.Text = "Aggregated Email Template Per Appointment";
 			// 
 			// labelEmailAggPerAppt
 			// 
