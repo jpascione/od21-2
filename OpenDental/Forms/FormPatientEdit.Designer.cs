@@ -2052,7 +2052,7 @@ namespace OpenDental{
             this.odDatePickerBirthDate.Location = new System.Drawing.Point(97, 263);
             this.odDatePickerBirthDate.Name = "odDatePickerBirthDate";
             this.odDatePickerBirthDate.Size = new System.Drawing.Size(218, 23);
-            this.odDatePickerBirthDate.TabIndex = 56;
+            this.odDatePickerBirthDate.TabIndex = 6;
             this.odDatePickerBirthDate.Leave += new System.EventHandler(this.odDatePickerBirthDate_Validated);
             // 
             // FormPatientEdit
