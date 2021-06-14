@@ -45,6 +45,7 @@ namespace OpenDental {
 				textTemplateSms.Enabled=false;
 			}
 			if(Rule.TypeCur==ApptReminderType.Arrival) {
+				butEditEmail.Visible=false;
 				labelEmail.Visible=false;
 				textTemplateSubject.Visible=false;
 				browserEmailBody.Visible=false;
