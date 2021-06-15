@@ -179,7 +179,7 @@ namespace OpenDentBusiness {
 				Userods.GetTableFromCache(false);
 			}
 			protected override bool IsInListShort(Userod userod) {
-				return !userod.IsHidden && userod.UserNumCEMT==0;
+				return !userod.IsHidden;
 			}
 		}
 
