@@ -9786,10 +9786,6 @@ namespace OpenDental {
 					return;
 				}
 			}
-			if(ODBuild.IsTrial() && procButton==null) {//Quick button
-				MsgBox.Show(this,"Quick buttons do not work in the trial version because dummy codes are being used instead of real codes.  Just to the left, change to a different category to see other procedure buttons available which do work.");
-				return;
-			}
 			bool isValid;
 			TreatmentArea tArea;
 			int quadCount=0;//automates quadrant codes.
