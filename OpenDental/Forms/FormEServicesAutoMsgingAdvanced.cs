@@ -151,7 +151,7 @@ namespace OpenDental {
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g(this,"Send Arrival SMS"),100,HorizontalAlignment.Center) { Tag=_listExcludeArrivalSendNums});
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g(this,"Send Arrival Response SMS"),120,HorizontalAlignment.Center) 
 				{ Tag=_listExcludeArrivalResponseNums});
-			gridMain.ListGridColumns.Add(new GridColumn(Lan.g(this,"Change on eClipboard Checkin"), 140, HorizontalAlignment.Center) 
+			gridMain.ListGridColumns.Add(new GridColumn(Lan.g(this,"Change on eClipboard Check-in"), 140, HorizontalAlignment.Center) 
 				{ Tag=_listEclipboardExcludeNums});
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g(this,"Enable BYOD"),70,HorizontalAlignment.Center) { Tag=_listByodEnabledNums});
 			gridMain.ListGridRows.Clear();
