@@ -141,6 +141,7 @@ namespace OpenDental {
 			#endregion Reports Tab
 			#region Manage Tab
 			checkEra835sRefreshOnLoad.Checked=PrefC.GetBool(PrefName.EraRefreshOnLoad);
+			checkEra835sStrictClaimMatching.Checked=PrefC.GetBool(PrefName.EraStrictClaimMatching);
 			#endregion Manage Tab
 		}
 
@@ -291,6 +292,7 @@ namespace OpenDental {
 				| Prefs.UpdateInt(PrefName.EnterpriseExactMatchPhoneNumDigits,PIn.Int(textPhoneNumDigits.Text))
 				| Prefs.UpdateBool(PrefName.EnterpriseAllowRefreshWhileTyping,checkEnterpriseAllowRefresh.Checked)
 				| Prefs.UpdateBool(PrefName.EraRefreshOnLoad,checkEra835sRefreshOnLoad.Checked)
+				| Prefs.UpdateBool(PrefName.EraStrictClaimMatching,checkEra835sStrictClaimMatching.Checked)
 			)
 			{
 				hasChanges=true;

@@ -531,6 +531,12 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 		}//End of 20_5_57() method
 
+		private static void To20_5_61() {
+			string command;
+			command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraStrictClaimMatching','0')"; //Default to false.
+			Db.NonQ(command);
+		}//End of 20_5_61() method
+
 		private static void To21_1_1() {
 			string command;
 			DataTable table;
@@ -799,6 +805,14 @@ namespace OpenDentBusiness {
 				Db.NonQ(command);
 			}
 		}//End of 21_1_31() method
+
+		private static void To21_1_35() {
+			string command="SELECT * FROM preference WHERE PrefName='EraStrictClaimMatching'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraStrictClaimMatching','0')"; //Default to false.
+				Db.NonQ(command);
+			}
+		}//End of 21_1_35() method
 
 		private static void To21_2_1() {
 			string command;
@@ -1231,5 +1245,13 @@ namespace OpenDentBusiness {
 				) DEFAULT CHARSET=utf8";
 			Db.NonQ(command);
 		}//End of 21_2_7() method
+
+		private static void To21_2_8() {
+			string command="SELECT * FROM preference WHERE PrefName='EraStrictClaimMatching'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraStrictClaimMatching','0')"; //Default to false.
+				Db.NonQ(command);
+			}
+		}//End of 21_2_8() method
 	}
 }
