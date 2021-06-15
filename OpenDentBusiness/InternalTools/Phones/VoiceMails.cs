@@ -14,7 +14,7 @@ namespace OpenDentBusiness{
 
 		///<summary>The PatNum for 'Misc.' which is the patient we attach voice mails to if the phone number is not found.
 		///Needs to be public because other projects (e.g. PhoneTrackingServer) use this constant.</summary>
-		public const long MiscPatNum=48015;
+		public const long MiscPatNum=77682;
 
 		///<summary>Gets all voice mails.</summary>
 		public static List<VoiceMail> GetAll(bool includeNonDbColumns=true,bool includeDeleted=false) {
