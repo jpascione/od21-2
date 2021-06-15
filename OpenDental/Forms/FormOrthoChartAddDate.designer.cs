@@ -31,12 +31,14 @@ namespace OpenDental{
 			this.label2 = new System.Windows.Forms.Label();
 			this.comboProv = new OpenDental.UI.ComboBoxOD();
 			this.butToday = new OpenDental.UI.Button();
+			this.butNow = new OpenDental.UI.Button();
+			this.labelOptional = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// butOK
 			// 
 			this.butOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butOK.Location = new System.Drawing.Point(159, 130);
+			this.butOK.Location = new System.Drawing.Point(239, 130);
 			this.butOK.Name = "butOK";
 			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 3;
@@ -46,7 +48,7 @@ namespace OpenDental{
 			// butCancel
 			// 
 			this.butCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butCancel.Location = new System.Drawing.Point(240, 130);
+			this.butCancel.Location = new System.Drawing.Point(320, 130);
 			this.butCancel.Name = "butCancel";
 			this.butCancel.Size = new System.Drawing.Size(75, 24);
 			this.butCancel.TabIndex = 2;
@@ -88,7 +90,6 @@ namespace OpenDental{
 			// 
 			// butToday
 			// 
-			this.butToday.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.butToday.Location = new System.Drawing.Point(225, 29);
 			this.butToday.Name = "butToday";
 			this.butToday.Size = new System.Drawing.Size(75, 24);
@@ -96,9 +97,29 @@ namespace OpenDental{
 			this.butToday.Text = "Today";
 			this.butToday.Click += new System.EventHandler(this.butToday_Click);
 			// 
+			// butNow
+			// 
+			this.butNow.Location = new System.Drawing.Point(306, 29);
+			this.butNow.Name = "butNow";
+			this.butNow.Size = new System.Drawing.Size(75, 24);
+			this.butNow.TabIndex = 9;
+			this.butNow.Text = "Now";
+			this.butNow.Click += new System.EventHandler(this.butNow_Click);
+			// 
+			// labelOptional
+			// 
+			this.labelOptional.Location = new System.Drawing.Point(277, 65);
+			this.labelOptional.Name = "labelOptional";
+			this.labelOptional.Size = new System.Drawing.Size(68, 17);
+			this.labelOptional.TabIndex = 10;
+			this.labelOptional.Text = "(optional)";
+			this.labelOptional.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// FormOrthoChartAddDate
 			// 
-			this.ClientSize = new System.Drawing.Size(327, 166);
+			this.ClientSize = new System.Drawing.Size(407, 166);
+			this.Controls.Add(this.labelOptional);
+			this.Controls.Add(this.butNow);
 			this.Controls.Add(this.butToday);
 			this.Controls.Add(this.comboProv);
 			this.Controls.Add(this.label2);
@@ -125,5 +146,7 @@ namespace OpenDental{
 		private System.Windows.Forms.Label label2;
 		private UI.ComboBoxOD comboProv;
 		private UI.Button butToday;
+		private UI.Button butNow;
+		private System.Windows.Forms.Label labelOptional;
 	}
 }

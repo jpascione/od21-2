@@ -31,13 +31,27 @@ namespace OpenDentBusiness{
 			return Crud.OrthoChartCrud.SelectMany(command);
 		}
 
+		///<summary></summary>
+		public static List<OrthoChart> GetByOrthoChartRowNums(List<long> listOrthoChartRowNums) {
+			if(listOrthoChartRowNums.IsNullOrEmpty()) {
+				return new List<OrthoChart>();
+			}
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<List<OrthoChart>>(MethodBase.GetCurrentMethod(),listOrthoChartRowNums);
+			}
+			string command=$"SELECT * FROM orthochart WHERE OrthoChartRowNum IN({string.Join(",",listOrthoChartRowNums.Select(x => POut.Long(x)))}) ORDER BY OrthoChartNum";
+			return Crud.OrthoChartCrud.SelectMany(command);
+		}
+
 		///<summary>Gets all distinct field names used by any ortho chart.  Useful for displaying the "available" display fields.</summary>
 		public static List<string> GetDistinctFieldNames() {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetObject<List<string>>(MethodBase.GetCurrentMethod());
 			}
 			string command="SELECT FieldName FROM orthochart GROUP BY FieldName";
-			return Db.GetListString(command);
+			List<string> listFieldNames=Db.GetListString(command);
+			listFieldNames.Add("Signature");//OrthoChart will always have a Signature field.
+			return listFieldNames.Distinct().ToList();
 		}
 
 		///<summary></summary>
@@ -106,12 +120,14 @@ namespace OpenDentBusiness{
 
 		///<summary>Modified Sync pattern for the OrthoChart.  We cannot use the standard Sync pattern because we have to perform logging when updating 
 		///or deleting.</summary>
-		public static void Sync(Patient patCur,List<OrthoChart> listNew,List<DisplayField> listOrthDisplayFields,DisplayField displayFieldSignature) {
+		public static void Sync(Patient patCur,List<OrthoChart> listNew,List<DisplayField> listOrthDisplayFields) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
-				Meth.GetVoid(MethodBase.GetCurrentMethod(),patCur,listNew,listOrthDisplayFields,displayFieldSignature);
+				Meth.GetVoid(MethodBase.GetCurrentMethod(),patCur,listNew,listOrthDisplayFields);
 				return;
 			}
-			List<OrthoChart> listDB=GetAllForPatient(patCur.PatNum);
+			List<OrthoChartRow> listOrthChartRowsForPat=OrthoChartRows.GetAllForPatient(patCur.PatNum,doIncludeOrthoCharts:false);
+			List<OrthoChart> listDB=GetByOrthoChartRowNums(listOrthChartRowsForPat.Select(x => x.OrthoChartRowNum).ToList());
+			//This code is mostly a copy of the Crud sync.  Differences include sort and logging.
 			//Inserts, updates, or deletes database rows to match supplied list.
 			//Adding items to lists changes the order of operation. All inserts are completed first, then updates, then deletes.
 			List<OrthoChart> listIns    =new List<OrthoChart>();
@@ -129,8 +145,8 @@ namespace OpenDentBusiness{
 				}
 			}
 			listNew=listNew.FindAll(x => listColNames.Contains(x.FieldName));
-			listNew.Sort(OrthoCharts.SortDateField);
-			listDB.Sort(OrthoCharts.SortDateField);
+			listNew.Sort(OrthoCharts.Sort);
+			listDB.Sort(OrthoCharts.Sort);
 			int idxNew=0;
 			int idxDB=0;
 			OrthoChart fieldNew;
@@ -157,27 +173,12 @@ namespace OpenDentBusiness{
 					idxDB++;
 					continue;
 				}
-				else if(fieldNew.DateService<fieldDB.DateService && fieldNew.ProvNum==fieldDB.ProvNum) {//newPK less than dbPK, newItem is 'next'
+				else if(fieldNew.OrthoChartRowNum<fieldDB.OrthoChartRowNum) {//newPK less than dbPK, newItem is 'next'
 					listIns.Add(fieldNew);
 					idxNew++;
 					continue;
 				}
-				else if(fieldNew.DateService>fieldDB.DateService && fieldNew.ProvNum==fieldDB.ProvNum) {//dbPK less than newPK, dbItem is 'next'
-					listDel.Add(fieldDB);
-					idxDB++;
-					continue;
-				}
-				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)<0 && fieldNew.ProvNum==fieldDB.ProvNum) {//New Fieldname Comes First
-					listIns.Add(fieldNew);
-					idxNew++;
-					continue;
-				}
-				else if(fieldNew.FieldName.CompareTo(fieldDB.FieldName)>0 && fieldNew.ProvNum==fieldDB.ProvNum) {//DB Fieldname Comes First
-					listDel.Add(fieldDB);
-					idxDB++;
-					continue;
-				}
-				else if(fieldNew.ProvNum!=fieldDB.ProvNum) {
+				else if(fieldNew.OrthoChartRowNum>fieldDB.OrthoChartRowNum) {//dbPK less than newPK, dbItem is 'next'
 					listDel.Add(fieldDB);
 					idxDB++;
 					continue;
@@ -193,10 +194,6 @@ namespace OpenDentBusiness{
 				if(listIns[i].FieldValue=="") {//do not insert new blank values. This happens when fields from today are not used.
 					continue;
 				}
-				//New ortho charts can be created on behalf of another user so only default to the currently logged in user if no UserNum set.
-				if(listIns[i].UserNum==0) {
-					listIns[i].UserNum=Security.CurUser.UserNum;
-				}
 				Insert(listIns[i]);
 			}
 			for(int i=0;i<listUpdNew.Count;i++) {
@@ -210,22 +207,12 @@ namespace OpenDentBusiness{
 					listDel.Add(listUpdDB[i]);
 				}
 				#region security log entry
-				string logText=Lans.g("OrthoCharts","Ortho chart field edited.  Field date")+": "+listUpdNew[i].DateService.ToShortDateString()+"  "
+				string logText=Lans.g("OrthoCharts","Ortho chart field edited. ")
 					+Lans.g("OrthoCharts","Field name")+": "+listUpdNew[i].FieldName+"\r\n";
 				//Do not log the Base64 information into the audit trail if this is a signature column, log some short descriptive text instead.
-				if(displayFieldSignature!=null && listUpdNew[i].FieldName==displayFieldSignature.Description) {//This is the signature box
-					if(listUpdDB[i].FieldValue != "" && listUpdNew[i].FieldValue != "") {
-						logText+=Lans.g("OrthoCharts","Signature modified.")+" ";
-					}
-					else if(listUpdDB[i].FieldValue != "" && listUpdNew[i].FieldValue=="") {
-						logText+=Lans.g("OrthoCharts","Signature deleted.")+" ";
-					}
-				}
-				else {//Not a signature
-					logText+=Lans.g("OrthoCharts","Old value")+": \""+listUpdDB[i].FieldValue+"\"  "
-						+Lans.g("OrthoCharts","New value")+": \""+listUpdNew[i].FieldValue+"\" ";
-				}
-				logText+=listUpdDB[i].DateService.ToString("yyyyMMdd");//This date stamp must be the last 8 characters for new OrthoEdit audit trail entries.
+				logText+=Lans.g("OrthoCharts","Old value")+": \""+listUpdDB[i].FieldValue+"\"  "
+							+Lans.g("OrthoCharts","New value")+": \""+listUpdNew[i].FieldValue+"\" ";
+				logText+=Lans.g("OrthoCharts","OrthoChartRowNum")+": \""+listUpdNew[i].OrthoChartRowNum+"\" ";
 				SecurityLogs.MakeLogEntry(Permissions.OrthoChartEditFull,patCur.PatNum,logText);
 				#endregion
 			}
@@ -287,14 +274,8 @@ namespace OpenDentBusiness{
 			return retVal;//Should be DateTime.MinVal if we are returning here.
 		}
 
-		public static int SortDateField(OrthoChart x,OrthoChart y) {
-			if(x.DateService!=y.DateService) {
-				return x.DateService.CompareTo(y.DateService);
-			}
-			if(x.ProvNum!=y.ProvNum) {
-				return x.ProvNum.CompareTo(y.ProvNum);
-			}
-			return x.FieldName.CompareTo(y.FieldName);
+		public static int Sort(OrthoChart x,OrthoChart y) {
+			return x.OrthoChartNum.CompareTo(y.OrthoChartNum);
 		}
 
 		///<summary>Gets the hashstring for generating signatures.
@@ -316,7 +297,11 @@ namespace OpenDentBusiness{
 				strb.Append(pat.FName);
 				strb.Append(pat.LName);
 			}
-			strb.Append(dateService.ToString("yyyyMMdd"));
+			string strDateService=dateService.ToString("yyyyMMdd");
+			if(dateService.TimeOfDay!=TimeSpan.Zero) {
+				strDateService=dateService.ToString();
+			}
+			strb.Append(strDateService);
 			foreach(OrthoChart orChart in listOrthoCharts.OrderBy(x=>x.FieldName)) {
 				strb.Append(orChart.FieldName);
 				strb.Append(orChart.FieldValue);
