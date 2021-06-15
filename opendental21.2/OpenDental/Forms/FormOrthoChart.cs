@@ -783,15 +783,18 @@ namespace OpenDental {
 		}
 
 		private void butDelete_Click(object sender,EventArgs e) {
-			List<long> listOrthoChartRowNumsSelected=gridMain.SelectedTags<OrthoChartRow>().Select(x => x.OrthoChartRowNum).ToList();
-			if(listOrthoChartRowNumsSelected.Count==0) {
+			OrthoChartRow orthoChartRowSelected=gridMain.SelectedTag<OrthoChartRow>();
+			if(orthoChartRowSelected==null) {
 				MsgBox.Show(this,"Please select an Ortho Chart row first.");
+				return;
+			}
+			if(!Security.IsAuthorized(Permissions.OrthoChartEditFull,orthoChartRowSelected.DateTimeService,false)) {
 				return;
 			}
 			if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"Delete entire row?")) {
 				return;
 			}
-			_listOrthoChartRows.RemoveAll(x => ListTools.In(x.OrthoChartRowNum,listOrthoChartRowNumsSelected));
+			_listOrthoChartRows.RemoveAll(x => x.OrthoChartRowNum==orthoChartRowSelected.OrthoChartRowNum);
 			FillGrid();
 		}
 
