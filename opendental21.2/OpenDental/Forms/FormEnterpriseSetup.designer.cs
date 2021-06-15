@@ -128,6 +128,7 @@ namespace OpenDental {
 			this.label9 = new System.Windows.Forms.Label();
 			this.butOK = new OpenDental.UI.Button();
 			this.tabManage = new System.Windows.Forms.TabPage();
+			this.checkEra835sStrictClaimMatching = new System.Windows.Forms.CheckBox();
 			this.checkEra835sRefreshOnLoad = new System.Windows.Forms.CheckBox();
 			this.tabControlMain.SuspendLayout();
 			this.tabAccount.SuspendLayout();
@@ -1285,6 +1286,7 @@ namespace OpenDental {
 			// 
 			// tabManage
 			// 
+			this.tabManage.Controls.Add(this.checkEra835sStrictClaimMatching);
 			this.tabManage.Controls.Add(this.checkEra835sRefreshOnLoad);
 			this.tabManage.Location = new System.Drawing.Point(4, 22);
 			this.tabManage.Name = "tabManage";
@@ -1292,6 +1294,17 @@ namespace OpenDental {
 			this.tabManage.TabIndex = 8;
 			this.tabManage.Text = "Manage";
 			this.tabManage.UseVisualStyleBackColor = true;
+			// 
+			// checkEra835sStrictClaimMatching
+			// 
+			this.checkEra835sStrictClaimMatching.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkEra835sStrictClaimMatching.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkEra835sStrictClaimMatching.Location = new System.Drawing.Point(154,30);
+			this.checkEra835sStrictClaimMatching.Name = "checkEra835sStrictClaimMatching";
+			this.checkEra835sStrictClaimMatching.Size = new System.Drawing.Size(319,18);
+			this.checkEra835sStrictClaimMatching.TabIndex = 273;
+			this.checkEra835sStrictClaimMatching.Text = "ERA 835s use strict claim date matching";
+			this.checkEra835sStrictClaimMatching.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// checkEra835sRefreshOnLoad
 			// 
@@ -1447,5 +1460,6 @@ namespace OpenDental {
 		private System.Windows.Forms.CheckBox checkEnterpriseAllowRefresh;
 		private System.Windows.Forms.TabPage tabManage;
 		private System.Windows.Forms.CheckBox checkEra835sRefreshOnLoad;
-	}
+        private System.Windows.Forms.CheckBox checkEra835sStrictClaimMatching;
+    }
 }

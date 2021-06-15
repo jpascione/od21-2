@@ -923,6 +923,9 @@ namespace OpenDentBusiness {
 		///Otherwise Control ID UI is not visable and can not be used.</summary>
 		[PrefName(ValueType=PrefValueType.BOOL)]
 		EraShowControlIdFilter,
+		///<summary>Boolean, false by default. When true, will use a list of dates instead of a date range when matching claims in Claims.GetClaimFromX12.</summary>
+		[PrefName(ValueType=PrefValueType.BOOL)]
+		EraStrictClaimMatching,
 		ExportPath,
 		///<summary>Allows guarantor access to all family health information in the patient portal.  Default is 1.</summary>
 		FamPhiAccess,

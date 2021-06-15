@@ -67,6 +67,24 @@ namespace CodeBase {
 			return lowerBound.AddDays(ODRandom.Next(daysInRange));
 		}
 
+		///<summary>Includes the start and end dates. Returns an empty list if the start and end is MinValue.</summary>
+		public static List<DateTime> GetDatesInRange(DateTime dateTimeStart,DateTime dateTimeEnd) {
+			List<DateTime> listDateTimes=new List<DateTime>();
+			if(dateTimeStart!=DateTime.MinValue && dateTimeEnd==DateTime.MinValue) {
+				return ListTools.FromSingle(dateTimeStart);
+			}
+			if(dateTimeStart==DateTime.MinValue && dateTimeEnd!=DateTime.MinValue) {
+				return ListTools.FromSingle(dateTimeEnd);
+            }
+			if(dateTimeStart==DateTime.MinValue && dateTimeEnd==DateTime.MinValue) {
+				return listDateTimes;
+			}
+			for(DateTime dateTime=dateTimeStart;dateTime<=dateTimeEnd;dateTime=dateTime.AddDays(1)) {
+				listDateTimes.Add(dateTime.Date);
+			}
+			return listDateTimes;
+		}
+
 		///<summary>Displays the bytes passed in into a human readable string. E.g. KB, MB, GB, etc.
 		///This method treats 1024 bytes as a single KB instead of 1000 bytes as a single KB.</summary>
 		public static string DisplayBytes(long byteCount) {

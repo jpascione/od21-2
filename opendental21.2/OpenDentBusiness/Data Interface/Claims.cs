@@ -514,21 +514,37 @@ namespace OpenDentBusiness{
 			if(listX12claims.Count==0) {
 				return null;
 			}
-			#region Set dateMin and dateMax for given X12ClaimMatchs for internal claim query below.
-			//Usually claims from the same ERA will all have dates of service within a few weeks of each other.
+			#region Either get a list of dates for given X12ClaimMatches, or a dateMin and dateMax.
+			List<DateTime> listDateTimes=new List<DateTime>();
 			DateTime dateMin=DateTime.MinValue;
-			if(listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Count() > 0) {
-				dateMin=listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Select(x => x.DateServiceStart).Min();//DateServiceStart can be min value for PreAuths.
-			}
 			DateTime dateMax=DateTime.MinValue;
-			if(listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Count() > 0) {
-				dateMax=listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Select(x => x.DateServiceEnd).Max();//DateServiceEnd can be min value for PreAuths.
+			if(PrefC.GetBool(PrefName.EraStrictClaimMatching)) {
+				for(int i=0;i<listX12claims.Count;i++) {
+					listDateTimes.AddRange(MiscUtils.GetDatesInRange(listX12claims[i].DateServiceStart,listX12claims[i].DateServiceEnd));
+					for(int j=0;j<listX12claims[i].List835Procs.Count;j++) {
+						listDateTimes.AddRange(MiscUtils.GetDatesInRange(listX12claims[i].List835Procs[j].DateServiceStart,listX12claims[i].List835Procs[j].DateServiceEnd));
+					}
+				}
+				listDateTimes=listDateTimes.Distinct().ToList();
+				//If there are no dates to consider, return early.
+				if(listDateTimes.Count==0) {
+					return null;
+				}
 			}
-			if(dateMin.Year<1880 || dateMax.Year<1880) {
-				//Service dates are required for us to continue.
-				//In 227s, the claim dates of service are required and should be present.
-				//In 835s, we pull the procedure dates up into the claim dates of service if the claim dates are of service are not present.
-				return null;
+			else {
+				//Usually claims from the same ERA will all have dates of service within a few weeks of each other.
+				if(listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Count() > 0) {
+					dateMin=listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Select(x => x.DateServiceStart).Min();//DateServiceStart can be min value for PreAuths.
+				}
+				if(listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Count() > 0) {
+					dateMax=listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Select(x => x.DateServiceEnd).Max();//DateServiceEnd can be min value for PreAuths.
+				}
+				if(dateMin.Year<1880 || dateMax.Year<1880) {
+					//Service dates are required for us to continue.
+					//In 227s, the claim dates of service are required and should be present.
+					//In 835s, we pull the procedure dates up into the claim dates of service if the claim dates are of service are not present.
+					return null;
+				}
 			}
 			#endregion
 			#region Construct etrans/835 dictionary.  Use for matching loop and internal claim query.
@@ -565,9 +581,17 @@ namespace OpenDentBusiness{
 			}
 			#endregion
 			#region Get List of Claims For Date and Fee Ranges
-			Dictionary<DateTime,List<DataRow>> dictClaims=GetClaimTable(dateMin,dateMax,listTotalClaimFees).Select()
-				.GroupBy(x => PIn.Date(x["DateService"].ToString()))
-				.ToDictionary(x => x.Key,x => x.ToList());
+			Dictionary<DateTime,List<DataRow>> dictClaims;
+			if(PrefC.GetBool(PrefName.EraStrictClaimMatching)) {
+				dictClaims=GetClaimTable(listDateTimes,listTotalClaimFees).Select()
+					.GroupBy(x => PIn.Date(x["DateService"].ToString()))
+					.ToDictionary(x => x.Key,x => x.ToList());
+			}
+			else {
+				dictClaims=GetClaimTable(dateMin,dateMax,listTotalClaimFees).Select()
+					.GroupBy(x => PIn.Date(x["DateService"].ToString()))
+					.ToDictionary(x => x.Key,x => x.ToList());
+			}
 			#endregion
 			#region Get claimProcs for given 835 procNums that are associated to a claim.
 			List<long> listAllEraProcNums=dictMatchesPerClaimId
@@ -842,7 +866,24 @@ namespace OpenDentBusiness{
 
 		///<summary>We always require the claim fee and dates of service to match, then we use additional criteria to wisely choose from the shorter list
 		///of claims.  The list of claims with matching fee and date of service should be very short.  Worst case, the list would contain all of the
-		///claims for a few days if every claim had the same fee (rare).</summary>
+		///claims if every claim had the same fee (rare).</summary>
+		public static DataTable GetClaimTable(List<DateTime> listDateTimes,List<double> listClaimFees) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetTable(MethodBase.GetCurrentMethod(),listDateTimes,listClaimFees);
+			}
+			string command=$@"SELECT claim.ClaimNum,claim.ClaimIdentifier,claim.ClaimStatus,ROUND(ClaimFee,2) ClaimFee,claim.DateService,patient.LName,
+				patient.FName,inssub.SubscriberID
+				FROM claim
+				INNER JOIN patient ON patient.PatNum=claim.PatNum
+				INNER JOIN inssub ON inssub.InsSubNum=claim.InsSubNum AND claim.PlanNum=inssub.PlanNum
+				WHERE DATE(DateService) IN ({string.Join(",",listDateTimes.Select(x => POut.Date(x)))})
+				AND ROUND(ClaimFee,2) IN ({string.Join(",",listClaimFees.Select(x => POut.Double(x)))})";
+			return Db.GetTable(command);
+		}
+
+		///<summary>We always require the claim fee and dates of service to match, then we use additional criteria to wisely choose from the shorter list
+		///of claims.  The list of claims with matching fee and date of service should be very short.  Worst case, the list would contain all of the
+		///claims if every claim had the same fee (rare).</summary>
 		public static DataTable GetClaimTable(DateTime dateMin,DateTime dateMax,List<double> listClaimFees) {
 			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
 				return Meth.GetTable(MethodBase.GetCurrentMethod(),dateMin,dateMax,listClaimFees);
