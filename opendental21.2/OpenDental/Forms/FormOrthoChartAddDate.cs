@@ -31,6 +31,10 @@ namespace OpenDental {
 			textDate.Text=DateTime.Today.ToShortDateString();
 		}
 
+		private void butNow_Click(object sender,EventArgs e) {
+			textDate.Text=DateTime.Now.ToShortDateString()+" "+DateTime.Now.ToShortTimeString();
+		}
+
 		private void butOK_Click(object sender,EventArgs e) {
 			if(!DateTime.TryParse(textDate.Text,out DateSelected)) {
 				MsgBox.Show(this,"Please fix date entry.");
@@ -43,7 +47,5 @@ namespace OpenDental {
 		private void butCancel_Click(object sender,EventArgs e) {
 			DialogResult=DialogResult.Cancel;
 		}
-
-		
 	}
 }

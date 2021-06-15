@@ -42,6 +42,7 @@ namespace OpenDental{
 			this.labelUser = new System.Windows.Forms.Label();
 			this.labelPermAlert = new System.Windows.Forms.Label();
 			this.menuMain = new OpenDental.UI.MenuOD();
+			this.butDelete = new OpenDental.UI.Button();
 			this.tabControl.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -50,9 +51,9 @@ namespace OpenDental{
 			this.butPrint.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.butPrint.Image = global::OpenDental.Properties.Resources.butPrintSmall;
 			this.butPrint.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.butPrint.Location = new System.Drawing.Point(725, 655);
+			this.butPrint.Location = new System.Drawing.Point(725, 653);
 			this.butPrint.Name = "butPrint";
-			this.butPrint.Size = new System.Drawing.Size(85, 24);
+			this.butPrint.Size = new System.Drawing.Size(85, 25);
 			this.butPrint.TabIndex = 118;
 			this.butPrint.Text = "Print";
 			this.butPrint.Click += new System.EventHandler(this.butPrint_Click);
@@ -118,9 +119,9 @@ namespace OpenDental{
 			// butOK
 			// 
 			this.butOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butOK.Location = new System.Drawing.Point(846, 656);
+			this.butOK.Location = new System.Drawing.Point(846, 654);
 			this.butOK.Name = "butOK";
-			this.butOK.Size = new System.Drawing.Size(75, 23);
+			this.butOK.Size = new System.Drawing.Size(75, 24);
 			this.butOK.TabIndex = 109;
 			this.butOK.Text = "OK";
 			this.butOK.UseVisualStyleBackColor = true;
@@ -129,9 +130,9 @@ namespace OpenDental{
 			// butAudit
 			// 
 			this.butAudit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butAudit.Location = new System.Drawing.Point(487, 656);
+			this.butAudit.Location = new System.Drawing.Point(487, 654);
 			this.butAudit.Name = "butAudit";
-			this.butAudit.Size = new System.Drawing.Size(80, 23);
+			this.butAudit.Size = new System.Drawing.Size(80, 24);
 			this.butAudit.TabIndex = 108;
 			this.butAudit.Text = "Audit Trail";
 			this.butAudit.Click += new System.EventHandler(this.butAudit_Click);
@@ -139,9 +140,9 @@ namespace OpenDental{
 			// butUseAutoNote
 			// 
 			this.butUseAutoNote.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.butUseAutoNote.Location = new System.Drawing.Point(96, 656);
+			this.butUseAutoNote.Location = new System.Drawing.Point(96, 654);
 			this.butUseAutoNote.Name = "butUseAutoNote";
-			this.butUseAutoNote.Size = new System.Drawing.Size(80, 23);
+			this.butUseAutoNote.Size = new System.Drawing.Size(80, 24);
 			this.butUseAutoNote.TabIndex = 107;
 			this.butUseAutoNote.Text = "Auto Note";
 			this.butUseAutoNote.Click += new System.EventHandler(this.butUseAutoNote_Click);
@@ -149,9 +150,9 @@ namespace OpenDental{
 			// butAdd
 			// 
 			this.butAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.butAdd.Location = new System.Drawing.Point(10, 656);
+			this.butAdd.Location = new System.Drawing.Point(10, 654);
 			this.butAdd.Name = "butAdd";
-			this.butAdd.Size = new System.Drawing.Size(80, 23);
+			this.butAdd.Size = new System.Drawing.Size(80, 24);
 			this.butAdd.TabIndex = 9;
 			this.butAdd.Text = "Add Row";
 			this.butAdd.UseVisualStyleBackColor = true;
@@ -160,9 +161,9 @@ namespace OpenDental{
 			// butCancel
 			// 
 			this.butCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.butCancel.Location = new System.Drawing.Point(927, 656);
+			this.butCancel.Location = new System.Drawing.Point(927, 654);
 			this.butCancel.Name = "butCancel";
-			this.butCancel.Size = new System.Drawing.Size(75, 23);
+			this.butCancel.Size = new System.Drawing.Size(75, 24);
 			this.butCancel.TabIndex = 7;
 			this.butCancel.Text = "Cancel";
 			this.butCancel.UseVisualStyleBackColor = true;
@@ -247,9 +248,22 @@ namespace OpenDental{
 			this.menuMain.Size = new System.Drawing.Size(1014, 24);
 			this.menuMain.TabIndex = 212;
 			// 
+			// butDelete
+			// 
+			this.butDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.butDelete.Icon = OpenDental.UI.EnumIcons.DeleteX;
+			this.butDelete.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.butDelete.Location = new System.Drawing.Point(182, 654);
+			this.butDelete.Name = "butDelete";
+			this.butDelete.Size = new System.Drawing.Size(80, 24);
+			this.butDelete.TabIndex = 213;
+			this.butDelete.Text = "Delete";
+			this.butDelete.Click += new System.EventHandler(this.butDelete_Click);
+			// 
 			// FormOrthoChart
 			// 
 			this.ClientSize = new System.Drawing.Size(1014, 687);
+			this.Controls.Add(this.butDelete);
 			this.Controls.Add(this.butCancel);
 			this.Controls.Add(this.butOK);
 			this.Controls.Add(this.labelPermAlert);
@@ -298,5 +312,6 @@ namespace OpenDental{
 		private System.Windows.Forms.Label labelUser;
 		private System.Windows.Forms.Label labelPermAlert;
 		private UI.MenuOD menuMain;
+		private UI.Button butDelete;
 	}
 }

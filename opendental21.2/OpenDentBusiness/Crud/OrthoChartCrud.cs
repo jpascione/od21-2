@@ -47,13 +47,14 @@ namespace OpenDentBusiness.Crud{
 			OrthoChart orthoChart;
 			foreach(DataRow row in table.Rows) {
 				orthoChart=new OrthoChart();
-				orthoChart.OrthoChartNum= PIn.Long  (row["OrthoChartNum"].ToString());
-				orthoChart.PatNum       = PIn.Long  (row["PatNum"].ToString());
-				orthoChart.DateService  = PIn.Date  (row["DateService"].ToString());
-				orthoChart.FieldName    = PIn.String(row["FieldName"].ToString());
-				orthoChart.FieldValue   = PIn.String(row["FieldValue"].ToString());
-				orthoChart.UserNum      = PIn.Long  (row["UserNum"].ToString());
-				orthoChart.ProvNum      = PIn.Long  (row["ProvNum"].ToString());
+				orthoChart.OrthoChartNum   = PIn.Long  (row["OrthoChartNum"].ToString());
+				orthoChart.PatNum          = PIn.Long  (row["PatNum"].ToString());
+				orthoChart.DateService     = PIn.Date  (row["DateService"].ToString());
+				orthoChart.FieldName       = PIn.String(row["FieldName"].ToString());
+				orthoChart.FieldValue      = PIn.String(row["FieldValue"].ToString());
+				orthoChart.UserNum         = PIn.Long  (row["UserNum"].ToString());
+				orthoChart.ProvNum         = PIn.Long  (row["ProvNum"].ToString());
+				orthoChart.OrthoChartRowNum= PIn.Long  (row["OrthoChartRowNum"].ToString());
 				retVal.Add(orthoChart);
 			}
 			return retVal;
@@ -72,6 +73,7 @@ namespace OpenDentBusiness.Crud{
 			table.Columns.Add("FieldValue");
 			table.Columns.Add("UserNum");
 			table.Columns.Add("ProvNum");
+			table.Columns.Add("OrthoChartRowNum");
 			foreach(OrthoChart orthoChart in listOrthoCharts) {
 				table.Rows.Add(new object[] {
 					POut.Long  (orthoChart.OrthoChartNum),
@@ -81,6 +83,7 @@ namespace OpenDentBusiness.Crud{
 					            orthoChart.FieldValue,
 					POut.Long  (orthoChart.UserNum),
 					POut.Long  (orthoChart.ProvNum),
+					POut.Long  (orthoChart.OrthoChartRowNum),
 				});
 			}
 			return table;
@@ -100,7 +103,7 @@ namespace OpenDentBusiness.Crud{
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+="OrthoChartNum,";
 			}
-			command+="PatNum,DateService,FieldName,FieldValue,UserNum,ProvNum) VALUES(";
+			command+="PatNum,DateService,FieldName,FieldValue,UserNum,ProvNum,OrthoChartRowNum) VALUES(";
 			if(useExistingPK || PrefC.RandomKeys) {
 				command+=POut.Long(orthoChart.OrthoChartNum)+",";
 			}
@@ -110,7 +113,8 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(orthoChart.FieldName)+"',"
 				+    DbHelper.ParamChar+"paramFieldValue,"
 				+    POut.Long  (orthoChart.UserNum)+","
-				+    POut.Long  (orthoChart.ProvNum)+")";
+				+    POut.Long  (orthoChart.ProvNum)+","
+				+    POut.Long  (orthoChart.OrthoChartRowNum)+")";
 			if(orthoChart.FieldValue==null) {
 				orthoChart.FieldValue="";
 			}
@@ -139,7 +143,7 @@ namespace OpenDentBusiness.Crud{
 			if(isRandomKeys || useExistingPK) {
 				command+="OrthoChartNum,";
 			}
-			command+="PatNum,DateService,FieldName,FieldValue,UserNum,ProvNum) VALUES(";
+			command+="PatNum,DateService,FieldName,FieldValue,UserNum,ProvNum,OrthoChartRowNum) VALUES(";
 			if(isRandomKeys || useExistingPK) {
 				command+=POut.Long(orthoChart.OrthoChartNum)+",";
 			}
@@ -149,7 +153,8 @@ namespace OpenDentBusiness.Crud{
 				+"'"+POut.String(orthoChart.FieldName)+"',"
 				+    DbHelper.ParamChar+"paramFieldValue,"
 				+    POut.Long  (orthoChart.UserNum)+","
-				+    POut.Long  (orthoChart.ProvNum)+")";
+				+    POut.Long  (orthoChart.ProvNum)+","
+				+    POut.Long  (orthoChart.OrthoChartRowNum)+")";
 			if(orthoChart.FieldValue==null) {
 				orthoChart.FieldValue="";
 			}
@@ -166,12 +171,13 @@ namespace OpenDentBusiness.Crud{
 		///<summary>Updates one OrthoChart in the database.</summary>
 		public static void Update(OrthoChart orthoChart) {
 			string command="UPDATE orthochart SET "
-				+"PatNum       =  "+POut.Long  (orthoChart.PatNum)+", "
-				+"DateService  =  "+POut.Date  (orthoChart.DateService)+", "
-				+"FieldName    = '"+POut.String(orthoChart.FieldName)+"', "
-				+"FieldValue   =  "+DbHelper.ParamChar+"paramFieldValue, "
-				+"UserNum      =  "+POut.Long  (orthoChart.UserNum)+", "
-				+"ProvNum      =  "+POut.Long  (orthoChart.ProvNum)+" "
+				+"PatNum          =  "+POut.Long  (orthoChart.PatNum)+", "
+				+"DateService     =  "+POut.Date  (orthoChart.DateService)+", "
+				+"FieldName       = '"+POut.String(orthoChart.FieldName)+"', "
+				+"FieldValue      =  "+DbHelper.ParamChar+"paramFieldValue, "
+				+"UserNum         =  "+POut.Long  (orthoChart.UserNum)+", "
+				+"ProvNum         =  "+POut.Long  (orthoChart.ProvNum)+", "
+				+"OrthoChartRowNum=  "+POut.Long  (orthoChart.OrthoChartRowNum)+" "
 				+"WHERE OrthoChartNum = "+POut.Long(orthoChart.OrthoChartNum);
 			if(orthoChart.FieldValue==null) {
 				orthoChart.FieldValue="";
@@ -207,6 +213,10 @@ namespace OpenDentBusiness.Crud{
 				if(command!="") { command+=",";}
 				command+="ProvNum = "+POut.Long(orthoChart.ProvNum)+"";
 			}
+			if(orthoChart.OrthoChartRowNum != oldOrthoChart.OrthoChartRowNum) {
+				if(command!="") { command+=",";}
+				command+="OrthoChartRowNum = "+POut.Long(orthoChart.OrthoChartRowNum)+"";
+			}
 			if(command=="") {
 				return false;
 			}
@@ -239,6 +249,9 @@ namespace OpenDentBusiness.Crud{
 				return true;
 			}
 			if(orthoChart.ProvNum != oldOrthoChart.ProvNum) {
+				return true;
+			}
+			if(orthoChart.OrthoChartRowNum != oldOrthoChart.OrthoChartRowNum) {
 				return true;
 			}
 			return false;

@@ -9,19 +9,21 @@ namespace OpenDentBusiness {
 		///<summary>Primary key.</summary>
 		[CrudColumn(IsPriKey=true)]
 		public long OrthoChartNum;
-		///<summary>FK to patient.PatNum.</summary>
+		///<summary>Deprecated, use orthochartrow table instead. FK to patient.PatNum.</summary>
 		public long PatNum;
-		///<summary>Date of service.</summary>
+		///<summary>Deprecated, use orthochartrow table instead.  Date of service.</summary>
 		public DateTime DateService;
 		///<summary>Keyed to displayfield.Description.</summary>
 		public string FieldName;
-		///<summary>Stores the text that the user entered or picked.  Can also store signature.</summary>
+		///<summary>Stores the text that the user entered or picked.</summary>
 		[CrudColumn(SpecialType=CrudSpecialColType.TextIsClob)]
 		public string FieldValue;
-		///<summary>FK to userod.UserNum.  The user that created or last edited an ortho chart field.</summary>
+		///<summary>Deprecated, use orthochartrow table instead. FK to userod.UserNum.  The user that created or last edited an ortho chart field.</summary>
 		public long UserNum;
-		///<summary>FK to provider.ProvNum.  Can be 0.</summary>
+		///<summary>Deprecated, use orthochartrow table instead. FK to provider.ProvNum.  Can be 0.</summary>
 		public long ProvNum;
+		///<summary>FK to orthochartrow.OrthoChartRowNum.</summary>
+		public long OrthoChartRowNum;
 
 		///<summary></summary>
 		public OrthoChart Clone() {

@@ -363,6 +363,7 @@
     <Compile Include="Crud\MobileAppDeviceCrud.cs" />
     <Compile Include="Crud\MobileDataByteCrud.cs" />
     <Compile Include="Crud\OrthoCaseCrud.cs" />
+    <Compile Include="Crud\OrthoChartRowCrud.cs" />
     <Compile Include="Crud\OrthoPlanLinkCrud.cs" />
     <Compile Include="Crud\OrthoProcLinkCrud.cs" />
     <Compile Include="Crud\OrthoScheduleCrud.cs" />
@@ -417,6 +418,7 @@
     <Compile Include="Data Interface\ApptGeneralMessageSents.cs" />
     <Compile Include="Data Interface\CareCreditWebResponses.cs" />
     <Compile Include="Data Interface\CloudAddresses.cs" />
+    <Compile Include="Data Interface\OrthoChartRows.cs" />
     <Compile Include="Data Interface\ReferralClinicLinks.cs" />
     <Compile Include="Data Interface\HieClinics.cs" />
     <Compile Include="Data Interface\HieQueues.cs" />
@@ -683,6 +685,7 @@
     <Compile Include="TableTypes\MobileDataByte.cs" />
     <Compile Include="TableTypes\ImagingDevice.cs" />
     <Compile Include="TableTypes\OrthoCase.cs" />
+    <Compile Include="TableTypes\OrthoChartRow.cs" />
     <Compile Include="TableTypes\OrthoPlanLink.cs" />
     <Compile Include="TableTypes\OrthoProcLink.cs" />
     <Compile Include="TableTypes\OrthoSchedule.cs" />
@@ -699,7 +702,7 @@
     <Compile Include="TableTypes\SessionToken.cs" />
     <Compile Include="TableTypes\StatementProd.cs" />
     <Compile Include="TableTypes\TransactionInvoice.cs" />
-	<Compile Include="TableTypes\TreatPlanParam.cs" />
+    <Compile Include="TableTypes\TreatPlanParam.cs" />
     <Compile Include="UI\DpiScale.cs" />
     <Compile Include="UI\ODGridPageNav.cs">
       <SubType>UserControl</SubType>

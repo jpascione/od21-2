@@ -15,9 +15,6 @@ namespace OpenDental {
 	public partial class FormOrthoChart:FormODBase {
 		private PatField[] _arrayPatientFields;
 		private List<DisplayField> _listOrthDisplayFields;
-		///<summary>A stale copy of all ortho charts associated with the selected patient.  Filled on load. This will be the same as what's in the
-		///database.</summary>
-		private List<OrthoChart> _listOrthoChartsInitial;
 		private Patient _patCur;
 		private PatientNote _patNoteCur;
 		private List<string> _listDisplayFieldNames;
@@ -61,34 +58,23 @@ namespace OpenDental {
 
 		private void FormOrthoChart_Load(object sender,EventArgs e) {
 			signatureBoxWrapper.SetAllowDigitalSig(true);
-			_listOrthoChartsInitial=OrthoCharts.GetAllForPatient(_patCur.PatNum);
 			//_listDatesAdded=new List<DateTime>() {
 			//	DateTime.Today
 			//};
 			_listOrthoChartTabs=OrthoChartTabs.GetDeepCopy(true);
 			LayoutMenu();
 			FillTabs();
-			//_dictOrthoCharts=new SortedDictionary<DateTime, List<OrthoChart>>();
-			//FillDictionary();
-			_listOrthoChartRows=new List<OrthoChartRow>();
-			for(int i=0;i<_listOrthoChartsInitial.Count;i++){
-				OrthoChartRow orthoChartRow=_listOrthoChartRows.FirstOrDefault(
-					x=>x.Date==_listOrthoChartsInitial[i].DateService
-					&& x.ProvNum==_listOrthoChartsInitial[i].ProvNum);
-				if(orthoChartRow==null){
-					orthoChartRow=new OrthoChartRow();
-					orthoChartRow.Date=_listOrthoChartsInitial[i].DateService;
-					orthoChartRow.ProvNum=_listOrthoChartsInitial[i].ProvNum;
-					_listOrthoChartRows.Add(orthoChartRow);
-				}
-				orthoChartRow.ListOrthoCharts.Add(_listOrthoChartsInitial[i].Clone());
-			}
-			if(!_listOrthoChartRows.Any(x=>x.Date==DateTime.Today)){
+			_listOrthoChartRows=OrthoChartRows.GetAllForPatient(_patCur.PatNum);
+			if(!_listOrthoChartRows.Any(x => x.DateTimeService.Date==DateTime.Today.Date)) {
 				OrthoChartRow orthoChartRow=new OrthoChartRow();
-				orthoChartRow.Date=DateTime.Today;
+				orthoChartRow.PatNum=_patCur.PatNum;
+				orthoChartRow.ProvNum=_patCur.PriProv;
+				orthoChartRow.DateTimeService=DateTime.Today;
+				orthoChartRow.UserNum=_curUser.UserNum;
+				OrthoChartRows.Insert(orthoChartRow);
 				_listOrthoChartRows.Add(orthoChartRow);
 			}
-			_listOrthoChartRows=_listOrthoChartRows.OrderBy(x=>x.Date).ToList();//not going to bother with prov
+			_listOrthoChartRows=_listOrthoChartRows.OrderBy(x=>x.DateTimeService).ToList();//not going to bother with prov
 			FillDisplayFields();
 			//A specific tab is desired to be pre-selected.  This has to happen after FillDataTable() because it causes FillGrid() to get called.
 			if(_indexInitialTab!=tabControl.SelectedIndex) {
@@ -190,7 +176,7 @@ namespace OpenDental {
 			gridMain.ListGridColumns.Clear();
 			GridColumn col;
 			//First column will always be the date.  gridMain_CellLeave() depends on this fact.
-			col=new GridColumn(Lan.g(this,"Date"),70);
+			col=new GridColumn(Lan.g(this,"Date"),125);
 			gridMain.ListGridColumns.Add(col);
 			for(int i=0;i<listDisplayFields.Count;i++) {
 				string columnHeader=listDisplayFields[i].Description;
@@ -225,11 +211,14 @@ namespace OpenDental {
 			gridMain.ListGridRows.Clear();
 			GridRow row;
 			for(int r=0;r<_listOrthoChartRows.Count;r++){
-			//foreach(KeyValuePair<DateTime, List<OrthoChart>> kvPair in _dictOrthoCharts) {
 				row=new GridRow();
-				//DateTime tempDate=kvPair.Key;
-				row.Cells.Add(_listOrthoChartRows[r].Date.ToShortDateString());
-				row.Tag=_listOrthoChartRows[r].Date;
+				//Show Date only by default.
+				string dateTimeService=_listOrthoChartRows[r].DateTimeService.ToShortDateString();
+				if(_listOrthoChartRows[r].DateTimeService.TimeOfDay!=TimeSpan.Zero) {
+					//Show DateTime if not midnight
+					dateTimeService=_listOrthoChartRows[r].DateTimeService.ToString();
+				}
+				row.Cells.Add(dateTimeService);
 				//bool areAllColumnsBlank=true;
 				for(int i=0;i<listDisplayFields.Count;i++) {
 					string cellValue="";
@@ -260,9 +249,10 @@ namespace OpenDental {
 					//}
 				}
 				//if(!areAllColumnsBlank || _listDatesAdded.Contains(tempDate)) {
+				row.Tag=_listOrthoChartRows[r];
 				gridMain.ListGridRows.Add(row);
 				//}
-				CanEditRow(_listOrthoChartRows[r].Date);//Function uses _showSigBox, must be set prior to calling.
+				CanEditRow(_listOrthoChartRows[r].DateTimeService);//Function uses _showSigBox, must be set prior to calling.
 			}
 			gridMain.EndUpdate();
 			if(gridMainScrollValue==0) {
@@ -390,14 +380,10 @@ namespace OpenDental {
 		}
 
 		private void ClearSignature(int idxRow) {
-			DateTime date=_listOrthoChartRows[idxRow].Date;
-			long provNum=_listOrthoChartRows[idxRow].ProvNum;
-				//GetOrthoDate(idxRow);
-			if(OrthoSignature.GetSigString(GetValueFromList(date,provNum,_sigTableOrthoColIdx))!="") {
+			if(OrthoSignature.GetSigString(_listOrthoChartRows[idxRow].Signature)!="") {
 				_hasChanged=true;
 			}
-			SetValueInList("",date,provNum,_sigTableOrthoColIdx);
-			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
+			_listOrthoChartRows[idxRow].Signature="";
 			DisplaySignature(idxRow);
 			_prevRow=idxRow;
 		}
@@ -406,24 +392,16 @@ namespace OpenDental {
 			if(gridMain.SelectedCell.Y==-1) {
 				return;
 			}
-			DateTime date=_listOrthoChartRows[gridMain.SelectedCell.Y].Date;
-				//GetOrthoDate(gridMain.SelectedCell.Y);
-			long provNum=_listOrthoChartRows[gridMain.SelectedCell.Y].ProvNum;
-			if(OrthoSignature.GetSigString(GetValueFromList(date,provNum,_sigTableOrthoColIdx))!="") {
+			if(OrthoSignature.GetSigString(_listOrthoChartRows[gridMain.SelectedCell.Y].Signature)!="") {
 				_hasChanged=true;
 			}
-			SetValueInList("",date,provNum,_sigTableOrthoColIdx);
-			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
+			_listOrthoChartRows[gridMain.SelectedCell.Y].Signature="";
 			_prevRow=gridMain.SelectedCell.Y;
 			_topazNeedsSaved=true;
 		}
 
-		///<summary>Displays the signature for this row when clicking on the Date column or the Signature column. The gridMain_CellEnter event
-		///does not fire when the column is not editable.</summary>
+		///<summary>Displays the signature for this row. The gridMain_CellEnter event does not fire when the column is not editable.</summary>
 		private void gridMain_CellClick(object sender,ODGridClickEventArgs e) {
-			if(e.Col!=0 && e.Col!=_sigColIdx) {//If not the date column or the signature column, return.
-				return;
-			}
 			SaveAndSetSignatures(e.Row);
 		}
 
@@ -455,14 +433,13 @@ namespace OpenDental {
 		private void gridMain_CellLeave(object sender,ODGridClickEventArgs e) {
 			Logger.LogAction("gridMain_CellLeave",LogPath.OrthoChart,() => {
 				//Get the date for the ortho chart that was just edited.
-				DateTime date=_listOrthoChartRows[e.Row].Date;
-				//GetOrthoDate(e.Row);
+				DateTime dateTime=_listOrthoChartRows[e.Row].DateTimeService;
 				long provNum=_listOrthoChartRows[e.Row].ProvNum;
-				string oldText=GetValueFromList(date,provNum,(string)gridMain.ListGridColumns[e.Col].Tag);
+				string oldText=GetValueFromList(_listOrthoChartRows[e.Row],(string)gridMain.ListGridColumns[e.Col].Tag);
 				string newText=gridMain.ListGridRows[e.Row].Cells[e.Col].Text;
-				if(CanEditRow(date)) {
+				if(CanEditRow(dateTime)) {
 					if(newText != oldText) {
-						SetValueInList(newText,date,provNum,(string)gridMain.ListGridColumns[e.Col].Tag);
+						SetValueInList(_listOrthoChartRows[e.Row],newText,(string)gridMain.ListGridColumns[e.Col].Tag);
 						//Cannot be placed in if statement below as we only want to clear the signature when the grid text has changed.
 						//We cannot use a textchanged event to call the .dll as this causes massive slowness for certain customers.
 						if(_showSigBox) {
@@ -495,16 +472,9 @@ namespace OpenDental {
 				if(!_showSigBox || idxRow<0) {
 					return;
 				}
-				DateTime date=_listOrthoChartRows[idxRow].Date;
-				//GetOrthoDate(gridRow);
-				List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts;//   _dictOrthoCharts[date];
-				//Get the "translated" name for the signature column.
-				string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
-				if(!listOrthoCharts.Exists(x => x.FieldName==sigColumnName)) {
-					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => { signatureBoxWrapper.ClearSignature(false); },"signature.ClearSignature1");
-					return;
-				}
-				OrthoSignature orthoSignature=new OrthoSignature(listOrthoCharts.Find(x => x.FieldName==sigColumnName).FieldValue);
+				DateTime dateTime=_listOrthoChartRows[idxRow].DateTimeService;
+				List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts;
+				OrthoSignature orthoSignature=new OrthoSignature(_listOrthoChartRows[idxRow].Signature);
 				if(orthoSignature.SigString=="") {
 					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => { signatureBoxWrapper.ClearSignature(false); },"signature.ClearSignature2");
 					gridMain.ListGridRows[idxRow].ColorBackG=SystemColors.Window;
@@ -517,15 +487,17 @@ namespace OpenDental {
 					}
 					return;
 				}
+				//Get the "translated" name for the signature column.
+				string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature")?.Description??"";
 				string keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
-				.FindAll(x => x.DateService==date && x.FieldValue!="" && x.FieldName!=sigColumnName),date);
+				.FindAll(x => (x.DateService==dateTime || x.DateService==DateTime.MinValue) && x.FieldValue!="" && x.FieldName!=sigColumnName),dateTime);
 				Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => {
 					signatureBoxWrapper.FillSignature(orthoSignature.IsTopaz,keyData,orthoSignature.SigString);
 				},"signature.FillSignature1 IsTopaz="+(orthoSignature.IsTopaz ? "true" : "false"));
 				if(!signatureBoxWrapper.IsValid) {
 					//This ortho chart may have been signed when we were using the patient name in the hash. Try hashing the signature with the patient name.
 					keyData=OrthoCharts.GetKeyDataForSignatureHash(_patCur,listOrthoCharts
-						.FindAll(x => x.DateService==date && x.FieldValue!="" && x.FieldName!=sigColumnName),date,doUsePatName: true);
+						.FindAll(x => x.DateService==dateTime && x.FieldValue!="" && x.FieldName!=sigColumnName),dateTime,doUsePatName:true);
 					Logger.LogAction("DisplaySignature",LogPath.OrthoChart,() => {
 						signatureBoxWrapper.FillSignature(orthoSignature.IsTopaz,keyData,orthoSignature.SigString);
 					},"signature.FillSignature2 IsTopaz="+(orthoSignature.IsTopaz ? "true" : "false"));
@@ -534,14 +506,11 @@ namespace OpenDental {
 					gridMain.ListGridRows[idxRow].ColorBackG=Color.FromArgb(0,245,165);//A lighter version of Color.MediumSpringGreen
 					if(_sigColIdx > 0) {//User might be vieweing a tab that does not have the signature column.  Greater than 0 because index 0 is a Date column.
 						gridMain.ListGridRows[idxRow].Cells[_sigColIdx].Text=Lan.g(this,"Valid");
-						//Only display user if the signature is valid.
-						OrthoChart orthoChartSig=listOrthoCharts.FirstOrDefault(x=>x.FieldName==sigColumnName);
-						if(orthoChartSig is null){
+						if(orthoSignature.SigString=="") {
 							textUser.Text="";
 						}
 						else{
-							long userNum=orthoChartSig.UserNum;
-							//_dictOrthoCharts[date].Where(x => x.FieldName==sigColumnName).Select(x => x.UserNum).FirstOrDefault();
+							long userNum=_listOrthoChartRows[idxRow].UserNum;
 							textUser.Text=Userods.GetName(userNum);
 						}
 					}
@@ -560,9 +529,8 @@ namespace OpenDental {
 
 		///<summary>Removes the Sign Topaz button and the Clear Signature button from the signature box if the user does not have OrthoChartEdit permissions for that date.</summary>
 		private void SetSignatureButtonVisibility(int idxRow) {
-			DateTime date=_listOrthoChartRows[idxRow].Date;
-				//GetOrthoDate(gridRow);
-			signatureBoxWrapper.SetButtonVisibility(CanEditRow(date));
+			DateTime dateTime=_listOrthoChartRows[idxRow].DateTimeService;
+			signatureBoxWrapper.SetButtonVisibility(CanEditRow(dateTime));
 		}
 
 		///<summary>Saves the signature to the dictionary. The signature is hashed using the patient name, the date of service, and all ortho chart fields (even the ones not showing).</summary>
@@ -570,10 +538,9 @@ namespace OpenDental {
 			if(!_showSigBox || idxRow<0) {
 				return;
 			}
-			DateTime date=_listOrthoChartRows[idxRow].Date;
-				//GetOrthoDate(idxRow);
+			DateTime dateTime=_listOrthoChartRows[idxRow].DateTimeService;
 			long provNum=_listOrthoChartRows[idxRow].ProvNum;
-			if(!CanEditRow(date)) {
+			if(!CanEditRow(dateTime)) {
 				return;
 			}			
 			if(!signatureBoxWrapper.GetSigChanged() || !signatureBoxWrapper.IsValid) {
@@ -581,85 +548,68 @@ namespace OpenDental {
 			}
 			string keyData;
 			//Get the "translated" name for the signature column.
-			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature").Description;
-			List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts.FindAll(x => x.FieldName != sigColumnName  && x.FieldValue!="");
-				//_dictOrthoCharts[date]
-				//.FindAll(x => x.DateService==date && x.FieldValue!="" && x.FieldName!=sigColumnName);
-			keyData=OrthoCharts.GetKeyDataForSignatureSaving(listOrthoCharts,date);
+			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature")?.Description??"";
+			List<OrthoChart> listOrthoCharts=_listOrthoChartRows[idxRow].ListOrthoCharts.FindAll(x => x.FieldName!=sigColumnName && x.FieldValue!="");
+			keyData=OrthoCharts.GetKeyDataForSignatureSaving(listOrthoCharts,dateTime);
 			OrthoSignature sig=new OrthoSignature();
 			sig.IsTopaz=signatureBoxWrapper.GetSigIsTopaz();
 			sig.SigString=signatureBoxWrapper.GetSignature(keyData);
 			if(sig.IsTopaz && !_topazNeedsSaved) {
 				return;
 			}
-			if(OrthoSignature.GetSigString(GetValueFromList(date,provNum,sigColumnName))!=sig.SigString) {
+			if(OrthoSignature.GetSigString(_listOrthoChartRows[idxRow].Signature)!=sig.SigString) {
 				_hasChanged=true;
-				SetValueInList(sig.ToString(),date,provNum,sigColumnName);
+				_listOrthoChartRows[idxRow].Signature=sig.ToString();
 			}
 		}
 
-		private bool CanEditRow(DateTime date) {
-			if(_dictCanEditDay.ContainsKey(date)) {
-				return _dictCanEditDay[date];
+		private bool CanEditRow(DateTime dateTime) {
+			if(_dictCanEditDay.ContainsKey(dateTime)) {
+				return _dictCanEditDay[dateTime];
 			}
-			if(Security.IsAuthorized(Permissions.OrthoChartEditFull,date,true)) {
-				_dictCanEditDay[date]=true;
+			if(Security.IsAuthorized(Permissions.OrthoChartEditFull,dateTime,true)) {
+				_dictCanEditDay[dateTime]=true;
 				return true;
 			}
-			if(!Security.IsAuthorized(Permissions.OrthoChartEditUser,date,true)) {
-				_dictCanEditDay[date]=false;
+			if(!Security.IsAuthorized(Permissions.OrthoChartEditUser,dateTime,true)) {
+				_dictCanEditDay[dateTime]=false;
 				return false;//User doesn't have any permission.
 			}
 			//User has permission to edit the ones that they have signed or ones that no one has signed.
 			if(!_showSigBox) {
-				_dictCanEditDay[date]=true;
+				_dictCanEditDay[dateTime]=true;
 				return true;
 			}
-			OrthoChartRow orthoChartRow=_listOrthoChartRows.FirstOrDefault(x=>x.Date==date);
+			OrthoChartRow orthoChartRow=_listOrthoChartRows.FirstOrDefault(x=>x.DateTimeService==dateTime);
 			if(orthoChartRow is null){
-				_dictCanEditDay[date]=true;
+				_dictCanEditDay[dateTime]=true;
 				return true;
 			}
-			OrthoChart orthoChartSig=orthoChartRow.ListOrthoCharts.FirstOrDefault(x=>x.FieldName==_listDisplayFieldNames[_sigTableOrthoColIdx]);
-				//_dictOrthoCharts[date].Find(x => x.FieldName==_listDisplayFieldNames[_sigTableOrthoColIdx]);
-			if(orthoChartSig==null || orthoChartSig.UserNum==_curUser.UserNum) {
-				_dictCanEditDay[date]=true;
+			if(orthoChartRow.UserNum==_curUser.UserNum) {
+				_dictCanEditDay[dateTime]=true;
 				return true;
 			}
 			bool canEditRow;
-			OrthoSignature sig=new OrthoSignature(orthoChartSig.FieldValue);
+			OrthoSignature sig=new OrthoSignature(orthoChartRow.Signature);
 			canEditRow=string.IsNullOrEmpty(sig.SigString);//User has partial permission and somebody else signed it.
-			_dictCanEditDay[date]=canEditRow;
+			_dictCanEditDay[dateTime]=canEditRow;
 			return canEditRow;
 		}
 
-		/*
-		///<summary>Gets the date of the ortho chart for the passed in grid row.</summary>
-		private DateTime GetOrthoDate(int idxRow) {
-			//The grid row tag gets set to the key of the dictionary. Return the tag.
-			return (DateTime)gridMain.ListGridRows[idxRow].Tag;
-		}*/
-
 		///<summary>Gets the value from _listOrthoChartRows for the specified date and column heading.  Returns empty string if not found.  Note that the column name showing within the ODGrid could be different than the column heading within _listOrthoChartRows.  Use gridMain.Columns[x].Tag to get the corresponding column header that _listOrthoChartRows uses (displayfield.Description).</summary>
-		private string GetValueFromList(DateTime date,long provNum,string columnHeading) {	
-			OrthoChartRow orthoChartRow=_listOrthoChartRows.FirstOrDefault(x=>x.Date==date && x.ProvNum==provNum);
-			if(orthoChartRow is null){
+		private string GetValueFromList(OrthoChartRow orthoChartRow,string columnHeading) {
+			if(orthoChartRow is null) {
 				return "";
 			}
+			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature")?.Description??"";
+			if(columnHeading==sigColumnName) {
+				return orthoChartRow.Signature;
+			}
 			OrthoChart orthoChart=orthoChartRow.ListOrthoCharts.FirstOrDefault(x=>x.FieldName==columnHeading);
-			if(orthoChart is null){
+			if(orthoChart is null) {
 				return "";
 			}
 			return orthoChart.FieldValue;
-			//if(!_dictOrthoCharts.ContainsKey(date) || !_dictOrthoCharts[date].Exists(x => x.FieldName==columnHeading)) {
-			//	return "";
-			//}
-			//return _dictOrthoCharts[date].Find(x => x.FieldName==columnHeading).FieldValue;
-		}
-
-		///<summary>Gets the value from _dictOrthoCharts for the specified date and index.  Returns empty string if not found.</summary>
-		private string GetValueFromList(DateTime date,long provNum,int columnIdx) {
-			return GetValueFromList(date,provNum,_listDisplayFieldNames[columnIdx]);
 		}
 
 		///<summary>Returns true if the display field column has a pick list</summary>
@@ -673,55 +623,28 @@ namespace OpenDental {
 		}
 
 		///<summary>Sets the value in _listOrthoChartRows for the specified date and column heading.</summary>
-		private void SetValueInList(string newValue,DateTime date,long provNum,string columnHeading) {
-			OrthoChartRow orthoChartRow=_listOrthoChartRows.FirstOrDefault(x=>x.Date==date && x.ProvNum==provNum);
-			if(orthoChartRow is null){
-				orthoChartRow=new OrthoChartRow();
-				orthoChartRow.Date=date;
-				orthoChartRow.ProvNum=provNum;
-				_listOrthoChartRows.Add(orthoChartRow);
+		private void SetValueInList(OrthoChartRow orthoChartRow,string newValue,string columnHeading) {
+			string sigColumnName=_listOrthDisplayFields.FirstOrDefault(x => x.InternalName=="Signature")?.Description??"";
+			orthoChartRow.UserNum=_curUser.UserNum;
+			if(columnHeading==sigColumnName) {//Signature column was modified
+				orthoChartRow.Signature=newValue;
+				return;
 			}
 			OrthoChart orthoChart=orthoChartRow.ListOrthoCharts.FirstOrDefault(x=>x.FieldName==columnHeading);
-			if(orthoChart is null){
+			if(orthoChart is null) {
 				orthoChart=new OrthoChart();
-				orthoChart.DateService=date;
 				orthoChart.FieldName=columnHeading;
 				orthoChart.FieldValue=newValue;
-				orthoChart.PatNum=_patCur.PatNum;
-				orthoChart.UserNum=_curUser.UserNum;
-				orthoChart.ProvNum=provNum;
+				orthoChart.OrthoChartRowNum=orthoChartRow.OrthoChartRowNum;
 				orthoChartRow.ListOrthoCharts.Add(orthoChart);
 				return;
 			}
 			orthoChart.FieldValue=newValue;
-			orthoChart.UserNum=_curUser.UserNum;
-			/*
-			if(!_dictOrthoCharts.ContainsKey(date)) {
-				_dictOrthoCharts.Add(date,new List<OrthoChart>());
-			}
-			if(!_dictOrthoCharts[date].Exists(x => x.FieldName==columnHeading)) {
-				OrthoChart chart=new OrthoChart();
-				chart.DateService=date;
-				chart.FieldName=columnHeading;
-				chart.FieldValue=newValue;
-				chart.PatNum=_patCur.PatNum;
-				chart.UserNum=_curUser.UserNum;
-				_dictOrthoCharts[date].Add(chart);
-				return;
-			}
-			_dictOrthoCharts[date].Find(x => x.FieldName==columnHeading).FieldValue=newValue;
-			_dictOrthoCharts[date].Find(x => x.FieldName==columnHeading).UserNum=_curUser.UserNum;*/
-		}
-
-		///<summary>Sets the value in _dictOrthoCharts for the specified date and index.</summary>
-		private void SetValueInList(string newValue,DateTime date,long provNum,int columnIdx) {
-			SetValueInList(newValue,date,provNum,_listDisplayFieldNames[columnIdx]);
 		}
 
 		private void gridMain_CellSelectionCommitted(object sender,ODGridClickEventArgs e) {
-			DateTime date=_listOrthoChartRows[gridMain.SelectedCell.Y].Date;
-				//GetOrthoDate(gridMain.SelectedCell.Y);
-			if(!CanEditRow(date)) {
+			DateTime dateTime=_listOrthoChartRows[gridMain.SelectedCell.Y].DateTimeService;
+			if(!CanEditRow(dateTime)) {
 				return;
 			}
 			_hasChanged=true;
@@ -751,25 +674,15 @@ namespace OpenDental {
 			if(formOrthoChartAdd.DialogResult!=DialogResult.OK) {
 				return;
 			}
-			//if(_listDatesAdded.Contains(formOrothoChartAdd.DateSelected)) {
-			//	return;//No need to refill the grid
-			//}
-			//_listDatesAdded.Add(formOrothoChartAdd.DateSelected);
-			if(_listOrthoChartRows.Exists(x=>x.Date==formOrthoChartAdd.DateSelected && x.ProvNum==formOrthoChartAdd.ProvNumSelected)){
-			//if(_dictOrthoCharts.ContainsKey(formOrothoChartAdd.DateSelected)) {
-				MsgBox.Show(this,"That date/prov combination already exists.");
-				Logger.LogAction("butAdd_Click",LogPath.OrthoChart,() => {
-					FillGrid();
-				},"FillGrid1");
-				return;
-			}
 			SaveAndSetSignatures(gridMain.SelectedCell.Y);
 			OrthoChartRow orthoChartRow=new OrthoChartRow();
-			orthoChartRow.Date=formOrthoChartAdd.DateSelected;
+			orthoChartRow.PatNum=_patCur.PatNum;
+			orthoChartRow.DateTimeService=formOrthoChartAdd.DateSelected;
 			orthoChartRow.ProvNum=formOrthoChartAdd.ProvNumSelected;
+			orthoChartRow.UserNum=_curUser.UserNum;
+			OrthoChartRows.Insert(orthoChartRow);
 			_listOrthoChartRows.Add(orthoChartRow);
-			_listOrthoChartRows=_listOrthoChartRows.OrderBy(x => x.Date).ToList();
-			//_dictOrthoCharts.Add(formOrothoChartAdd.DateSelected,new List<OrthoChart>());//COULD HAVE TO DO WITH EMPTY SIG ITEM HERE??
+			_listOrthoChartRows=_listOrthoChartRows.OrderBy(x => x.DateTimeService).ToList();
 			_hasChanged=true;
 			Logger.LogAction("butAdd_Click",LogPath.OrthoChart,() => {
 				FillGrid();
@@ -811,7 +724,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"Please select a ortho chart first.");//This shouldn't happen.
 				return;
 			}
-			DateTime date=_listOrthoChartRows[idxRow].Date;
+			DateTime date=_listOrthoChartRows[idxRow].DateTimeService;
 				//GetOrthoDate(idxRow);
 			if(!CanEditRow(date)) {
 				MsgBox.Show(this,"You need either Ortho Chart Edit (full) or Ortho Chart Edit (same user, signed) to edit this ortho chart.");
@@ -848,7 +761,7 @@ namespace OpenDental {
 			SortedDictionary<DateTime,List<SecurityLog>> dictDatesOfServiceLogEntries=new SortedDictionary<DateTime,List<SecurityLog>>();
 			//Add all dates from grid first, some may not have audit trail entries, but should be selectable from FormAO
 			for(int i=0;i<gridMain.ListGridRows.Count;i++) {
-				DateTime date=_listOrthoChartRows[i].Date;
+				DateTime date=_listOrthoChartRows[i].DateTimeService;
 					//GetOrthoDate(i);
 				if(dictDatesOfServiceLogEntries.ContainsKey(date)) {
 					continue;
@@ -867,6 +780,19 @@ namespace OpenDental {
 			FormAO.DictDateOrthoLogs=dictDatesOfServiceLogEntries;
 			FormAO.PatientFieldLogs.AddRange(patientFieldLogs);
 			FormAO.ShowDialog();
+		}
+
+		private void butDelete_Click(object sender,EventArgs e) {
+			List<long> listOrthoChartRowNumsSelected=gridMain.SelectedTags<OrthoChartRow>().Select(x => x.OrthoChartRowNum).ToList();
+			if(listOrthoChartRowNumsSelected.Count==0) {
+				MsgBox.Show(this,"Please select an Ortho Chart row first.");
+				return;
+			}
+			if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"Delete entire row?")) {
+				return;
+			}
+			_listOrthoChartRows.RemoveAll(x => ListTools.In(x.OrthoChartRowNum,listOrthoChartRowNumsSelected));
+			FillGrid();
 		}
 
 		private int _pagesPrinted;
@@ -979,19 +905,18 @@ namespace OpenDental {
 				SaveSignatureToDict(gridMain.SelectedCell.Y);
 			}
 			List<OrthoChart> listOrthoChartsNew=new List<OrthoChart>();
-			//foreach(KeyValuePair<DateTime,List<OrthoChart>> kvPair in _dictOrthoCharts) {
+			List<long> listOrthChartRowNumsToDelete=new List<long>();
 			for(int i=0;i<_listOrthoChartRows.Count;i++){
-				if(_showSigBox){
-					//&& kvPair.Value.All(x => (_sigTableOrthoColIdx>-1 && x.FieldName==_listDisplayFieldNames[_sigTableOrthoColIdx]) || x.FieldValue==""))
-					if(_listOrthoChartRows[i].ListOrthoCharts.All(x=>(_sigTableOrthoColIdx>-1 && x.FieldName==_listDisplayFieldNames[_sigTableOrthoColIdx]) || x.FieldValue==""))
-					{
-						continue;//Don't save the signature if the user tried to sign an empty ortho chart.
-					}					
+				if(_listOrthoChartRows[i].ListOrthoCharts.IsNullOrEmpty() || _listOrthoChartRows[i].ListOrthoCharts.All(x => string.IsNullOrEmpty(x.FieldValue))) {
+					//Delete orthochartrows that are empty.
+					listOrthChartRowNumsToDelete.Add(_listOrthoChartRows[i].OrthoChartRowNum);
+					continue;
 				}
 				listOrthoChartsNew.AddRange(_listOrthoChartRows[i].ListOrthoCharts);
-					//kvPair.Value);
 			}
-			OrthoCharts.Sync(_patCur,listOrthoChartsNew,_listOrthDisplayFields,_listOrthDisplayFields.Find(x => x.InternalName=="Signature"));
+			List<OrthoChartRow> listOrthoChartRowsFiltered=_listOrthoChartRows.FindAll(x => !ListTools.In(x.OrthoChartRowNum,listOrthChartRowNumsToDelete));
+			OrthoCharts.Sync(_patCur,listOrthoChartsNew,_listOrthDisplayFields);
+			OrthoChartRows.Sync(listOrthoChartRowsFiltered,_patCur.PatNum);
 			DialogResult=DialogResult.OK;
 		}
 
@@ -1054,10 +979,4 @@ namespace OpenDental {
 		
 	}
 
-	///<summary>A group of OrthoChart cells pulled from the db, where each one has the same date and provider.  But they may or may not be displayed, depending on the display fields for the current tab.</summary>
-	public class OrthoChartRow{
-		public DateTime Date;
-		public long ProvNum;
-		public List<OrthoChart> ListOrthoCharts=new List<OrthoChart>();
-	}
 }
