@@ -29,6 +29,7 @@ namespace OpenDental{
 		private Label labelUnallocated;
 		private bool _doShowUnallocatedLabel;
 		private bool _doShowAdjustments;
+		private bool _doShowTreatmentPlanProcs;
 		#endregion
 
 		#region Public Variables
@@ -36,14 +37,14 @@ namespace OpenDental{
 		public List<Procedure> ListSelectedProcs=new List<Procedure>();
 		///<summary>List of paysplits for the current payment.</summary>
 		public List<PaySplit> ListSplitsCur=new List<PaySplit>();
-		public bool ShowTpProcs=PrefC.GetYN(PrefName.PrePayAllowedForTpProcs);
+		public bool isPrepayAllowedForTpProcs=PrefC.GetYN(PrefName.PrePayAllowedForTpProcs);
 		public List<AccountEntry> ListAccountEntries=new List<AccountEntry>();
 		#endregion
 
 		///<summary>Displays completed procedures for the passed-in pat. 
 		///Pass in true for isSimpleView to show all completed procedures, 
 		///otherwise the user will be able to pick between credit allocation strategies (FIFO, Explicit, All).</summary>
-		public FormProcSelect(long patNum,bool isSimpleView,bool isMultiSelect=false,bool doShowUnallocatedLabel=false,bool doShowAdjustments=false) {
+		public FormProcSelect(long patNum,bool isSimpleView,bool isMultiSelect=false,bool doShowUnallocatedLabel=false,bool doShowAdjustments=false,bool doShowTreatmentPlanProcs=true) {
 			InitializeComponent();
 			InitializeLayoutManager();
 			Lan.F(this);
@@ -56,6 +57,7 @@ namespace OpenDental{
 				gridMain.Title=Lan.g(gridMain.TranslationName,"Account Entries");
 				this.Text=Lan.g(this,"Select Account Entries");
 			}
+			_doShowTreatmentPlanProcs=doShowTreatmentPlanProcs;
 		}
 
 		private void FormProcSelect_Load(object sender,System.EventArgs e) {
@@ -63,7 +65,7 @@ namespace OpenDental{
 				gridMain.SelectionMode=OpenDental.UI.GridSelectionMode.MultiExtended;
 			}
 			_listProcedures=Procedures.GetCompleteForPats(new List<long> { _patNumCur });
-			if(ShowTpProcs) {
+			if(isPrepayAllowedForTpProcs && _doShowTreatmentPlanProcs) {
 				_listProcedures.AddRange(Procedures.GetTpForPats(new List<long> {_patNumCur}));
 			}
 			_listProcedures.RemoveAll(x => x.PatNum!=_patNumCur);
