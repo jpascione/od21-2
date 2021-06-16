@@ -982,7 +982,10 @@ namespace OpenDentBusiness {
 		}
 
 		///<summary>Run by OpenDentalService.PaymentThread. Takes any hiddenUnearnedTotal from hidden unearned, and applies it to listPayPlanChargesExpected.</summary>
-		public static void ApplyPrepaymentToDynamicPaymentPlan(long patNum,double hiddenUnearnedTotal,List<PayPlanCharge> listPayPlanChargesExpected) {
+		public static void ApplyPrepaymentToDynamicPaymentPlan(long patNum,double hiddenUnearnedTotal,List<PayPlanCharge> listPayPlanChargesExpected,long payPlanNum=0) {
+			if(listPayPlanChargesExpected.IsNullOrEmpty()) {
+				return;
+			}
 			List<PaySplit> listTransferSplits=new List<PaySplit>();
 			long PrepayUnearnedType=PrefC.GetLong(PrefName.DynamicPayPlanPrepaymentUnearnedType);
 			Payment transferPayment=new Payment();
@@ -1016,6 +1019,13 @@ namespace OpenDentBusiness {
 			transferPayment.PayNum=Payments.Insert(transferPayment,listTransferSplits);
 			string logText=Payments.GetSecuritylogEntryText(transferPayment,transferPayment,isNew:true)+", "+Lans.g("PayPlanEdit","from the dynamic payment plan prepayment processing service.");
 			SecurityLogs.MakeLogEntry(Permissions.PaymentCreate,transferPayment.PatNum,logText);
+			if(CompareDouble.IsGreaterThan(hiddenUnearnedTotal,0) && payPlanNum!=0) {
+				PaymentEdit.IncomeTransferData notUsed=new PaymentEdit.IncomeTransferData();
+				listTransferSplits=new List<PaySplit>();
+				listTransferSplits.AddRange(PaymentEdit.CreateUnearnedTransfer((decimal)hiddenUnearnedTotal,patNum,0,0,ref notUsed,unearnedType:PrepayUnearnedType,payPlanNum:payPlanNum,isMovingFromHiddenUnearnedToUnearned:true));
+				transferPayment.PayNum=Payments.Insert(transferPayment,listTransferSplits);
+				SecurityLogs.MakeLogEntry(Permissions.PaymentCreate,transferPayment.PatNum,logText);
+			}
 		}
 
 		///<summary>Calculates the principal amount left on the plan. Considers paysplits on interest, principal, and unknown.</summary>

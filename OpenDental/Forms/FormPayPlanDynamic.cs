@@ -1187,6 +1187,9 @@ namespace OpenDental {
 					,DateTime.Today,Lans.g(this,"Close Out Charge"),entry.PriKey,entry.LinkType);
 				listChargesClosing.Add(charge);
 			}
+			List<PaySplit> listPaySplits=PaySplits.GetForPayPlans(ListTools.FromSingle(_payPlanCur.PayPlanNum));
+			double hiddenUnearnedTotal=PayPlanEdit.GetDynamicPayPlanPrepaymentAmount(listPaySplits);
+			PayPlanEdit.ApplyPrepaymentToDynamicPaymentPlan(_payPlanCur.PatNum,hiddenUnearnedTotal,listChargesClosing,payPlanNum:_payPlanCur.PayPlanNum);
 			_payPlanCur.IsClosed=true;
 			if(!SaveData(isUiValid:true)) {
 				return;

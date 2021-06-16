@@ -2698,7 +2698,8 @@ namespace OpenDentBusiness {
 		///Always returns exactly two PaySplits. The first will be the 'offset' split and the second will be the split taking from unearned.</summary>
 		public static List<PaySplit> CreateUnearnedTransfer(decimal splitAmount,long patNum,long provNum,long clinicNum,
 			ref IncomeTransferData incomeTransferData,long procNum=0,long adjNum=0,long unearnedType=0,long payPlanNum=0,DateTime datePay=default,
-			long payPlanChargeNum=0,PayPlanDebitTypes payPlanDebitType=PayPlanDebitTypes.Unknown,bool isForDynamicPaymentPlanBalancing=false)
+			long payPlanChargeNum=0,PayPlanDebitTypes payPlanDebitType=PayPlanDebitTypes.Unknown,bool isForDynamicPaymentPlanBalancing=false,
+			bool isMovingFromHiddenUnearnedToUnearned=false)
 		{
 			//No remoting role check; private method
 			long offsetUnearnedType=0;
@@ -2710,6 +2711,12 @@ namespace OpenDentBusiness {
 			if(isForDynamicPaymentPlanBalancing) {
 				offsetUnearnedType=0;
 				unearnedPayPlanNum=payPlanNum;
+			}
+			if(isMovingFromHiddenUnearnedToUnearned) {
+				offsetUnearnedType=unearnedType;
+				unearnedType=0;
+				unearnedPayPlanNum=0;
+				splitAmount=-splitAmount;
 			}
 			if(datePay.Year < 1880) {
 				datePay=DateTime.Today;
