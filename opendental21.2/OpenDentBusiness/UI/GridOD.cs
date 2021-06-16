@@ -1760,11 +1760,13 @@ namespace OpenDental.UI {
 				for(int i=_selectedCellOld.X+1;i<ListGridColumns.Count;i++) {
 					if(ListGridColumns[i].IsEditable){//textbox
 						_selectedCell=new Point(i,_selectedCellOld.Y);
+						Focus();
 						CreateEditBox();
 						return;
 					}
 					if(ListGridColumns[i].ListDisplayStrings!=null) {//dropdown
 						_selectedCell=new Point(i,_selectedCellOld.Y);
+						Focus();
 						CreateComboBox();
 						return;
 					}

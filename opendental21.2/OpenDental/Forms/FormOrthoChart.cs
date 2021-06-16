@@ -796,6 +796,7 @@ namespace OpenDental {
 			}
 			_listOrthoChartRows.RemoveAll(x => x.OrthoChartRowNum==orthoChartRowSelected.OrthoChartRowNum);
 			FillGrid();
+			_hasChanged=true;
 		}
 
 		private int _pagesPrinted;
