@@ -222,7 +222,7 @@ namespace OpenDental {
 		}
 
 		private void radioDoseSpotLegacy_Click(object sender,EventArgs e) {
-			MsgBox.Show(this,"This enables the DoseSpot program link only.  You must contact support to cancel current eRx Legacy charges and sign up for DoseSpot.");
+			MsgBox.Show(this,"This enables the program links only. You must contact support to sign up for eRx.");
 			SetRadioButtonChecked(ErxOption.DoseSpotWithLegacy);
 		}
 
