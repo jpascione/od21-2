@@ -223,6 +223,8 @@ namespace OpenDental{
 			this.checkAgingMonthly = new System.Windows.Forms.CheckBox();
 			this.checkStatementInvoiceGridShowWriteoffs = new System.Windows.Forms.CheckBox();
 			this.groupPayPlans = new OpenDental.UI.GroupBoxOD();
+			this.label39 = new System.Windows.Forms.Label();
+			this.comboDppUnearnedType = new OpenDental.UI.ComboBoxOD();
 			this.label59 = new System.Windows.Forms.Label();
 			this.textDynamicPayPlan = new OpenDental.ValidTime();
 			this.label27 = new System.Windows.Forms.Label();
@@ -251,32 +253,32 @@ namespace OpenDental{
 			this.labelDiscountPercentage = new System.Windows.Forms.Label();
 			this.groupBox6 = new OpenDental.UI.GroupBoxOD();
 			this.textInsImplant = new System.Windows.Forms.TextBox();
-			this.label53 = new System.Windows.Forms.Label();
+			this.labelInsImplant = new System.Windows.Forms.Label();
 			this.label52 = new System.Windows.Forms.Label();
 			this.textInsDentures = new System.Windows.Forms.TextBox();
-			this.label51 = new System.Windows.Forms.Label();
+			this.labelInsDentures = new System.Windows.Forms.Label();
 			this.textInsPerioMaint = new System.Windows.Forms.TextBox();
-			this.label50 = new System.Windows.Forms.Label();
+			this.labelInsPerioMaint = new System.Windows.Forms.Label();
 			this.textInsDebridement = new System.Windows.Forms.TextBox();
-			this.label49 = new System.Windows.Forms.Label();
+			this.labelInsDebridement = new System.Windows.Forms.Label();
 			this.textInsSealant = new System.Windows.Forms.TextBox();
-			this.label48 = new System.Windows.Forms.Label();
+			this.labelInsSealant = new System.Windows.Forms.Label();
 			this.textInsFlouride = new System.Windows.Forms.TextBox();
-			this.label47 = new System.Windows.Forms.Label();
+			this.labelInsFlouride = new System.Windows.Forms.Label();
 			this.textInsCrown = new System.Windows.Forms.TextBox();
-			this.label46 = new System.Windows.Forms.Label();
+			this.labelInsCrown = new System.Windows.Forms.Label();
 			this.textInsSRP = new System.Windows.Forms.TextBox();
-			this.label45 = new System.Windows.Forms.Label();
+			this.labelInsSRP = new System.Windows.Forms.Label();
 			this.textInsCancerScreen = new System.Windows.Forms.TextBox();
-			this.label44 = new System.Windows.Forms.Label();
+			this.labelInsCancerScreen = new System.Windows.Forms.Label();
 			this.textInsProphy = new System.Windows.Forms.TextBox();
-			this.label43 = new System.Windows.Forms.Label();
+			this.labelInsProphy = new System.Windows.Forms.Label();
 			this.textInsExam = new System.Windows.Forms.TextBox();
-			this.label35 = new System.Windows.Forms.Label();
+			this.labelInsPano = new System.Windows.Forms.Label();
 			this.textInsBW = new System.Windows.Forms.TextBox();
-			this.label34 = new System.Windows.Forms.Label();
+			this.labelInsExam = new System.Windows.Forms.Label();
 			this.textInsPano = new System.Windows.Forms.TextBox();
-			this.label36 = new System.Windows.Forms.Label();
+			this.labelInsBW = new System.Windows.Forms.Label();
 			this.label19 = new System.Windows.Forms.Label();
 			this.groupInsHist = new OpenDental.UI.GroupBoxOD();
 			this.textInsHistProphy = new System.Windows.Forms.TextBox();
@@ -394,8 +396,6 @@ namespace OpenDental{
 			this.checkRxSendNewToQueue = new System.Windows.Forms.CheckBox();
 			this.butCancel = new OpenDental.UI.Button();
 			this.butOK = new OpenDental.UI.Button();
-			this.label39 = new System.Windows.Forms.Label();
-			this.comboDppUnearnedType = new OpenDental.UI.ComboBoxOD();
 			this.tabControlMain.SuspendLayout();
 			this.tabAppts.SuspendLayout();
 			this.groupBox8.SuspendLayout();
@@ -2674,6 +2674,24 @@ namespace OpenDental{
 			this.groupPayPlans.TabStop = false;
 			this.groupPayPlans.Text = "Pay Plans";
 			// 
+			// label39
+			// 
+			this.label39.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label39.Location = new System.Drawing.Point(3, 121);
+			this.label39.Name = "label39";
+			this.label39.Size = new System.Drawing.Size(195, 17);
+			this.label39.TabIndex = 249;
+			this.label39.Text = "Dynamic payment plan prepayment type";
+			this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// comboDppUnearnedType
+			// 
+			this.comboDppUnearnedType.Location = new System.Drawing.Point(199, 120);
+			this.comboDppUnearnedType.Name = "comboDppUnearnedType";
+			this.comboDppUnearnedType.Size = new System.Drawing.Size(194, 21);
+			this.comboDppUnearnedType.TabIndex = 248;
+			this.comboDppUnearnedType.Text = "comboBoxOD1";
+			// 
 			// label59
 			// 
 			this.label59.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -2961,32 +2979,32 @@ namespace OpenDental{
 			// 
 			this.groupBox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(249)))), ((int)(((byte)(249)))), ((int)(((byte)(249)))));
 			this.groupBox6.Controls.Add(this.textInsImplant);
-			this.groupBox6.Controls.Add(this.label53);
+			this.groupBox6.Controls.Add(this.labelInsImplant);
 			this.groupBox6.Controls.Add(this.label52);
 			this.groupBox6.Controls.Add(this.textInsDentures);
-			this.groupBox6.Controls.Add(this.label51);
+			this.groupBox6.Controls.Add(this.labelInsDentures);
 			this.groupBox6.Controls.Add(this.textInsPerioMaint);
-			this.groupBox6.Controls.Add(this.label50);
+			this.groupBox6.Controls.Add(this.labelInsPerioMaint);
 			this.groupBox6.Controls.Add(this.textInsDebridement);
-			this.groupBox6.Controls.Add(this.label49);
+			this.groupBox6.Controls.Add(this.labelInsDebridement);
 			this.groupBox6.Controls.Add(this.textInsSealant);
-			this.groupBox6.Controls.Add(this.label48);
+			this.groupBox6.Controls.Add(this.labelInsSealant);
 			this.groupBox6.Controls.Add(this.textInsFlouride);
-			this.groupBox6.Controls.Add(this.label47);
+			this.groupBox6.Controls.Add(this.labelInsFlouride);
 			this.groupBox6.Controls.Add(this.textInsCrown);
-			this.groupBox6.Controls.Add(this.label46);
+			this.groupBox6.Controls.Add(this.labelInsCrown);
 			this.groupBox6.Controls.Add(this.textInsSRP);
-			this.groupBox6.Controls.Add(this.label45);
+			this.groupBox6.Controls.Add(this.labelInsSRP);
 			this.groupBox6.Controls.Add(this.textInsCancerScreen);
-			this.groupBox6.Controls.Add(this.label44);
+			this.groupBox6.Controls.Add(this.labelInsCancerScreen);
 			this.groupBox6.Controls.Add(this.textInsProphy);
-			this.groupBox6.Controls.Add(this.label43);
+			this.groupBox6.Controls.Add(this.labelInsProphy);
 			this.groupBox6.Controls.Add(this.textInsExam);
-			this.groupBox6.Controls.Add(this.label35);
+			this.groupBox6.Controls.Add(this.labelInsPano);
 			this.groupBox6.Controls.Add(this.textInsBW);
-			this.groupBox6.Controls.Add(this.label34);
+			this.groupBox6.Controls.Add(this.labelInsExam);
 			this.groupBox6.Controls.Add(this.textInsPano);
-			this.groupBox6.Controls.Add(this.label36);
+			this.groupBox6.Controls.Add(this.labelInsBW);
 			this.groupBox6.Location = new System.Drawing.Point(497, 58);
 			this.groupBox6.Name = "groupBox6";
 			this.groupBox6.Size = new System.Drawing.Size(316, 346);
@@ -3002,15 +3020,15 @@ namespace OpenDental{
 			this.textInsImplant.Size = new System.Drawing.Size(173, 20);
 			this.textInsImplant.TabIndex = 27;
 			// 
-			// label53
+			// labelInsImplant
 			// 
-			this.label53.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label53.Location = new System.Drawing.Point(3, 314);
-			this.label53.Name = "label53";
-			this.label53.Size = new System.Drawing.Size(135, 17);
-			this.label53.TabIndex = 250;
-			this.label53.Text = "Implant Codes";
-			this.label53.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsImplant.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsImplant.Location = new System.Drawing.Point(3, 314);
+			this.labelInsImplant.Name = "labelInsImplant";
+			this.labelInsImplant.Size = new System.Drawing.Size(135, 17);
+			this.labelInsImplant.TabIndex = 250;
+			this.labelInsImplant.Text = "Implant Codes";
+			this.labelInsImplant.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// label52
 			// 
@@ -3030,15 +3048,15 @@ namespace OpenDental{
 			this.textInsDentures.Size = new System.Drawing.Size(173, 20);
 			this.textInsDentures.TabIndex = 25;
 			// 
-			// label51
+			// labelInsDentures
 			// 
-			this.label51.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label51.Location = new System.Drawing.Point(3, 291);
-			this.label51.Name = "label51";
-			this.label51.Size = new System.Drawing.Size(135, 17);
-			this.label51.TabIndex = 247;
-			this.label51.Text = "Dentures Codes";
-			this.label51.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsDentures.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsDentures.Location = new System.Drawing.Point(3, 291);
+			this.labelInsDentures.Name = "labelInsDentures";
+			this.labelInsDentures.Size = new System.Drawing.Size(135, 17);
+			this.labelInsDentures.TabIndex = 247;
+			this.labelInsDentures.Text = "Dentures Codes";
+			this.labelInsDentures.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsPerioMaint
 			// 
@@ -3048,15 +3066,15 @@ namespace OpenDental{
 			this.textInsPerioMaint.Size = new System.Drawing.Size(173, 20);
 			this.textInsPerioMaint.TabIndex = 23;
 			// 
-			// label50
+			// labelInsPerioMaint
 			// 
-			this.label50.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label50.Location = new System.Drawing.Point(3, 268);
-			this.label50.Name = "label50";
-			this.label50.Size = new System.Drawing.Size(135, 17);
-			this.label50.TabIndex = 245;
-			this.label50.Text = "Perio Maintenance Codes";
-			this.label50.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsPerioMaint.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsPerioMaint.Location = new System.Drawing.Point(3, 268);
+			this.labelInsPerioMaint.Name = "labelInsPerioMaint";
+			this.labelInsPerioMaint.Size = new System.Drawing.Size(135, 17);
+			this.labelInsPerioMaint.TabIndex = 245;
+			this.labelInsPerioMaint.Text = "Perio Maintenance Codes";
+			this.labelInsPerioMaint.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsDebridement
 			// 
@@ -3066,15 +3084,15 @@ namespace OpenDental{
 			this.textInsDebridement.Size = new System.Drawing.Size(173, 20);
 			this.textInsDebridement.TabIndex = 21;
 			// 
-			// label49
+			// labelInsDebridement
 			// 
-			this.label49.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label49.Location = new System.Drawing.Point(3, 245);
-			this.label49.Name = "label49";
-			this.label49.Size = new System.Drawing.Size(135, 17);
-			this.label49.TabIndex = 243;
-			this.label49.Text = "Full Debridement Codes";
-			this.label49.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsDebridement.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsDebridement.Location = new System.Drawing.Point(3, 245);
+			this.labelInsDebridement.Name = "labelInsDebridement";
+			this.labelInsDebridement.Size = new System.Drawing.Size(135, 17);
+			this.labelInsDebridement.TabIndex = 243;
+			this.labelInsDebridement.Text = "Full Debridement Codes";
+			this.labelInsDebridement.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsSealant
 			// 
@@ -3084,15 +3102,15 @@ namespace OpenDental{
 			this.textInsSealant.Size = new System.Drawing.Size(173, 20);
 			this.textInsSealant.TabIndex = 15;
 			// 
-			// label48
+			// labelInsSealant
 			// 
-			this.label48.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label48.Location = new System.Drawing.Point(3, 176);
-			this.label48.Name = "label48";
-			this.label48.Size = new System.Drawing.Size(135, 17);
-			this.label48.TabIndex = 241;
-			this.label48.Text = "Sealant Codes";
-			this.label48.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsSealant.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsSealant.Location = new System.Drawing.Point(3, 176);
+			this.labelInsSealant.Name = "labelInsSealant";
+			this.labelInsSealant.Size = new System.Drawing.Size(135, 17);
+			this.labelInsSealant.TabIndex = 241;
+			this.labelInsSealant.Text = "Sealant Codes";
+			this.labelInsSealant.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsFlouride
 			// 
@@ -3102,15 +3120,15 @@ namespace OpenDental{
 			this.textInsFlouride.Size = new System.Drawing.Size(173, 20);
 			this.textInsFlouride.TabIndex = 13;
 			// 
-			// label47
+			// labelInsFlouride
 			// 
-			this.label47.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label47.Location = new System.Drawing.Point(3, 153);
-			this.label47.Name = "label47";
-			this.label47.Size = new System.Drawing.Size(135, 17);
-			this.label47.TabIndex = 239;
-			this.label47.Text = "Fluoride Codes";
-			this.label47.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsFlouride.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsFlouride.Location = new System.Drawing.Point(3, 153);
+			this.labelInsFlouride.Name = "labelInsFlouride";
+			this.labelInsFlouride.Size = new System.Drawing.Size(135, 17);
+			this.labelInsFlouride.TabIndex = 239;
+			this.labelInsFlouride.Text = "Fluoride Codes";
+			this.labelInsFlouride.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsCrown
 			// 
@@ -3120,15 +3138,15 @@ namespace OpenDental{
 			this.textInsCrown.Size = new System.Drawing.Size(173, 20);
 			this.textInsCrown.TabIndex = 17;
 			// 
-			// label46
+			// labelInsCrown
 			// 
-			this.label46.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label46.Location = new System.Drawing.Point(3, 199);
-			this.label46.Name = "label46";
-			this.label46.Size = new System.Drawing.Size(135, 17);
-			this.label46.TabIndex = 237;
-			this.label46.Text = "Crown Codes";
-			this.label46.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsCrown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsCrown.Location = new System.Drawing.Point(3, 199);
+			this.labelInsCrown.Name = "labelInsCrown";
+			this.labelInsCrown.Size = new System.Drawing.Size(135, 17);
+			this.labelInsCrown.TabIndex = 237;
+			this.labelInsCrown.Text = "Crown Codes";
+			this.labelInsCrown.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsSRP
 			// 
@@ -3138,15 +3156,15 @@ namespace OpenDental{
 			this.textInsSRP.Size = new System.Drawing.Size(173, 20);
 			this.textInsSRP.TabIndex = 19;
 			// 
-			// label45
+			// labelInsSRP
 			// 
-			this.label45.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label45.Location = new System.Drawing.Point(3, 222);
-			this.label45.Name = "label45";
-			this.label45.Size = new System.Drawing.Size(135, 17);
-			this.label45.TabIndex = 235;
-			this.label45.Text = "SRP Codes";
-			this.label45.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsSRP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsSRP.Location = new System.Drawing.Point(3, 222);
+			this.labelInsSRP.Name = "labelInsSRP";
+			this.labelInsSRP.Size = new System.Drawing.Size(135, 17);
+			this.labelInsSRP.TabIndex = 235;
+			this.labelInsSRP.Text = "SRP Codes";
+			this.labelInsSRP.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsCancerScreen
 			// 
@@ -3156,15 +3174,15 @@ namespace OpenDental{
 			this.textInsCancerScreen.Size = new System.Drawing.Size(173, 20);
 			this.textInsCancerScreen.TabIndex = 9;
 			// 
-			// label44
+			// labelInsCancerScreen
 			// 
-			this.label44.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label44.Location = new System.Drawing.Point(3, 107);
-			this.label44.Name = "label44";
-			this.label44.Size = new System.Drawing.Size(135, 17);
-			this.label44.TabIndex = 233;
-			this.label44.Text = "Cancer Screening Codes";
-			this.label44.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsCancerScreen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsCancerScreen.Location = new System.Drawing.Point(3, 107);
+			this.labelInsCancerScreen.Name = "labelInsCancerScreen";
+			this.labelInsCancerScreen.Size = new System.Drawing.Size(135, 17);
+			this.labelInsCancerScreen.TabIndex = 233;
+			this.labelInsCancerScreen.Text = "Cancer Screening Codes";
+			this.labelInsCancerScreen.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsProphy
 			// 
@@ -3174,15 +3192,15 @@ namespace OpenDental{
 			this.textInsProphy.Size = new System.Drawing.Size(173, 20);
 			this.textInsProphy.TabIndex = 11;
 			// 
-			// label43
+			// labelInsProphy
 			// 
-			this.label43.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label43.Location = new System.Drawing.Point(3, 130);
-			this.label43.Name = "label43";
-			this.label43.Size = new System.Drawing.Size(135, 17);
-			this.label43.TabIndex = 231;
-			this.label43.Text = "Prophylaxis Codes";
-			this.label43.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsProphy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsProphy.Location = new System.Drawing.Point(3, 130);
+			this.labelInsProphy.Name = "labelInsProphy";
+			this.labelInsProphy.Size = new System.Drawing.Size(135, 17);
+			this.labelInsProphy.TabIndex = 231;
+			this.labelInsProphy.Text = "Prophylaxis Codes";
+			this.labelInsProphy.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsExam
 			// 
@@ -3192,15 +3210,15 @@ namespace OpenDental{
 			this.textInsExam.Size = new System.Drawing.Size(173, 20);
 			this.textInsExam.TabIndex = 7;
 			// 
-			// label35
+			// labelInsPano
 			// 
-			this.label35.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label35.Location = new System.Drawing.Point(2, 61);
-			this.label35.Name = "label35";
-			this.label35.Size = new System.Drawing.Size(135, 17);
-			this.label35.TabIndex = 229;
-			this.label35.Text = "Pano/FMX Codes";
-			this.label35.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsPano.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsPano.Location = new System.Drawing.Point(2, 61);
+			this.labelInsPano.Name = "labelInsPano";
+			this.labelInsPano.Size = new System.Drawing.Size(135, 17);
+			this.labelInsPano.TabIndex = 229;
+			this.labelInsPano.Text = "Pano/FMX Codes";
+			this.labelInsPano.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsBW
 			// 
@@ -3210,15 +3228,15 @@ namespace OpenDental{
 			this.textInsBW.Size = new System.Drawing.Size(173, 20);
 			this.textInsBW.TabIndex = 3;
 			// 
-			// label34
+			// labelInsExam
 			// 
-			this.label34.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label34.Location = new System.Drawing.Point(3, 84);
-			this.label34.Name = "label34";
-			this.label34.Size = new System.Drawing.Size(135, 17);
-			this.label34.TabIndex = 228;
-			this.label34.Text = "Exam Codes";
-			this.label34.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsExam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsExam.Location = new System.Drawing.Point(3, 84);
+			this.labelInsExam.Name = "labelInsExam";
+			this.labelInsExam.Size = new System.Drawing.Size(135, 17);
+			this.labelInsExam.TabIndex = 228;
+			this.labelInsExam.Text = "Exam Codes";
+			this.labelInsExam.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// textInsPano
 			// 
@@ -3228,15 +3246,15 @@ namespace OpenDental{
 			this.textInsPano.Size = new System.Drawing.Size(173, 20);
 			this.textInsPano.TabIndex = 5;
 			// 
-			// label36
+			// labelInsBW
 			// 
-			this.label36.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label36.Location = new System.Drawing.Point(3, 38);
-			this.label36.Name = "label36";
-			this.label36.Size = new System.Drawing.Size(135, 17);
-			this.label36.TabIndex = 227;
-			this.label36.Text = "Bitewing Codes";
-			this.label36.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.labelInsBW.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInsBW.Location = new System.Drawing.Point(3, 38);
+			this.labelInsBW.Name = "labelInsBW";
+			this.labelInsBW.Size = new System.Drawing.Size(135, 17);
+			this.labelInsBW.TabIndex = 227;
+			this.labelInsBW.Text = "Bitewing Codes";
+			this.labelInsBW.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// label19
 			// 
@@ -4533,24 +4551,6 @@ namespace OpenDental{
 			this.butOK.Text = "&OK";
 			this.butOK.Click += new System.EventHandler(this.butOK_Click);
 			// 
-			// label39
-			// 
-			this.label39.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label39.Location = new System.Drawing.Point(3, 121);
-			this.label39.Name = "label39";
-			this.label39.Size = new System.Drawing.Size(195, 17);
-			this.label39.TabIndex = 249;
-			this.label39.Text = "Dynamic payment plan prepayment type";
-			this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			// 
-			// comboDppUnearnedType
-			// 
-			this.comboDppUnearnedType.Location = new System.Drawing.Point(199, 120);
-			this.comboDppUnearnedType.Name = "comboDppUnearnedType";
-			this.comboDppUnearnedType.Size = new System.Drawing.Size(194, 21);
-			this.comboDppUnearnedType.TabIndex = 248;
-			this.comboDppUnearnedType.Text = "comboBoxOD1";
-			// 
 			// FormModuleSetup
 			// 
 			this.ClientSize = new System.Drawing.Size(1230, 696);
@@ -4724,32 +4724,32 @@ namespace OpenDental{
 		private Label label19;
 		private UI.GroupBoxOD groupBox6;
 		private TextBox textInsImplant;
-		private Label label53;
+		private Label labelInsImplant;
 		private Label label52;
 		private TextBox textInsDentures;
-		private Label label51;
+		private Label labelInsDentures;
 		private TextBox textInsPerioMaint;
-		private Label label50;
+		private Label labelInsPerioMaint;
 		private TextBox textInsDebridement;
-		private Label label49;
+		private Label labelInsDebridement;
 		private TextBox textInsSealant;
-		private Label label48;
+		private Label labelInsSealant;
 		private TextBox textInsFlouride;
-		private Label label47;
+		private Label labelInsFlouride;
 		private TextBox textInsCrown;
-		private Label label46;
+		private Label labelInsCrown;
 		private TextBox textInsSRP;
-		private Label label45;
+		private Label labelInsSRP;
 		private TextBox textInsCancerScreen;
-		private Label label44;
+		private Label labelInsCancerScreen;
 		private TextBox textInsProphy;
-		private Label label43;
+		private Label labelInsProphy;
 		private TextBox textInsExam;
-		private Label label35;
+		private Label labelInsPano;
 		private TextBox textInsBW;
-		private Label label34;
+		private Label labelInsExam;
 		private TextBox textInsPano;
-		private Label label36;
+		private Label labelInsBW;
 		private CheckBox checkFrequency;
 		private CheckBox checkProcNoteConcurrencyMerge;
 		private CheckBox checkSolidBlockouts;

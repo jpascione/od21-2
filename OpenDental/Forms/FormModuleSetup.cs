@@ -1054,6 +1054,26 @@ namespace OpenDental{
 			checkPromptSaveTP.Checked=PrefC.GetBool(PrefName.TreatPlanPromptSave);
 		}
 
+		///<summary>The preference passed is assumed to be comma delimited list of procedure codes.
+		///Updates and returns true if all proc codes in textProcCodes are valid. Otherwise, we add these codes to errorMessage and returns false.</summary>
+		private bool UpdateProcCodesPref(PrefName prefName,string textProcCodes,string labelText,ref string errorMessage) {
+			List<string> listProcCodesInvalid=new List<string>();
+			List<string> listProcCodes=textProcCodes
+				.Split(",",StringSplitOptions.RemoveEmptyEntries)
+				.ToList();
+			for(int i=0;i<listProcCodes.Count;i++) {
+				if(!ProcedureCodes.GetContainsKey(listProcCodes[i])) {
+					listProcCodesInvalid.Add($"'{listProcCodes[i]}'");
+				}
+			}
+			if(listProcCodesInvalid.Count > 0) {
+				errorMessage+=$"\r\n  - {labelText}: {string.Join(",",listProcCodesInvalid)}";
+				return false;
+			}
+			//All valid codes in text box.
+			return Prefs.UpdateString(prefName,textProcCodes);
+		}
+
 		///<summary>Returns false if validation fails.</summary>
 		private bool SaveTreatPlan(){
 			float percent=0;
@@ -1079,44 +1099,51 @@ namespace OpenDental{
 					}
 				}
 			}
+			string errorMessage="";
+			//Should we somehow be returning false once all are updated and there were code errors so the window doesn't close and they can edit the errors? Or do we not care enough?
 			_changed|=Prefs.UpdateString(PrefName.TreatmentPlanNote,textTreatNote.Text);
 			_changed|=Prefs.UpdateBool(PrefName.TreatPlanShowCompleted,checkTreatPlanShowCompleted.Checked);
 			_changed|=Prefs.UpdateDouble(PrefName.TreatPlanDiscountPercent,percent);
 			_changed|=Prefs.UpdateBool(PrefName.TreatPlanItemized,checkTreatPlanItemized.Checked);
 			_changed|=Prefs.UpdateBool(PrefName.TreatPlanSaveSignedToPdf,checkTPSaveSigned.Checked);
 			_changed|=Prefs.UpdateBool(PrefName.InsChecksFrequency,checkFrequency.Checked);
-			_changed|=Prefs.UpdateString(PrefName.InsBenBWCodes,textInsBW.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenPanoCodes,textInsPano.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenExamCodes,textInsExam.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenCancerScreeningCodes,textInsCancerScreen.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenProphyCodes,textInsProphy.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenFlourideCodes,textInsFlouride.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenSealantCodes,textInsSealant.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenCrownCodes,textInsCrown.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenSRPCodes,textInsSRP.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenFullDebridementCodes,textInsDebridement.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenPerioMaintCodes,textInsPerioMaint.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenDenturesCodes,textInsDentures.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsBenImplantCodes,textInsImplant.Text);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenBWCodes,textInsBW.Text,labelInsBW.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenPanoCodes,textInsPano.Text,labelInsPano.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenExamCodes,textInsExam.Text,labelInsExam.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenCancerScreeningCodes,textInsCancerScreen.Text,labelInsCancerScreen.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenProphyCodes,textInsProphy.Text,labelInsProphy.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenFlourideCodes,textInsFlouride.Text,labelInsFlouride.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenSealantCodes,textInsSealant.Text,labelInsSealant.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenCrownCodes,textInsCrown.Text,labelInsCrown.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenSRPCodes,textInsSRP.Text,labelInsSRP.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenFullDebridementCodes,textInsDebridement.Text,labelInsDebridement.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenPerioMaintCodes,textInsPerioMaint.Text,labelInsPerioMaint.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenDenturesCodes,textInsDentures.Text,labelInsDentures.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsBenImplantCodes,textInsImplant.Text,labelInsImplant.Text,ref errorMessage);
 			_changed|=Prefs.UpdateBool(PrefName.TreatPlanSortByTooth,radioTreatPlanSortTooth.Checked || PrefC.RandomKeys);
-			_changed|=Prefs.UpdateString(PrefName.InsHistBWCodes,textInsHistBW.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistDebridementCodes,textInsHistDebridement.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistExamCodes,textInsHistExam.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPanoCodes,textInsHistFMX.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPerioMaintCodes,textInsHistPerioMaint.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPerioLLCodes,textInsHistPerioLL.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPerioLRCodes,textInsHistPerioLR.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPerioULCodes,textInsHistPerioUL.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistPerioURCodes,textInsHistPerioUR.Text);
-			_changed|=Prefs.UpdateString(PrefName.InsHistProphyCodes,textInsHistProphy.Text);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistBWCodes,textInsHistBW.Text,labelInsHistBW.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistDebridementCodes,textInsHistDebridement.Text,labelInsHistDebridement.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistExamCodes,textInsHistExam.Text,labelInsHistExam.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPanoCodes,textInsHistFMX.Text,labelInsHistFMX.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPerioMaintCodes,textInsHistPerioMaint.Text,labelInsHistPerioMaint.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPerioLLCodes,textInsHistPerioLL.Text,labelInsHistPerioLL.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPerioLRCodes,textInsHistPerioLR.Text,labelInsHistPerioLR.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPerioULCodes,textInsHistPerioUL.Text,labelInsHistPerioUL.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistPerioURCodes,textInsHistPerioUR.Text,labelInsHistPerioUR.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.InsHistProphyCodes,textInsHistProphy.Text,labelInsHistProphy.Text,ref errorMessage);
 			_changed|=Prefs.UpdateBool(PrefName.TreatPlanPromptSave, checkPromptSaveTP.Checked);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanExamCodes,textDiscountExamCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanPerioCodes,textDiscountPerioCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanProphyCodes,textDiscountProphyCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanFluorideCodes,textDiscountFluorideCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanXrayCodes,textDiscountXrayCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanLimitedCodes,textDiscountLimitedCodes.Text);
-			_changed|=Prefs.UpdateString(PrefName.DiscountPlanPACodes,textDiscountPACodes.Text);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanExamCodes,textDiscountExamCodes.Text,labelDiscountExamFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanPerioCodes,textDiscountPerioCodes.Text,labelDiscountPerioFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanProphyCodes,textDiscountProphyCodes.Text,labelDiscountProphyFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanFluorideCodes,textDiscountFluorideCodes.Text,labelDiscountFluorideFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanXrayCodes,textDiscountXrayCodes.Text,labelDiscountXrayFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanLimitedCodes,textDiscountLimitedCodes.Text,labelDiscountLimitedFreq.Text,ref errorMessage);
+			_changed|=UpdateProcCodesPref(PrefName.DiscountPlanPACodes,textDiscountPACodes.Text,labelDiscountPAFreq.Text,ref errorMessage);
+			if(!string.IsNullOrEmpty(errorMessage)) {//Keep them in the window if invalid codes found.
+				using MsgBoxCopyPaste msgBoxCopyPaste=new MsgBoxCopyPaste(Lan.g(this,"Invalid Treat' Plan procedure codes were detected and need to be corrected before saving.")+$"{errorMessage}");
+				msgBoxCopyPaste.ShowDialog();
+				return false;
+			}
 			return true;
 		}
 		#endregion Methods - Treat' Plan
