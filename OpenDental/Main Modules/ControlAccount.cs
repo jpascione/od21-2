@@ -2240,7 +2240,7 @@ namespace OpenDental {
 			//Don't allow the user to allocate negative unearned which is a problem that needs to be handled with a real income transfer.
 			if(isPrePay && CompareDecimal.IsGreaterThanZero(unearnedAmt)) {
 				if(listAcctEntries.Count<1) {
-					using FormProcSelect formProcSelect=new FormProcSelect(_patCur.PatNum,false,true,doShowAdjustments:true);
+					using FormProcSelect formProcSelect=new FormProcSelect(_patCur.PatNum,false,true,doShowAdjustments:true,doShowTreatmentPlanProcs:false);
 					if(formProcSelect.ShowDialog()!=DialogResult.OK) {
 						return;
 					}
