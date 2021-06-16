@@ -7419,10 +7419,10 @@ namespace OpenDental{
 			if(controlChart.TreatmentNoteChanged) {
 				controlChart.UpdateTreatmentNote();
 			}
-			if(controlAccount.UrgFinNoteChanged) {
+			if(controlAccount.canUpdateUrgFinNote()) {
 				controlAccount.UpdateUrgFinNote();
 			}
-			if(controlAccount.FinNoteChanged) {
+			if(controlAccount.canUpdateFinNote()) {
 				controlAccount.UpdateFinNote();
 			}
 			if(controlTreat.HasNoteChanged) {

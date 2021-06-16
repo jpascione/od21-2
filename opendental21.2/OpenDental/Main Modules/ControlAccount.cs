@@ -56,6 +56,8 @@ namespace OpenDental {
 		///<summary>Gets updated to PatCur.PatNum that the last security log was made with so that we don't make too many security logs for this patient.  When _patNumLast no longer matches PatCur.PatNum (e.g. switched to a different patient within a module), a security log will be entered.  Gets reset (cleared and the set back to PatCur.PatNum) any time a module button is clicked which will cause another security log to be entered.</summary>
 		private long _patNumLast;
 		private decimal _PPBalanceTotal;
+		private string _famUrgFinNoteOnLoad;
+		private string _famFinNoteOnLoad;
 		#endregion Fields - Private	
 	
 		#region Constructors
@@ -2138,6 +2140,17 @@ namespace OpenDental {
 			Plugins.HookAddCode(this,"ContrAccount.ModuleUnselected_end");
 		}
 
+		/// <summary>Only for use in FormOpenDental.cs form deactivate event handler. Used to prevent a bug that would clear out the FamUrgFinNote when closing the program sometimes.
+		/// There is a case where a user has a note on load, intentionally clears that note and OD is shutdown via shutdown signal or other process termination before they leave the textbox. This will result in the note that they deleted not being updated and still being present when OD is opened again as if the changes made were not committed.</summary>
+		public bool canUpdateFinNote() {
+			if(FinNoteChanged) {
+				if(textFinNote.Text=="" && _famFinNoteOnLoad != textFinNote.Text) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public void UpdateFinNote() {
 			if(_famCur==null)
 				return;
@@ -2146,6 +2159,17 @@ namespace OpenDental {
 				PatientNotes.Update(_patientNoteCur,_patCur.Guarantor);
 				FinNoteChanged=false;
 			}
+		}
+
+		/// <summary>Only for use in FormOpenDental.cs form deactivate event handler. Used to prevent a bug that would clear out the FamUrgFinNote when closing the program sometimes.
+		/// There is a case where a user has a note on load, intentionally clears that note and OD is shutdown via shutdown signal or other process termination before they leave the textbox. This will result in the note that they deleted not being updated and still being present when OD is opened again as if the changes made were not committed.</summary>
+		public bool canUpdateUrgFinNote() {
+			if(UrgFinNoteChanged) {
+				if(textUrgFinNote.Text=="" && _famUrgFinNoteOnLoad != textUrgFinNote.Text) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public void UpdateUrgFinNote() {
@@ -3077,7 +3101,9 @@ namespace OpenDental {
 			}
 			else{
 				textUrgFinNote.Text=_famCur.ListPats[0].FamFinUrgNote;
+				_famUrgFinNoteOnLoad=_famCur.ListPats[0].FamFinUrgNote;
 				textFinNote.Text=_patientNoteCur.FamFinancial;
+				_famFinNoteOnLoad=_patientNoteCur.FamFinancial;
 				if(!textFinNote.Focused) {
 					textFinNote.SelectionStart=textFinNote.Text.Length;
 					//This will cause a crash if the richTextBox currently has focus. We don't know why.
