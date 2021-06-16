@@ -80,6 +80,7 @@ namespace OpenDental {
 				gridMain.ListGridRows.Add(row);
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 		}
 
 		private void FillFilters() {
@@ -262,6 +263,10 @@ namespace OpenDental {
 			return tableUserQuery.Select().Select(x => PIn.Long(x["PatNum"].ToString())).ToList();
 		}
 
+		private void UpdateSelectedCount() {
+			labelNumberPats.Text=gridMain.ListGridRows.Count(x=>x.Cells[0].Text.ToUpper()=="X").ToString();
+		}
+
 		private void listBoxPatStatus_SelectedIndexChanged(object sender,EventArgs e) {
 			labelRefreshNeeded.Visible=true;
 		}
@@ -336,6 +341,7 @@ namespace OpenDental {
 				}
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 			gridMain.SetSelected(e.Row);
 		}
 
@@ -372,6 +378,7 @@ namespace OpenDental {
 				gridMain.ListGridRows[i].Cells[0].Text="X";
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 		}
 		
 		private void butSetSelected_Click(object sender,EventArgs e) {
@@ -380,6 +387,7 @@ namespace OpenDental {
 				gridMain.SelectedGridRows[i].Cells[0].Text="X";
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 		}
 
 		private void butClearSelected_Click(object sender,EventArgs e) {
@@ -388,6 +396,7 @@ namespace OpenDental {
 				gridMain.SelectedGridRows[i].Cells[0].Text="";
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 		}
 
 		private void butClearAll_Click(object sender,EventArgs e) {
@@ -396,6 +405,7 @@ namespace OpenDental {
 				gridMain.ListGridRows[i].Cells[0].Text="";
 			}
 			gridMain.EndUpdate();
+			UpdateSelectedCount();
 		}
 
 		private void butPreviewTemplate_Click(object sender,EventArgs e) {
