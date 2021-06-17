@@ -165,7 +165,7 @@ namespace OpenDental{
 				return;
 			}
 			if(checkIsHidden.Checked==true && Operatories.HasFutureApts(OpCur.OperatoryNum,ApptStatus.UnschedList)) {
-				MsgBox.Show(this,"Can not hide an operatory with future appointments.");
+				MsgBox.Show(this,"Operatory cannot be hidden if there are future appointments.");
 				checkIsHidden.Checked=false;
 				return;
 			}
