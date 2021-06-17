@@ -257,7 +257,9 @@ namespace OpenDentBusiness.Eclaims {
 						throw new ApplicationException("Internal error, invalid field list id in: "+fieldOrderStr);
 					}
 					i+=6;
-					for(int p=0;p<Convert.ToInt32(valueField.valuestr);p++) {
+					int count=0;
+					Int32.TryParse(valueField.valuestr,out count);//Treat spaces as 0.
+					for(int p=0;p<count;p++) {
 						message=InputField(message,listFieldId);
 					}
 				}
