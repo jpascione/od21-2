@@ -130,6 +130,7 @@ namespace OpenDental {
 			this.tabManage = new System.Windows.Forms.TabPage();
 			this.checkEra835sStrictClaimMatching = new System.Windows.Forms.CheckBox();
 			this.checkEra835sRefreshOnLoad = new System.Windows.Forms.CheckBox();
+			this.checkEra835sShowStatusAndClinic = new System.Windows.Forms.CheckBox();
 			this.tabControlMain.SuspendLayout();
 			this.tabAccount.SuspendLayout();
 			this.groupBoxClaimIdPrefix.SuspendLayout();
@@ -1288,6 +1289,7 @@ namespace OpenDental {
 			// 
 			this.tabManage.Controls.Add(this.checkEra835sStrictClaimMatching);
 			this.tabManage.Controls.Add(this.checkEra835sRefreshOnLoad);
+			this.tabManage.Controls.Add(this.checkEra835sShowStatusAndClinic);
 			this.tabManage.Location = new System.Drawing.Point(4, 22);
 			this.tabManage.Name = "tabManage";
 			this.tabManage.Size = new System.Drawing.Size(494, 593);
@@ -1316,6 +1318,17 @@ namespace OpenDental {
 			this.checkEra835sRefreshOnLoad.TabIndex = 273;
 			this.checkEra835sRefreshOnLoad.Text = "ERA 835s window refresh data on load";
 			this.checkEra835sRefreshOnLoad.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// checkEra835sShowStatusAndClinic
+			// 
+			this.checkEra835sShowStatusAndClinic.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkEra835sShowStatusAndClinic.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkEra835sShowStatusAndClinic.Location = new System.Drawing.Point(154,48);
+			this.checkEra835sShowStatusAndClinic.Name = "checkEra835sShowStatusAndClinic";
+			this.checkEra835sShowStatusAndClinic.Size = new System.Drawing.Size(319,18);
+			this.checkEra835sShowStatusAndClinic.TabIndex = 274;
+			this.checkEra835sShowStatusAndClinic.Text = "ERA 835s window show status and clinic information";
+			this.checkEra835sShowStatusAndClinic.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// FormEnterpriseSetup
 			// 
@@ -1461,5 +1474,6 @@ namespace OpenDental {
 		private System.Windows.Forms.TabPage tabManage;
 		private System.Windows.Forms.CheckBox checkEra835sRefreshOnLoad;
         private System.Windows.Forms.CheckBox checkEra835sStrictClaimMatching;
+        private System.Windows.Forms.CheckBox checkEra835sShowStatusAndClinic;
     }
 }

@@ -46,6 +46,7 @@
 			this.textCheckTrace = new OpenDental.ODtextBox();
 			this.gridMain = new OpenDental.UI.GridOD();
 			this.checkAutomatableCarriersOnly = new System.Windows.Forms.CheckBox();
+			this.checkShowFinalizedOnly = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -268,11 +269,22 @@
 			this.checkAutomatableCarriersOnly.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.checkAutomatableCarriersOnly.Click += new System.EventHandler(this.checkAutomatableCarriersOnly_Click);
 			// 
+			// checkShowFinalizedOnly
+			// 
+			this.checkShowFinalizedOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.checkShowFinalizedOnly.Location = new System.Drawing.Point(761,27);
+			this.checkShowFinalizedOnly.Name = "checkShowFinalizedOnly";
+			this.checkShowFinalizedOnly.Size = new System.Drawing.Size(162,17);
+			this.checkShowFinalizedOnly.TabIndex = 271;
+			this.checkShowFinalizedOnly.Text = "Finalized Only";
+			this.checkShowFinalizedOnly.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
 			// FormEtrans835s
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1034, 786);
+			this.Controls.Add(this.checkShowFinalizedOnly);
 			this.Controls.Add(this.checkAutomatableCarriersOnly);
 			this.Controls.Add(this.comboClinics);
 			this.Controls.Add(this.textControlId);
@@ -320,5 +332,6 @@
 		private System.Windows.Forms.Label labelControlId;
 		private UI.ComboBoxClinicPicker comboClinics;
 		private System.Windows.Forms.CheckBox checkAutomatableCarriersOnly;
+		private System.Windows.Forms.CheckBox checkShowFinalizedOnly;
 	}
 }
