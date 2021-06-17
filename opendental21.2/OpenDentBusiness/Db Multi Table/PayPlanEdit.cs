@@ -969,6 +969,95 @@ namespace OpenDentBusiness {
 			return listExpectedCharges;//returns all expected for the entire life of the payment plan. 
 		}
 
+		///<summary>Issues charges for all active dynamic payment plans in a database. Called by the OpenDentalService.PaymentPlanThread.</summary>
+		public static void IssueChargesDueForDynamicPaymentPlans(List<PayPlan> listDynamicPayPlans,LogWriter log) {
+			//no remoting role check; no call to db
+			Signalods.SetInvalid(InvalidType.Prefs);
+			try {
+				log.WriteLine("Running payment plan logic.",LogLevel.Verbose);
+				List<PayPlanLink> listPayPlanLinksAll=PayPlanLinks.GetForPayPlans(listDynamicPayPlans.Select(x => x.PayPlanNum).ToList());
+				Dictionary<long,List<PayPlanCharge>> dictPayPlanCharges=PayPlanCharges.GetForPayPlans(listDynamicPayPlans.Select(x => x.PayPlanNum).ToList())
+					.GroupBy(x => x.PayPlanNum)
+					.ToDictionary(x => x.Key,x => x.OrderBy(y => y.ChargeDate).ToList());
+				Dictionary<long,List<PaySplit>> dictPaySplits=PaySplits.GetForPayPlans(listDynamicPayPlans.Select(x => x.PayPlanNum).ToList())
+					.GroupBy(x => x.PayPlanNum)
+					.ToDictionary(x => x.Key,x => x.ToList());
+				Dictionary<long,List<PayPlanProductionEntry>> dictProdEntrys=PayPlanProductionEntry.GetProductionForLinks(listPayPlanLinksAll)
+					.GroupBy(x=>x.PayPlanNum)
+					.ToDictionary(x => x.Key,x => x.ToList());
+				//Make a list of distinct pat nums for each payment plan.
+				List<long> listPatNums=listDynamicPayPlans.Select(x => x.PatNum).Distinct().ToList();
+				//Get every family for each pat num found.
+				List<Family> listFamilies=Patients.GetFamilies(listPatNums);
+				//Make a dictionary out of the distinct pat nums for each payment plan and find their corresponding family entity.
+				Dictionary<long,Family> dictFamilies=new Dictionary<long,Family>();
+				foreach(long patNum in listPatNums) {
+					dictFamilies[patNum]=listFamilies.First(x => x.ListPats.Any(y => y.PatNum==patNum));
+				}
+				log.WriteLine($"Dynamic payment plans found: {listDynamicPayPlans.Count}",LogLevel.Verbose);
+				//Create any necessary pay plan charges for dynamic payment plans.
+				foreach(PayPlan payplan in listDynamicPayPlans) {
+					if(!dictPayPlanCharges.TryGetValue(payplan.PayPlanNum,out List<PayPlanCharge> listPayPlanChargesInDb)) {
+						listPayPlanChargesInDb=new List<PayPlanCharge>();
+					}
+					if(!dictPaySplits.TryGetValue(payplan.PayPlanNum,out List<PaySplit> listPaySplits)) {
+						listPaySplits=new List<PaySplit>();
+					}
+					List<PayPlanLink> listLinksForPayPlan=listPayPlanLinksAll.FindAll(x => x.PayPlanNum==payplan.PayPlanNum);
+					PayPlanTerms terms=PayPlanEdit.GetPayPlanTerms(payplan,listLinksForPayPlan);
+					//get the expected period that this charge would be for.
+					int periodCount=listPayPlanChargesInDb.DistinctBy(x => x.ChargeDate).Count();
+					if(terms.DownPayment!=0 && listPayPlanChargesInDb.Count!=0 && terms.DateFirstPayment.Date!=listPayPlanChargesInDb[0].ChargeDate.Date) {
+						periodCount--;//down payment does not count towards the period count since it was made before the start date.
+					}
+					DateTime nextExpectedDate=PayPlanEdit.CalcNextPeriodDate(payplan.DatePayPlanStart,periodCount,payplan.ChargeFrequency);
+					if(nextExpectedDate.Date > DateTime.Today) {
+						continue;//it is not yet time to add another charge. Skip the other logic.
+					}
+					//Filter out on charge date so we don't insert future charges. We need to get ALL expected charges here just in case the service was
+					//down or a payment got missed from the run time. Logic should add the older charge to the database as well as the newer that is now due.
+					//Should have been skipped above, though the logic within GetListExpectedCharges() is more accurate.
+					List<PayPlanCharge> listExpected=new List<PayPlanCharge>();
+					List<PayPlanProductionEntry> listProdEntryForPlan;
+					if(!dictProdEntrys.TryGetValue(payplan.PayPlanNum,out listProdEntryForPlan)) {
+						listProdEntryForPlan=new List<PayPlanProductionEntry>();
+					}
+					double principalActual=PayPlanProductionEntry.GetDynamicPayPlanCompletedAmount(payplan,listProdEntryForPlan);
+					int payPeriodsMissable=100; //This should be way more than sufficent to catch up on charges. Mostly put in for safety kickout. 
+					while(payplan.DatePayPlanStart.Date <= DateTime.Today.Date 
+						&& (listPayPlanChargesInDb.Count==0 || listPayPlanChargesInDb.Max(x=>x.ChargeDate).Date < DateTime.Today.Date) 
+						&& listPayPlanChargesInDb.Sum(x => x.Principal) < principalActual
+						&& payPeriodsMissable > 0) 
+					{
+						List<PayPlanCharge> listChargesThisPeriod=PayPlanEdit.GetListExpectedCharges(listPayPlanChargesInDb,terms,dictFamilies[payplan.PatNum]
+						,listLinksForPayPlan,payplan,true,listPaySplits:listPaySplits);
+						if(listChargesThisPeriod.IsNullOrEmpty()) {
+							break;
+						}
+						listExpected.AddRange(listChargesThisPeriod);
+						listPayPlanChargesInDb.AddRange(listChargesThisPeriod);
+						payPeriodsMissable--;
+					}
+					log.WriteLine($"Expected PayPlanCharges to be inserted for PayPlanNum #{payplan.PayPlanNum}: {listExpected.Count}",LogLevel.Verbose);
+					//Loop through each expected charge and insert them into the database one at a time so that the primary keys in memory are set correctly.
+					foreach(PayPlanCharge payPlanCharge in listExpected) {
+						PayPlanCharges.Insert(payPlanCharge);
+					}
+					double hiddenUnearnedTotal=PayPlanEdit.GetDynamicPayPlanPrepaymentAmount(listPaySplits);
+					if(CompareDouble.IsGreaterThan(hiddenUnearnedTotal,0)) {
+						log.WriteLine($"Hidden unearned prepayments detected for PayPlanNum #{payplan.PayPlanNum}. Applying up to {hiddenUnearnedTotal.ToString("c")} to any new charges.",LogLevel.Verbose);
+						PayPlanEdit.ApplyPrepaymentToDynamicPaymentPlan(payplan.Guarantor,hiddenUnearnedTotal,listExpected);//Guarantors on payment plans are the ones that make the payments.
+					}
+				}
+			}
+			finally {
+				//This instance of Open Dental service is no longer running the dynamic payment plan logic.  Update the database to indicate this fact.
+				Prefs.UpdateDateT(PrefName.DynamicPayPlanLastDateTime,MiscData.GetNowDateTime());
+				Prefs.UpdateDateT(PrefName.DynamicPayPlanStartDateTime,DateTime.MinValue);
+				Signalods.SetInvalid(InvalidType.Prefs);
+			}
+		}
+
 		///<summary>Expects all PaySplits and PayPlanCharges to be linked to the same plan.</summary>
 		public static bool IsDynamicPaymentPlanInterestOrPrincipalOverpaid(List<PayPlanCharge> listPayPlanCharges,List<PaySplit> listPaySplits) {
 			DynamicPaymentPlanRecalculationBuckets buckets=GetDynamicPaymentPlanRecalculationBuckets(listPayPlanCharges,listPaySplits);
