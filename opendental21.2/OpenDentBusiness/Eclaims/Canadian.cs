@@ -1693,8 +1693,7 @@ namespace OpenDentBusiness.Eclaims {
 					}
 				}
 				catch(Exception ex) {
-					ex.DoNothing();
-					errorMsg+=Lans.g("Canadian","Response is not formatted according to message standards.");
+					errorMsg+=Lans.g("Canadian","Response is not formatted according to message standards.")+"\r\n"+ex.Message;
 				}
 			}
 			return result;
