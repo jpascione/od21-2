@@ -978,11 +978,11 @@ namespace DataConnectionBase {
 			//Don't catch error 1153 (max_allowed_packet error), it will change program behavior if we do.
 			if(IsConnectionLost(ex)) {
 				//Pause the application here for a specified amount of time.
-				return StartConnectionErrorRetry(_con.ConnectionString,DataConnectionEventType.ConnectionLost);
+				return StartConnectionErrorRetry(DataConnectionEventType.ConnectionLost);
 			}
 			if(IsTooManyConnections(ex)) {
 				//Pause the application here for a specified amount of time.
-				return StartConnectionErrorRetry(_con.ConnectionString,DataConnectionEventType.TooManyConnections);
+				return StartConnectionErrorRetry(DataConnectionEventType.TooManyConnections);
 			}
 			if(IsCrashedTable(ex,out _crashedTableName)) {
 				//Pause the application here for a specified amount of time.
@@ -996,10 +996,15 @@ namespace DataConnectionBase {
 		///Immediately returns if ConnectionRetrySeconds is 0 or this is the Middle Tier that has lost connection to the database.
 		///Returns true if the calling method should retry the db action that just failed.  E.g. recursively invoke GetTable()
 		///Returns false if the calling method should instead bubble up the original exception.</summary>
-		private bool StartConnectionErrorRetry(string connectionString,DataConnectionEventType errorType) {
+		private bool StartConnectionErrorRetry(DataConnectionEventType errorType) {
 			if(ConnectionRetryTimeoutSeconds==0 || !GetCanReconnect()) {
 				return false;
 			}
+			//Important to use GetCurrentConnectionString() here instead of _con.ConnectionString.
+			//_con.ConnectionString will be devoid of it's password after _con.Open() has been called.
+			//This will yield authentication errors if we seed a new MySqlConnection (below) with _con.ConnectionString.
+			//See https://stackoverflow.com/a/12467984.
+			string connectionString=GetCurrentConnectionString();
 			bool doRetry=true;
 			//Register for the DataConnection event just in case another thread notices that the connection has come back before this method does.
 			DataConnectionEvent.Fired+=DataConnectionEvent_Fired;

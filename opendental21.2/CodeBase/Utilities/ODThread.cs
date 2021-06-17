@@ -14,6 +14,8 @@ namespace CodeBase {
 		private Thread _thread=null;
 		///<summary>Sleep timer which can be interrupted elegantly.</summary>
 		private AutoResetEvent _waitEvent=new AutoResetEvent(false);
+		///<summary>Created and returned when QuitAsync is called. Will be invoked at the end of the thread right as thread exits.</summary>
+		private AutoResetEvent _waitEventAsyncQuitComplete=null;
 		///<summary>The exact time when this thread was started.  Useful for determining thread run times.</summary>
 		private DateTime _dateTimeStart=DateTime.MinValue;
 		///<summary>The exact time when this thread was quit.  Useful for determining thread run times.</summary>
@@ -214,6 +216,9 @@ namespace CodeBase {
 					return;
 				}
 			}
+			//QuitAsync returned this wait handle so async quitting could be done and waited upon without having to join to main thread.
+			//Let's alert the awaiter that our thread is officially done.
+			ODException.SwallowAnyException(() => { _waitEventAsyncQuitComplete?.Set(); });
 		}
 
 		///<summary>Calls the appropriate exception handler for this exception. Returns false if the thread needs to quit.</summary>
@@ -296,13 +301,19 @@ namespace CodeBase {
 		}
 
 		///<summary>Immediately returns after flagging the thread to quit itself asynchronously.  The thread may execute a bit longer.  If the thread has been forgotten, it will be forcefully quit on closing of the main application.</summary>
-		public void QuitAsync() {
-			QuitAsync(true);
+		public EventWaitHandle QuitAsync() {
+			return QuitAsync(true);
 		}
 
-		///<summary>Immediately returns after flagging the thread to quit itself asynchronously.  The thread may execute a bit longer.  If the thread has been forgotten, it will be forcefully quit on closing of the main application.  Set removeThread false if you want this thread to stay in the global list of ODThreads.</summary>
-		public void QuitAsync(bool removeThread) {
+		///<summary>Immediately returns after flagging the thread to quit itself asynchronously.  The thread may execute a bit longer.  
+		///If the thread has been forgotten, it will be forcefully quit on closing of the main application.  
+		///Set removeThread false if you want this thread to stay in the global list of ODThreads.
+		///Returns a WaitHandle that will each when the respective thread has officially exited. 
+		///Wait on this handle if you want to quit async and wait for results without joining back to the main thread.</summary>
+		public EventWaitHandle QuitAsync(bool removeThread) {
 			_hasQuit=true;
+			//Set the quit wait handle. This event will be triggered as the thread is exiting.
+			_waitEventAsyncQuitComplete=new AutoResetEvent(false);
 			//If thread is in idle due to wait event, then wake it immediately so we can more quickly quit.  Helps the thread quit within timeoutMS.
 			Wakeup();
 			if(removeThread) {
@@ -310,6 +321,7 @@ namespace CodeBase {
 					_listOdThreads.Remove(this);
 				}
 			}
+			return _waitEventAsyncQuitComplete;
 		}
 
 		///<summary>Waits for this thread to quit itself before returning.  If the thread has been forgotten, it will be forcefully quit on closing of the main application.</summary>
@@ -332,12 +344,16 @@ namespace CodeBase {
 		}
 
 		///<summary>Asynchronously quits all threads that have the passed in group name.
-		///Optionally have this quit method remove the threads from the global list of threads.</summary>
-		public static void QuitAsyncThreadsByGroupName(string groupName,bool doRemoveThreads=false) {
+		///Optionally have this quit method remove the threads from the global list of threads.
+		///Returns a list of WaitHandles that will each fire when their respective thread has officially exited. 
+		///Wait on these handles if you want to quit async and wait for results without joining back to the main thread.</summary>
+		public static List<WaitHandle> QuitAsyncThreadsByGroupName(string groupName,bool doRemoveThreads=false) {
+			List<WaitHandle> listWaitHandles=new List<WaitHandle>();
 			List<ODThread> listThreadsForGroup=GetThreadsByGroupName(groupName);
 			for(int i=0;i<listThreadsForGroup.Count;i++) { //Quit all threads in parallel so our wait times are not cummulative.
-				listThreadsForGroup[i].QuitAsync(doRemoveThreads);//Do not remove threads from global list so that the Join can have access to them.
+				listWaitHandles.Add(listThreadsForGroup[i].QuitAsync(doRemoveThreads));//Do not remove threads from global list so that the Join can have access to them.
 			}
+			return listWaitHandles;
 		}
 
 		///<summary>Waits for ALL threads in the group to finish doing work before returning.  Each thread will be given the timeoutMS to quit.  Try to keep in mind how many threads are going to be quitting when setting the milliseconds for the timeout.  If the thread has been forgotten, it will be forcefully quit on closing of the main application.  Removes all threads from the global list of ODThreads after the threads have quit.</summary>

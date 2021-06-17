@@ -23,6 +23,8 @@ namespace OpenDental {
 		#region Thread instances. Only keep an instance when necessary for guarding against re-entrace.
 		///<summary>Add your thread instance to this list if you only want this thread to only be started once.</summary>
 		private List<ODThread> _listOdThreadsRunOnce=new List<ODThread>();
+		///<summary>Used internally to await for all threads to exit before attempting to restart.</summary>
+		private List<WaitHandle> _listThreadExitWaitHandles=new List<WaitHandle>();
 		private ODThread _odThreadDataConnectionLost;
 		private ODThread _odThreadCrashedTableMonitor;
 		private ODThread _odThreadMiddleTierConnectionLost;
@@ -63,25 +65,32 @@ namespace OpenDental {
 		///<summary>Either starts all possible threads owned by FormOpenDental or stops a select few threads which are safe to stop.
 		///Some threads are not designed to be stopped once they've started.  E.g. heartbeat, data connection lost, etc.</summary>
 		private void SetThreads(bool doStart) {
-			if(doStart) {
-				BeginClaimReportThread();
-				BeginCanadianItransCarrierThread();
-				BeginEServiceMonitorThread();
-				BeginLogOffThread();
-				BeginODServiceMonitorThread();
-				BeginUpdateFormTextThread();
-				BeginWebSyncThread();
-				BeginComputerHeartbeatThread();
-				BeginPodiumThread();
-				BeginEhrCodeListThread();
-				BeginTimeSyncThread();
-				BeginVoicemailThread();
-				BeginHqMetricsThread();
-				BeginRegKeyThread();
-				BeginRegistrationKeyIsDisabledThread();
-				CheckAlerts(doRunOnThread:true);
-			}
-			else {
+			//We need to lock this entire method because we can't have threads being added while threads are being removed at the same time.
+			lock(_listThreadExitWaitHandles) {
+				//Make sure our threads from last time are dead and gone.
+				if(!_listThreadExitWaitHandles.IsNullOrEmpty()) {
+					WaitHandle.WaitAll(_listThreadExitWaitHandles.ToArray(),30000);
+					_listThreadExitWaitHandles.Clear();
+				}
+				if(doStart) {
+					BeginClaimReportThread();
+					BeginCanadianItransCarrierThread();
+					BeginEServiceMonitorThread();
+					BeginLogOffThread();
+					BeginODServiceMonitorThread();
+					BeginUpdateFormTextThread();
+					BeginWebSyncThread();
+					BeginComputerHeartbeatThread();
+					BeginPodiumThread();
+					BeginEhrCodeListThread();
+					BeginTimeSyncThread();
+					BeginVoicemailThread();
+					BeginHqMetricsThread();
+					BeginRegKeyThread();
+					BeginRegistrationKeyIsDisabledThread();
+					CheckAlerts(doRunOnThread: true);
+					return;
+				}
 				Enum.GetValues(typeof(FormODThreadNames)).Cast<FormODThreadNames>().ForEach(threadName => {
 					switch(threadName) {
 						//Do not kill these.
@@ -109,7 +118,8 @@ namespace OpenDental {
 						case FormODThreadNames.VoicemailHQ:
 						case FormODThreadNames.CheckAlerts:
 						default:
-							ODThread.QuitAsyncThreadsByGroupName(threadName.GetDescription());
+							//Add these to our list so we can wait on them to exit before restarting the threads next time.
+							_listThreadExitWaitHandles.AddRange(ODThread.QuitAsyncThreadsByGroupName(threadName.GetDescription()));
 							break;
 					}
 				});
@@ -286,7 +296,7 @@ namespace OpenDental {
 				Func<bool> funcTestConnection=() => {
 					using(DataConnection dconn=new DataConnection()) {
 						try {
-							dconn.SetDb(DataConnection.GetCurrentConnectionString(),"",DataConnection.DBtype);
+							dconn.SetDb(e.ConnectionString,"",DataConnection.DBtype);
 							//Tell everyone that the data connection has been found.
 							DataConnectionEvent.Fire(new DataConnectionEventArgs(DataConnectionEventType.ConnectionRestored,true,e.ConnectionString));
 						}
@@ -308,9 +318,10 @@ namespace OpenDental {
 			//Add exception handling just in case MySQL is unreachable at any point in the lifetime of this session.
 			_odThreadDataConnectionLost.AddExceptionHandler((ex) => ex.DoNothing());
 			_odThreadDataConnectionLost.AddExitHandler((ex) => {
-				_odThreadDataConnectionLost=null;
 				//Restart our threads no matter what happened.  If we're killing the program this won't matter anyway.
 				SetThreads(true);//Start the threads because they were the only ones stopped, the timers were locked up via a Join() on the main thread.
+				//Important that this only get set to null AFTER we have restarted the threads. This our re-entrance blocker at the top of this method.
+				_odThreadDataConnectionLost=null;
 			});
 			_odThreadDataConnectionLost.GroupName=FormODThreadNames.DataConnectionLost.GetDescription();
 			_odThreadDataConnectionLost.Name=FormODThreadNames.DataConnectionLost.GetDescription();
