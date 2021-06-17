@@ -537,6 +537,12 @@ namespace OpenDentBusiness {
 			Db.NonQ(command);
 		}//End of 20_5_61() method
 
+		private static void To20_5_65() {
+			string command;
+			command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraShowStatusAndClinic','1')"; //Default to true.
+			Db.NonQ(command);
+		}//End of 20_5_65() method
+
 		private static void To21_1_1() {
 			string command;
 			DataTable table;
@@ -813,6 +819,14 @@ namespace OpenDentBusiness {
 				Db.NonQ(command);
 			}
 		}//End of 21_1_35() method
+
+		private static void To21_1_37() {
+			string command="SELECT * FROM preference WHERE PrefName='EraShowStatusAndClinic'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraShowStatusAndClinic','1')"; //Default to true.
+				Db.NonQ(command);
+			}
+		}//End of 21_1_37() method
 
 		private static void To21_2_1() {
 			string command;
@@ -1316,6 +1330,14 @@ namespace OpenDentBusiness {
 				}
 			}
 		}//End of 21_2_8() method
+
+		private static void To21_2_9() {
+			string command="SELECT * FROM preference WHERE PrefName='EraShowStatusAndClinic'";
+			if(Db.GetTable(command).Rows.Count==0) {
+				command="INSERT INTO preference(PrefName,ValueString) VALUES ('EraShowStatusAndClinic','1')"; //Default to true.
+				Db.NonQ(command);
+			}
+		}//End of 21_2_9() method
 
 		private class OrthoObj {
 			public long ProvNum;

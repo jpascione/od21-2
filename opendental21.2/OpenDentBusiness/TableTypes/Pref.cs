@@ -923,6 +923,10 @@ namespace OpenDentBusiness {
 		///Otherwise Control ID UI is not visable and can not be used.</summary>
 		[PrefName(ValueType=PrefValueType.BOOL)]
 		EraShowControlIdFilter,
+		///<summary>Boolean, true by default.  When true FormEtrans835s allows the user to filter by status and clinic and shows the values in a grid column.
+		///Otherwise Status and Clinic UI is not visible and can not be used. This makes FormEtrans835s load ERAs faster for large databases.</summary>
+		[PrefName(ValueType=PrefValueType.BOOL)]
+		EraShowStatusAndClinic,
 		///<summary>Boolean, false by default. When true, will use a list of dates instead of a date range when matching claims in Claims.GetClaimFromX12.</summary>
 		[PrefName(ValueType=PrefValueType.BOOL)]
 		EraStrictClaimMatching,

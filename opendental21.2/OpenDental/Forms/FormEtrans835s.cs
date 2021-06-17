@@ -48,6 +48,15 @@ namespace OpenDental {
 			}
 			#endregion
 			#region Statuses
+			if(PrefC.GetBool(PrefName.EraShowStatusAndClinic)) {
+				checkShowFinalizedOnly.Visible=false;
+			}
+			else {
+				labelStatus.Visible=false;
+				listStatus.Visible=false;
+				checkAutomatableCarriersOnly.Visible=false;
+				comboClinics.Visible=false;
+			}
 			foreach(X835Status status in Enum.GetValues(typeof(X835Status))) {
 				if(ListTools.In(status,X835Status.None,X835Status.FinalizedSomeDetached,X835Status.FinalizedAllDetached)) {
 					//FinalizedSomeDetached and FinalizedAllDetached are shown via Finalized.
@@ -95,6 +104,7 @@ namespace OpenDental {
 			Cursor=Cursors.WaitCursor;
 			labelControlId.Visible=PrefC.GetBool(PrefName.EraShowControlIdFilter);
 			textControlId.Visible=PrefC.GetBool(PrefName.EraShowControlIdFilter);
+			bool showStatusAndClinics=PrefC.GetBool(PrefName.EraShowStatusAndClinic);
 			List<Etrans> listEtransFiltered=new List<Etrans>();
 			List<X835Status> listEtransStatuses=new List<X835Status>();
 			if(isRefreshNeeded) {
@@ -104,6 +114,7 @@ namespace OpenDental {
 				_dictEtransClaims.Clear();
 				List<Etrans> listEtrans=new List<Etrans>();
 				if(ValidateFields()) {
+					bool showFinalizedOnly=checkShowFinalizedOnly.Checked;
 					bool hasFinalizedStatus=listStatus.SelectedIndices.Contains(_listStatuses.IndexOf(X835Status.Finalized));//We only show 1 of the 3 finalized statuses in the listbox.
 					DataTable table=Etranss.RefreshHistory(_reportDateFrom,_reportDateTo,new List<EtransType>() { EtransType.ERA_835 });
 					foreach(DataRow row in table.Rows) {
@@ -116,8 +127,12 @@ namespace OpenDental {
 						etrans.TranSetId835=row["TranSetId835"].ToString();
 						etrans.UserNum=Security.CurUser.UserNum;
 						etrans.DateTimeTrans=PIn.DateT(row["dateTimeTrans"].ToString());
-						if(ListTools.In(etrans.AckCode,"Recd") && !hasFinalizedStatus) {//This ERA 835 etrans record is Received/Finalized but the user chose to hide finalized ERAs.
+						if(ListTools.In(etrans.AckCode,"Recd") && !(hasFinalizedStatus || showFinalizedOnly)) {//This ERA 835 etrans record is Received/Finalized but the user chose to hide finalized ERAs.
 							//We can exlcude this record from our class-wide list because changes to the listStatus selections causes a refresh from the database.
+							continue;
+						}
+						if(!ListTools.In(etrans.AckCode,"Recd") && showFinalizedOnly) {//This ERA 835 etrans record is not Received/Finalized but the user chose to only show finalized ERAs.
+							//We can exclude this record from our class-wide list because changes to the listStatus selections causes a refresh from the database.
 							continue;
 						}
 						listEtrans.Add(etrans);
@@ -146,10 +161,15 @@ namespace OpenDental {
 						dictEtransNumToX835s.Add(etrans.EtransNum,x835);
 						List<X12ClaimMatch> listClaimMatches=x835.GetClaimMatches();
 						dictClaimMatchCount.Add(etrans.EtransNum,listClaimMatches.Count);
-						list835ClaimMatches.AddRange(listClaimMatches);
+						if(showStatusAndClinics) {
+							list835ClaimMatches.AddRange(listClaimMatches);
+						}
 					}
 					ProgressBarEvent.Fire(ODEventType.ProgressBar,Lan.g(this,"Gathering internal claim matches."));
-					List<long> listClaimNums=Claims.GetClaimFromX12(list835ClaimMatches);//Can return null.
+					List<long> listClaimNums=null;
+					if(showStatusAndClinics) {
+						listClaimNums=Claims.GetClaimFromX12(list835ClaimMatches);//Can return null.
+					}
 					ProgressBarEvent.Fire(ODEventType.ProgressBar,Lan.g(this,"Building data sets."));
 					int claimIndexCur=0;
 					List<long> listMatchedClaimNums=new List<long>();
@@ -198,23 +218,28 @@ namespace OpenDental {
 						}
 						#endregion
 						List<Hx835_ShortClaim> listValidClaims=_dictEtransClaims[etrans.EtransNum].FindAll(x => x!=null);
-						X835Status stat=_dictEtrans835s[etrans.EtransNum].GetStatus(listValidClaims,_listAllClaimProcs,_listAllAttaches,_dictClaimPaymentsExist);
+						X835Status stat=X835Status.None;
 						#region Filter: Status
-						if(etrans.AckCode=="" && ListTools.In(stat,X835Status.Finalized,X835Status.FinalizedAllDetached,X835Status.FinalizedSomeDetached)) {
-							Etrans etransOld=etrans.Copy();
-							etrans.AckCode="Recd";
-							Etranss.Update(etrans,etransOld);
-						}
-						string status=Lan.g(this,stat.GetDescription());//Either description tag or enum.ToString().
-						if(!listSelectedStatuses.Contains(status.Replace("*",""))) {//The filter will ignore finalized with detached claims.
-							continue;
+						if(showStatusAndClinics) {
+							stat=_dictEtrans835s[etrans.EtransNum].GetStatus(listValidClaims,_listAllClaimProcs,_listAllAttaches,_dictClaimPaymentsExist);
+							if(etrans.AckCode=="" && ListTools.In(stat,X835Status.Finalized,X835Status.FinalizedAllDetached,X835Status.FinalizedSomeDetached)) {
+								Etrans etransOld=etrans.Copy();
+								etrans.AckCode="Recd";
+								Etranss.Update(etrans,etransOld);
+							}
+							string status=Lan.g(this,stat.GetDescription());//Either description tag or enum.ToString().
+							if(!listSelectedStatuses.Contains(status.Replace("*",""))) {//The filter will ignore finalized with detached claims.
+								continue;
+							}
 						}
 						#endregion
-						//List of ClinicNums for the current etrans.ListClaimsPaid from the DB.
-						List<long> listClinicNums=_dictEtransClaims[etrans.EtransNum].Select(x => x==null? 0 :x.ClinicNum).Distinct().ToList();
 						#region Filter: Clinics
-						if(PrefC.HasClinicsEnabled && !listClinicNums.Exists(x => listSelectedClinicNums.Contains(x))) {
-							continue;//The ClinicNums associated to the 835 do not match any of the selected ClinicNums, so nothing to show in this 835.
+						if(showStatusAndClinics && PrefC.HasClinicsEnabled) {
+							//List of ClinicNums for the current etrans.ListClaimsPaid from the DB.
+							List<long> listClinicNums=_dictEtransClaims[etrans.EtransNum].Select(x => x==null? 0 :x.ClinicNum).Distinct().ToList();
+							if(!listClinicNums.Exists(x => listSelectedClinicNums.Contains(x))) {
+								continue;//The ClinicNums associated to the 835 do not match any of the selected ClinicNums, so nothing to show in this 835.
+							}
 						}
 						#endregion
 						#region Filter: Check and Trace Value
@@ -249,10 +274,12 @@ namespace OpenDental {
 			gridMain.ListGridColumns.Clear();
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Patient Name"),250));
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Carrier Name"),190));
-			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Status"),80));
+			if(showStatusAndClinics) {
+				gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Status"),80));
+			}
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Date"),80,GridSortingStrategy.DateParse));
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Amount"),80,GridSortingStrategy.AmountParse));
-			if(PrefC.HasClinicsEnabled) {
+			if(showStatusAndClinics && PrefC.HasClinicsEnabled) {
 				gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Clinic"),70));
 			}
 			gridMain.ListGridColumns.Add(new GridColumn(Lan.g("TableEtrans835s","Code"),37,HorizontalAlignment.Center));
@@ -279,11 +306,13 @@ namespace OpenDental {
 				row.Cells.Add(patName);
 				#endregion
 				row.Cells.Add(x835.PayerName);
-				row.Cells.Add(status);//See GetStringStatus(...) for possible values.
+				if(showStatusAndClinics) {
+					row.Cells.Add(status);//See GetStringStatus(...) for possible values.
+				}
 				row.Cells.Add(POut.Date(listEtransFiltered[i].DateTimeTrans));
 				row.Cells.Add(POut.Decimal(x835.InsPaid));
 				#region Column: Clinic
-				if(PrefC.HasClinicsEnabled) {
+				if(showStatusAndClinics && PrefC.HasClinicsEnabled) {
 					string clinicAbbr="";
 					if(listClinicNums.Count==1) {
 						if(listClinicNums[0]==0) {
