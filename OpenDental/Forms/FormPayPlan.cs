@@ -1074,7 +1074,7 @@ namespace OpenDental{
 				return;
 			}
 			double negAdjAmt=-(PIn.Double(inputBox.textResult.Text));
-			if(CompareDouble.IsGreaterThan(((_totalNegFutureAdjs+negAdjAmt)*-1),_totalRemainingBal)) {//make negative to compare _totalRemainingBal
+			if(CompareDouble.IsGreaterThan(Math.Abs(negAdjAmt),_totalRemainingBal)) {
 				MsgBox.Show(this,"Cannot add an adjustment totaling more than remaining balance due");
 				return;
 			}
