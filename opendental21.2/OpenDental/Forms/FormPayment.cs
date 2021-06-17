@@ -3441,7 +3441,7 @@ namespace OpenDental {
 				}
 				_isCCDeclined=true;
 				_wasCreditCardSuccessful=false;
-				return null;
+				return FormP.Response?.Description??resultNote??Lan.g(this,"PayConnect charge failed to process.");
 			}
 			return resultNote;
 		}
@@ -3594,7 +3594,7 @@ namespace OpenDental {
 				//We don't have that information here so do nothing.
 				_isCCDeclined=true;
 				_wasCreditCardSuccessful=false;
-				return null;
+				return form.ApiResponseOut?.FailureDescription??resultNote??Lan.g(this,"PaySimple charge failed to process.");
 			}
 			return resultNote;
 		}
@@ -3988,9 +3988,6 @@ namespace OpenDental {
 				AddCreditCardsToCombo(creditCards,x => x.XChargeToken==cc.XChargeToken
 					&& x.CCExpiration.Year==cc.CCExpiration.Year
 					&& x.CCExpiration.Month==cc.CCExpiration.Month);
-			}
-			if(_isCCDeclined) {
-				return null;
 			}
 			return resultText;
 		}
