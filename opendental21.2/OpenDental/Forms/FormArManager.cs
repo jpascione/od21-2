@@ -1426,7 +1426,7 @@ namespace OpenDental {
 				listPatNumsWrongService=listPatAging.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && x.DateBalBegan.Date<dateAsOf.AddDays(-180).Date)
 					.Select(x => x.PatNum).ToList();
 				msgTxt=Lan.g(this,"The accelerator service is recommended for any accounts less than 180 days old and one or more of the selected account balances "
-					+"is over 180 days old.  You may wish to consider placing those accounts directly to the Profit Recovery or Professional Collections service.")+"\r\n"
+					+"is over 180 days old.  You may wish to consider sending those accounts directly to the Profit Recovery or Professional Collections service.")+"\r\n"
 					+Lan.g(this,"Would you like to send the accounts to Accelerator?")+"\r\n\r\n"+Lan.g(this,"Press Yes to send all accounts to Accelerator.")
 					+"\r\n\r\n"+Lan.g(this,"Press No to send only the accounts 180 days old or less to Accelerator and leave the older accounts in the unsent "
 					+"grid to send to Profit Recovery or Professional Collections later.")+"\r\n\r\n"+Lan.g(this,"Press Cancel to cancel sending all accounts.");
@@ -1435,7 +1435,7 @@ namespace OpenDental {
 				listPatNumsWrongService=listPatAging.FindAll(x => !listPatNumsToReselect.Contains(x.PatNum) && x.DateBalBegan.Date<dateAsOf.AddDays(-365).Date)
 					.Select(x => x.PatNum).ToList();
 				msgTxt=Lan.g(this,"The Profit Recovery service is recommended for any accounts less than 365 days old and one or more of the selected account "
-					+"balances is over 365 days old.  You may wish to consider placing those accounts directly to the Professional Collections service.")+"\r\n"
+					+"balances is over 365 days old.  You may wish to consider sending those accounts directly to the Professional Collections service.")+"\r\n"
 					+Lan.g(this,"Would you like to send the accounts to Profit Recovery?")+"\r\n\r\n"+Lan.g(this,"Press Yes to send all accounts to Profit "
 					+"Recovery.")+"\r\n\r\n"+Lan.g(this,"Press No to send only the accounts 365 days old or less to Profit Recovery and leave the older "
 					+"accounts in the unsent grid to send to Professional Collections later.")+"\r\n\r\n"+Lan.g(this,"Press Cancel to cancel sending all accounts.");
