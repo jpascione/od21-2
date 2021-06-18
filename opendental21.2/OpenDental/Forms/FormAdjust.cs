@@ -89,7 +89,9 @@ namespace OpenDental {
 			}
 			textDateEntry.Text=_adjustment.DateEntry.ToShortDateString();
 			textAdjDate.Text=_adjustment.AdjDate.ToShortDateString();
-			textProcDate.Text=_adjustment.ProcDate.ToShortDateString();
+			if(_adjustment.ProcDate.Year > 1880) {
+				textProcDate.Text=_adjustment.ProcDate.ToShortDateString();
+			}
 			if(Defs.GetValue(DefCat.AdjTypes,_adjustment.AdjType)=="+"){//pos
 				textAmount.Text=_adjustment.AdjAmt.ToString("F");
 			}
