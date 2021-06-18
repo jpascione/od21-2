@@ -525,7 +525,8 @@ namespace OpenDentBusiness{
 						listDateTimes.AddRange(MiscUtils.GetDatesInRange(listX12claims[i].List835Procs[j].DateServiceStart,listX12claims[i].List835Procs[j].DateServiceEnd));
 					}
 				}
-				listDateTimes=listDateTimes.Distinct().ToList();
+				//Carrier will send 01/01/1900 as a default date instead of MinVal or omission.
+				listDateTimes=listDateTimes.Distinct().Where(x => x.Year>1900).ToList();
 				//If there are no dates to consider, return early.
 				if(listDateTimes.Count==0) {
 					return null;
@@ -533,11 +534,11 @@ namespace OpenDentBusiness{
 			}
 			else {
 				//Usually claims from the same ERA will all have dates of service within a few weeks of each other.
-				if(listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Count() > 0) {
-					dateMin=listX12claims.Where(x => x.DateServiceStart!=DateTime.MinValue).Select(x => x.DateServiceStart).Min();//DateServiceStart can be min value for PreAuths.
+				if(listX12claims.Where(x => x.DateServiceStart.Year>1900).Count() > 0) {
+					dateMin=listX12claims.Where(x => x.DateServiceStart.Year>1900).Select(x => x.DateServiceStart).Min();//DateServiceStart can be 1900 for PreAuths.
 				}
-				if(listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Count() > 0) {
-					dateMax=listX12claims.Where(x => x.DateServiceEnd!=DateTime.MinValue).Select(x => x.DateServiceEnd).Max();//DateServiceEnd can be min value for PreAuths.
+				if(listX12claims.Where(x => x.DateServiceEnd.Year>1900).Count() > 0) {
+					dateMax=listX12claims.Where(x => x.DateServiceEnd.Year>1900).Select(x => x.DateServiceEnd).Max();//DateServiceEnd can be 1900 for PreAuths.
 				}
 				if(dateMin.Year<1880 || dateMax.Year<1880) {
 					//Service dates are required for us to continue.
