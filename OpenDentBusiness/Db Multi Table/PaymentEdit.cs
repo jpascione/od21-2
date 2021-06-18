@@ -907,7 +907,41 @@ namespace OpenDentBusiness {
 				}
 				#endregion
 				#region FauxAccountEntry
-				//Explicitly attach all PayPlanCharge splits first. Then the payment plan splits will be attached to anything that is left over.
+				//Negative payment splits are created for payment plan charges when money is transferred away from them. There should be offsetting splits when this scenario has happened.
+				//Apply any negative splits to positive splits that are explicitly linked to the same PayPlanCharge. We only honor splits that have set the PayPlanChargeNum.
+				foreach(AccountEntry payPlanChargeEntry in listPayPlanEntries) {
+					List<PaySplit> listPayPlanChargeSplitsNegative=listPatProvClinicSplits.FindAll(x => CompareDouble.IsLessThanZero(x.SplitAmt)
+						&& x.UnearnedType==0
+						&& x.PayPlanNum==payPlanChargeEntry.PayPlanNum
+						&& x.PayPlanChargeNum==payPlanChargeEntry.PayPlanChargeNum);
+					if(listPayPlanChargeSplitsNegative.IsNullOrEmpty()) {
+						continue;
+					}
+					List<PaySplit> listPayPlanChargeSplitsPositive=listPatProvClinicSplits.FindAll(x => CompareDecimal.IsGreaterThanZero(x.SplitAmt)
+						&& x.UnearnedType==0
+						&& x.PayPlanNum==payPlanChargeEntry.PayPlanNum
+						&& x.PayPlanChargeNum==payPlanChargeEntry.PayPlanChargeNum);
+					foreach(PaySplit payPlanChargeSplitPositive in listPayPlanChargeSplitsPositive) {
+						foreach(PaySplit payPlanChargeSplitNegative in listPayPlanChargeSplitsNegative) {
+							if(CompareDouble.IsLessThanOrEqualToZero(payPlanChargeSplitPositive.SplitAmt)) {
+								break;
+							}
+							if(CompareDecimal.IsGreaterThanOrEqualToZero(payPlanChargeSplitNegative.SplitAmt)) {
+								continue;
+							}
+							double splitAmountBeingApplied=Math.Min(Math.Abs(payPlanChargeSplitNegative.SplitAmt),payPlanChargeSplitPositive.SplitAmt);
+							payPlanChargeSplitNegative.SplitAmt+=splitAmountBeingApplied;
+							if(dictPaySplitAccountEntries.TryGetValue((string)payPlanChargeSplitNegative.TagOD,out AccountEntry accountEntrySplitNegative)) {
+								accountEntrySplitNegative.AmountEnd-=(decimal)splitAmountBeingApplied;
+							}
+							payPlanChargeSplitPositive.SplitAmt-=splitAmountBeingApplied;
+							if(dictPaySplitAccountEntries.TryGetValue((string)payPlanChargeSplitPositive.TagOD,out AccountEntry accountEntrySplitPositive)) {
+								accountEntrySplitPositive.AmountEnd+=(decimal)splitAmountBeingApplied;
+							}
+						}
+					}
+				}
+				//Apply all positive splits that are explicitly linked to the PayPlanCharge. Generic payment plan splits will be applied to PayPlanCharges if there is anything left over.
 				foreach(AccountEntry payPlanChargeEntry in listPayPlanEntries) {
 					List<PaySplit> listPayPlanChargeSplits=listPatProvClinicSplits.FindAll(x => CompareDecimal.IsGreaterThanZero(x.SplitAmt)
 						&& x.UnearnedType==0
