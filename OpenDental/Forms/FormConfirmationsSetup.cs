@@ -61,14 +61,14 @@ namespace OpenDental {
 			//Confirmation---------------------------------------------------------------------------------------------
 			row=new GridRow();
 			row.Cells.Add(Lan.g(this,"Postcard"));
-			row.Cells.Add(Lan.g(this,"Confirmation message. Use [NameF], [date], and [time] where you want those values to be inserted"));
+			row.Cells.Add(Lan.g(this,"Confirmation message. Available variables: [NameF], [date], [time]."));
 			row.Cells.Add(PrefC.GetString(PrefName.ConfirmPostcardMessage));
 			row.Tag=PrefName.ConfirmPostcardMessage;
 			gridMain.ListGridRows.Add(row);
 			//
 			row=new GridRow();
 			row.Cells.Add(Lan.g(this,"Postcard"));
-			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Use [FamilyApptList] where the list of appointments should show."));
+			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Available variables: [FamilyApptList]."));
 			row.Cells.Add(PrefC.GetString(PrefName.ConfirmPostcardFamMessage));
 			row.Tag=PrefName.ConfirmPostcardFamMessage;
 			gridMain.ListGridRows.Add(row);
@@ -89,7 +89,7 @@ namespace OpenDental {
 			//
 			row=new GridRow();
 			row.Cells.Add(Lan.g(this,"E-Mail"));
-			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Use [FamilyApptList] where the list of appointments should show."));
+			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Available variables: [FamilyApptList]."));
 			row.Cells.Add(PrefC.GetString(PrefName.ConfirmEmailFamMessage));
 			row.Tag=PrefName.ConfirmEmailFamMessage;
 			gridMain.ListGridRows.Add(row);
@@ -105,7 +105,7 @@ namespace OpenDental {
 			//
 			row=new GridRow();
 			row.Cells.Add(Lan.g(this,"Text"));
-			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Use [FamilyApptList] where the list of appointments should show."));
+			row.Cells.Add(Lan.g(this,"For multiple patients in one family. Available variables: [FamilyApptList]."));
 			row.Cells.Add(PrefC.GetString(PrefName.ConfirmTextFamMessage));
 			row.Tag=PrefName.ConfirmTextFamMessage;
 			gridMain.ListGridRows.Add(row);
