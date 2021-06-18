@@ -4164,9 +4164,9 @@ namespace OpenDental.UI{
 				switch(listDisplayFieldsBubble[i].InternalName) {
 					case "Patient Name":
 						s=dataRow["PatientName"].ToString();
-						h=font.Height;
-						if(isNameWrapping) {
-							h=imageOffset=(float)Math.Floor(g.MeasureString(s,font,widthBubble-(int)x).Height);
+						h=(float)Math.Floor(g.MeasureString(s,font,widthBubble-(int)x).Height);
+						if(isNameWrapping) {//Patient name is first and wraps.
+							imageOffset=h;//Push the patient picture down below the name.
 						}
 						g.DrawString(s,font,brush,new RectangleF(x,y,widthBubble-(int)x,h));
 						y+=h;
