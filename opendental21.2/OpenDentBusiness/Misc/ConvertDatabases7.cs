@@ -705,18 +705,11 @@ namespace OpenDentBusiness {
 			defNums=string.Join(",",listDefNums);
 			command="INSERT INTO preference (PrefName,ValueString) VALUES ('ApptConfirmExcludeEclipboard','"+defNums+"')";
 			Db.NonQ(command);
-			command="ALTER TABLE emailmessage ADD MsgType varchar(255) NOT NULL,ADD FailReason varchar(255) NOT NULL";
+			//Set default to 'Legacy' to set the column value without updating the timestamp.
+			command="ALTER TABLE emailmessage ADD MsgType varchar(255) NOT NULL DEFAULT 'Legacy',ADD FailReason varchar(255) NOT NULL";
 			Db.NonQ(command);
-			//Set all current emailmessage.MsgType with 'Legacy'
-			//Alter the SecDateTEdit column to not automatically update when setting the MsgType to 'Legacy'. We want to perserve the actual last time it was modified
-			command="ALTER TABLE emailmessage CHANGE SecDateTEdit SecDateTEdit TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP";
-			Db.NonQ(command);
-			//This is how we can get it to work for both MySQL 5.5 and 5.6
-			command="ALTER TABLE emailmessage ALTER COLUMN SecDateTEdit DROP DEFAULT";
-			Db.NonQ(command);
-			command="UPDATE emailmessage SET MsgType='Legacy'";//EmailMessageSource.Legacy
-			Db.NonQ(command);
-			command="ALTER TABLE emailmessage CHANGE SecDateTEdit SecDateTEdit TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+			//Set default back to ''
+			command="ALTER TABLE emailmessage MODIFY MsgType varchar(255) NOT NULL";
 			Db.NonQ(command);
 		}//End of 21_1_6() method
 
