@@ -84,21 +84,28 @@ namespace CentralManager {
 			textDate.Text="";
 			textDate.Validate();
 		}
-		#endregion
 
-		#region Sync Methods
-		private void butPushBoth_Click(object sender,EventArgs e) {
+		///<summary>Updates the local Lock preferences with form details. </summary>
+		private bool UpdateLockPreferences() {
 			if(!textDate.IsValid()) {
 				MsgBox.Show(this,"Please fix error first.");
-				return;
+				return false;
 			}
-			//Enter info into local DB before pushing out to others so we save it.
 			int days=PIn.Int(textDays.Text);
 			DateTime date=PIn.Date(textDate.Text);
 			Prefs.UpdateString(PrefName.SecurityLockDate,POut.Date(date,false));
 			Prefs.UpdateInt(PrefName.SecurityLockDays,days);
-			Prefs.UpdateBool(PrefName.SecurityLockIncludesAdmin,checkAdmin.Checked) ;
+			Prefs.UpdateBool(PrefName.SecurityLockIncludesAdmin,checkAdmin.Checked);
 			Prefs.UpdateBool(PrefName.CentralManagerSecurityLock,checkEnable.Checked);
+			return true;
+		}
+		#endregion
+
+		#region Sync Methods
+		private void butPushBoth_Click(object sender,EventArgs e) {
+			if(!UpdateLockPreferences()) {
+				return;
+			}
 			using FormCentralConnections FormCC=new FormCentralConnections();
 			FormCC.IsSelectionMode=true;
 			FormCC.ShowDialog();
@@ -121,6 +128,9 @@ namespace CentralManager {
 		}
 
 		private void butPushLocks_Click(object sender,EventArgs e) {
+			if(!UpdateLockPreferences()) {
+				return;
+			}
 			using FormCentralConnections FormCC=new FormCentralConnections();
 			FormCC.IsSelectionMode=true;
 			FormCC.ShowDialog();
@@ -203,17 +213,9 @@ namespace CentralManager {
 		}
 
 		private void butOK_Click(object sender,EventArgs e) {
-			if(!textDate.IsValid()) {
-				MsgBox.Show(this,"Please fix error first.");
+			if(!UpdateLockPreferences()) {
 				return;
 			}
-			//Enter info into local DB before pushing out to others so we save it.
-			int days=PIn.Int(textDays.Text);
-			DateTime date=PIn.Date(textDate.Text);
-			Prefs.UpdateString(PrefName.SecurityLockDate,POut.Date(date,false));
-			Prefs.UpdateInt(PrefName.SecurityLockDays,days);
-			Prefs.UpdateBool(PrefName.SecurityLockIncludesAdmin,checkAdmin.Checked) ;
-			Prefs.UpdateBool(PrefName.CentralManagerSecurityLock,checkEnable.Checked);
 			Prefs.UpdateString(PrefName.DomainLoginPath,PIn.String(textDomainLoginPath.Text));
 			Prefs.UpdateBool(PrefName.DomainLoginEnabled,checkDomainLoginEnabled.Checked);
 			if(_domainObjectGuid!=null) {
