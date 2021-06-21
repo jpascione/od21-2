@@ -69,7 +69,15 @@ namespace OpenDental {
 			lock(_listThreadExitWaitHandles) {
 				//Make sure our threads from last time are dead and gone.
 				if(!_listThreadExitWaitHandles.IsNullOrEmpty()) {
-					WaitHandle.WaitAll(_listThreadExitWaitHandles.ToArray(),30000);
+					DateTime dateTimeStart=DateTime.Now;
+					TimeSpan timeSpanTotalWait=TimeSpan.FromSeconds(30);
+					//WaitAll will throw an exception when called from main thread. Instead we have to loop through each thread individually and WaitOne.
+					for(int i=0; i<_listThreadExitWaitHandles.Count; i++) {
+						//Accumulate total wait time over all threads and only allow a total of 30 seconds.
+						int msRemaining=(int)timeSpanTotalWait.Subtract(DateTime.Now.Subtract(dateTimeStart)).TotalMilliseconds;
+						//Always wait at least 1 ms.
+						_listThreadExitWaitHandles[i].WaitOne(Math.Max(msRemaining,1));
+					}
 					_listThreadExitWaitHandles.Clear();
 				}
 				if(doStart) {
