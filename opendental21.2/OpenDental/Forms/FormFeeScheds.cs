@@ -192,7 +192,7 @@ namespace OpenDental{
 				return;
 			}
 			using FormFeeSchedEdit FormF=new FormFeeSchedEdit();
-			FormF.FeeSchedCur=_listFeeSchedsForType[e.Row];
+			FormF.FeeSchedCur=(FeeSched)gridMain.ListGridRows[e.Row].Tag;
 			FormF.ShowDialog();
 			if(FormF.DialogResult!=DialogResult.OK) {
 				return;
