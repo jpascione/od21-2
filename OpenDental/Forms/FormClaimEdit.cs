@@ -1896,11 +1896,6 @@ namespace OpenDental{
 					}
 				}
 			}
-			if(!areAllReceived()) {
-				if(MsgBox.Show(MsgBoxButtons.YesNo, "Not all claim procedures on the claim are marked received. Would you like to mark them all as received?")) {
-					markAllReceived();
-				}
-			}
 			_isPaymentEntered=true;
 			comboClaimStatus.SelectedIndex=_listClaimStatus.IndexOf(ClaimStatus.Received);//Received
 			if(textDateRec.Text==""){
@@ -1908,6 +1903,11 @@ namespace OpenDental{
 			}
 			ClaimProcs.RemoveSupplementalTransfersForClaims(_claimCur.ClaimNum);
 			_listClaimProcs=ClaimProcs.Refresh(_patientCur.PatNum);
+			if(!areAllReceived()) {
+				if(MsgBox.Show(MsgBoxButtons.YesNo,"Not all claim procedures on the claim are marked received. Would you like to mark them all as received?")) {
+					markAllReceived();
+				}
+			}
 			FillGrids();
 		}
 
@@ -3515,6 +3515,7 @@ namespace OpenDental{
 		}
 
 		private bool areAllReceived() {
+			_listClaimProcsForClaim=ClaimProcs.RefreshForClaim(_claimCur.ClaimNum,_listProcedures,_listClaimProcs);
 			bool areAllReceived=true;
 			for(int i = 0;i<_listClaimProcsForClaim.Count;i++) {
 				if(((ClaimProc)_listClaimProcsForClaim[i]).Status==ClaimProcStatus.NotReceived) {
