@@ -162,12 +162,7 @@ namespace OpenDental {
 			Cursor=Cursors.WaitCursor;
 			//Get all the corresponding fields from the OrthoChartTabLink table that are associated with the currently selected ortho tab.
 			OrthoChartTab orthoChartTab=_listOrthoChartTabs[tabControl.SelectedIndex];
-			List<DisplayField> listDisplayFields=
-				OrthoChartTabLinks.GetWhere(x => x.OrthoChartTabNum==orthoChartTab.OrthoChartTabNum)//Determines the number of items that will be returned
-				.OrderBy(x => x.ItemOrder)//Each tab is ordered based on the ortho tab link entry
-				.Select(x => _listOrthDisplayFields.FirstOrDefault(y => y.DisplayFieldNum==x.DisplayFieldNum))//Project all corresponding display fields in order
-				.Where(x => x!=null)//Can happen when there is an OrthoChartTabLink in the database pointing to an invalid display field.
-				.ToList();//Casts the projection to a list of display fields
+			List<DisplayField> listDisplayFields=GetDisplayFieldsForCurrentTab();
 			_sigColIdx=-1;//Clear out the signature column index cause it will most likely change or disappear (switching tabs)
 			int gridMainScrollValue=gridMain.ScrollValue;
 			gridMain.BeginUpdate();
@@ -612,6 +607,18 @@ namespace OpenDental {
 			return orthoChart.FieldValue;
 		}
 
+		///<summary>Returns a list of displayfields for the current tab.</summary>
+		private List<DisplayField> GetDisplayFieldsForCurrentTab() {
+			OrthoChartTab orthoChartTab=_listOrthoChartTabs[tabControl.SelectedIndex];
+			List<DisplayField> listDisplayFields=
+				OrthoChartTabLinks.GetWhere(x => x.OrthoChartTabNum==orthoChartTab.OrthoChartTabNum)//Determines the number of items that will be returned
+				.OrderBy(x => x.ItemOrder)//Each tab is ordered based on the ortho tab link entry
+				.Select(x => _listOrthDisplayFields.FirstOrDefault(y => y.DisplayFieldNum==x.DisplayFieldNum))//Project all corresponding display fields in order
+				.Where(x => x!=null)//Can happen when there is an OrthoChartTabLink in the database pointing to an invalid display field.
+				.ToList();//Casts the projection to a list of display fields
+			return listDisplayFields;
+		}
+
 		///<summary>Returns true if the display field column has a pick list</summary>
 		private bool HasPickList(string colName) {
 			foreach (DisplayField field in _listOrthDisplayFields) {
@@ -794,7 +801,12 @@ namespace OpenDental {
 			if(!MsgBox.Show(this,MsgBoxButtons.OKCancel,"Delete entire row?")) {
 				return;
 			}
-			_listOrthoChartRows.RemoveAll(x => x.OrthoChartRowNum==orthoChartRowSelected.OrthoChartRowNum);
+			List<DisplayField> listDisplayFields=GetDisplayFieldsForCurrentTab();
+			List<string> listFieldNamesToDelete=listDisplayFields.Select(x => x.Description).ToList();
+			orthoChartRowSelected.ListOrthoCharts.RemoveAll(x => ListTools.In(x.FieldName,listFieldNamesToDelete));
+			if(orthoChartRowSelected.ListOrthoCharts.IsNullOrEmpty()) {
+				_listOrthoChartRows.RemoveAll(x => x.OrthoChartRowNum==orthoChartRowSelected.OrthoChartRowNum);
+			}
 			FillGrid();
 			_hasChanged=true;
 		}
