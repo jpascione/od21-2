@@ -216,9 +216,11 @@ namespace CodeBase {
 					return;
 				}
 			}
-			//QuitAsync returned this wait handle so async quitting could be done and waited upon without having to join to main thread.
-			//Let's alert the awaiter that our thread is officially done.
-			ODException.SwallowAnyException(() => { _waitEventAsyncQuitComplete?.Set(); });
+			finally {
+				//QuitAsync returned this wait handle so async quitting could be done and waited upon without having to join to main thread.
+				//Let's alert the awaiter that our thread is officially done.
+				ODException.SwallowAnyException(() => { _waitEventAsyncQuitComplete?.Set(); });
+			}			
 		}
 
 		///<summary>Calls the appropriate exception handler for this exception. Returns false if the thread needs to quit.</summary>
