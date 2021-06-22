@@ -181,7 +181,7 @@ namespace OpenDentBusiness{
 				logError("from "+Defs.GetName(DefCat.ApptConfirmed,aptOld.Confirmed));
 				return ConfStatusUpdate.Failure;
 			}
-			else if(ListTools.In(aptCur.AptStatus,ApptStatus.Broken,ApptStatus.UnschedList)) {//Broken or Unschedule appointments should not be confirmed.
+			else if(ListTools.In(aptCur.AptStatus,ApptStatus.Broken,ApptStatus.UnschedList,ApptStatus.Complete)) {//Broken,Unscheduled, and Complete appointments should not be confirmed.
 				logError("when AptStatus is "+aptCur.AptStatus.GetDescription());
 				return ConfStatusUpdate.Failure;
 			}
