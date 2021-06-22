@@ -275,6 +275,30 @@ namespace OpenDentBusiness{
 			Crud.VoiceMailCrud.Delete(voiceMail.VoiceMailNum);
 		}
 
+
+		///<summary>Returns true if the heartbeat is less than 7 seconds old. The VoiceMailMonitorHeartBeat gets updated every 3 seconds. Also returns the date time of the heartbeat.</summary>
+		public static ODTuple<bool,DateTime> IsVoicemailMonitorHeartbeatValid(DateTime dateTimeLastHeartbeat) {
+			if(RemotingClient.RemotingRole==RemotingRole.ClientWeb) {
+				return Meth.GetObject<ODTuple<bool,DateTime>>(MethodBase.GetCurrentMethod(),dateTimeLastHeartbeat);
+			}
+			//Default to using our local time just in case we can't query MySQL every second (lessens false positives due to query / network failure).
+			DateTime dateTimeNow=DateTime.Now;
+			DateTime dateTimeRecentHeartbeat=dateTimeLastHeartbeat;
+			DataTable table=null;
+			//Check to make sure the voicemail monitor is still up
+			ODException.SwallowAnyException(() => {
+				table=DataCore.GetTable("SELECT ValueString,NOW() DateTNow FROM preference WHERE PrefName='VoiceMailMonitorHeartBeat'");
+			});
+			if(table!=null && table.Rows.Count>=1 && table.Columns.Count>=2) {
+				dateTimeRecentHeartbeat=PIn.DateT(table.Rows[0]["ValueString"].ToString());
+				dateTimeNow=PIn.DateT(table.Rows[0]["DateTNow"].ToString());
+			}
+			//Check to see if the voicemail monitor heartbeat has stopped beating for the last 7 seconds.
+			if((dateTimeNow-dateTimeRecentHeartbeat).TotalSeconds > 7) {
+				return new ODTuple<bool,DateTime>(false,dateTimeRecentHeartbeat);
+			}
+			return new ODTuple<bool,DateTime>(true,dateTimeRecentHeartbeat);
+		}
 		/*
 		Only pull out the methods below as you need them.  Otherwise, leave them commented out.
 
