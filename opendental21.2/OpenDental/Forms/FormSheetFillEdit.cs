@@ -96,11 +96,11 @@ namespace OpenDental {
 				Width=Math.Max(SheetCur.Width+190,butOK.Right+27);
 				Height=SheetCur.Height+65;
 			}
-			if(Width>SystemInformation.WorkingArea.Width){
-				Width=SystemInformation.WorkingArea.Width;
+			if(Width>System.Windows.Forms.Screen.FromControl(this).WorkingArea.Width){
+				Width=System.Windows.Forms.Screen.FromControl(this).WorkingArea.Width;
 			}
-			if(Height>SystemInformation.WorkingArea.Height){
-				Height=SystemInformation.WorkingArea.Height;
+			if(Height>System.Windows.Forms.Screen.FromControl(this).WorkingArea.Height){
+				Height=System.Windows.Forms.Screen.FromControl(this).WorkingArea.Height;
 			}
 			CenterFormOnMonitor();
 			_isAutoSave=Defs.GetDefsForCategory(DefCat.ImageCats).Any(x => x.ItemValue.Contains("U"));
