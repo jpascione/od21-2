@@ -882,11 +882,6 @@ namespace OpenDentBusiness {
 		///OpenDental and should only be used in such a case. Returns true if it successfully saved a document.</summary>
 		public static bool CreateAndSaveTreatmentPlanPDF(TreatPlan treatPlan) {
 			try {
-				//If it is local AtoZ storage, then we need to check if they are using network storage, because we can still save the file 
-				//on the network.
-				if(PrefC.AtoZfolderUsed==DataStorageType.LocalAtoZ && !ImageStore.GetPreferredAtoZpath().StartsWith(@"\\")) {
-					return false;
-				}
 				SheetDrawingJob sheetDrawingJob=new SheetDrawingJob();
 				Patient PatCur=Patients.GetPat(treatPlan.PatNum);
 				Sheet sheetTP=TreatPlans.CreateSheetFromTreatmentPlan(treatPlan);
