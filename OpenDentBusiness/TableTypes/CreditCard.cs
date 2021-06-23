@@ -92,7 +92,7 @@ namespace OpenDentBusiness {
 			}
 			List<string> listTokens=new List<string>();
 			if(!string.IsNullOrEmpty(XChargeToken)) {
-				if(CCSource==CreditCardSource.EdgeExpressRCM) {
+				if(CCSource==CreditCardSource.EdgeExpressRCM || CCSource==CreditCardSource.EdgeExpressCNP) {
 					listTokens.Add("EdgeExpress");
 				}
 				else {

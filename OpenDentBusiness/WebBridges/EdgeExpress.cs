@@ -248,7 +248,7 @@ namespace OpenDentBusiness {
 			private static XWebResponse SendEdgeExpressRequest(long patNum,EdgeExpressTransType edgeExpressTransactionType,string url,bool isWebPayment,double amount = 0,
 				string orderId="",bool doCreateAlias=false,string alias="",string transactionID="",bool allowDuplicates=false,string expDate="")
 			{
-				Patient pat=Patients.GetLim(patNum);
+				Patient pat=Patients.GetPat(patNum);//Need GetPat() and not GetLim() here because we assign pat's ClinicNum.
 				if(pat==null) {
 					throw new ODException("Patient not found for PatNum: "+patNum.ToString(),ODException.ErrorCodes.XWebProgramProperties);
 				}
@@ -339,8 +339,8 @@ namespace OpenDentBusiness {
 					xmlWriter.WriteEndElement();//POSDEVICE
 					xmlWriter.WriteStartElement("RETURNOPTION");
 					if(ODBuild.IsDebug()) {
-					//xmlWriter.WriteElementString("RETURNURL","https://www.patientviewer.com/PortalPayDone.aspx"); //use this line for debugging easier
-					xmlWriter.WriteElementString("RETURNURL","http://localhost/OpenDentalWebLander/PortalPayDone.aspx");
+					xmlWriter.WriteElementString("RETURNURL","https://www.patientviewer.com/PortalPayDone.aspx"); //use this line for debugging easier
+					//xmlWriter.WriteElementString("RETURNURL","http://localhost/OpenDentalWebLander/PortalPayDone.aspx");
 				}
 					else {
 						xmlWriter.WriteElementString("RETURNURL","https://www.patientviewer.com/PortalPayDone.aspx");
