@@ -1302,6 +1302,11 @@ namespace OpenDental {
 				return;
 			}
 			Procedure procLab=Procedures.GetOneProc(PIn.Long(row["ProcNum"].ToString()),false);
+			List<ClaimProc> listClaimProcsForProc=ClaimProcs.RefreshForProc(procLab.ProcNum);
+			if(Procedures.IsAttachedToClaim(procLab,listClaimProcsForProc)) {
+				MsgBox.Show(this,"Cannot detach a lab procedure already on a claim.");
+				return;
+			}
 			Procedure procOld=procLab.Copy();
 			procLab.ProcNumLab=0;
 			Procedures.Update(procLab,procOld);
