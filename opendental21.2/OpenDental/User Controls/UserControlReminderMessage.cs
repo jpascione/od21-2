@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using CodeBase;
 using OpenDentBusiness;
 
 namespace OpenDental {
-	public partial class UserControlReminderMessage:UserControl {
+    public partial class UserControlReminderMessage:UserControl {
 		public LayoutManagerForms LayoutManager;
 		private string _templateEmail;
+		private bool _isLoading;
 
 		public UserControlReminderMessage(ApptReminderRule apptReminder,LayoutManagerForms layoutManager) {
 			InitializeComponent();
@@ -37,6 +39,27 @@ namespace OpenDental {
 			RefreshEmail();
 		}
 
+		private void browserEmailBody_Navigating(object sender,WebBrowserNavigatingEventArgs e) {
+			if(_isLoading) {
+				return;
+			}
+			e.Cancel=true;//Cancel browser navigation (for links clicked within the email message).
+			if(e.Url.AbsoluteUri=="about:blank") {
+				return;
+			}
+			//if user did not specify a valid url beginning with http:// then the event args would make the url start with "about:" 
+			//ex: about:www.google.com and then would ask the user to get a separate app to open the link since it is unrecognized
+			string url=e.Url.ToString();
+			if(url.StartsWith("about")) {
+				url=url.Replace("about:","http://");
+			}
+			Process.Start(url);//Instead launch the URL into a new default browser window.
+		}
+
+		private void browserEmailBody_Navigated(object sender,WebBrowserNavigatedEventArgs e) {
+			_isLoading=false;
+		}
+
 		private void LoadControl() {
 			textTemplateSms.Text=Rule.TemplateSMS;
 			textTemplateSubject.Text=Rule.TemplateEmailSubject;
@@ -54,6 +77,7 @@ namespace OpenDental {
 		}
 
 		private void RefreshEmail() {
+			_isLoading=true;
 			//There's no easy way to scale the text in the web browser preview to match zoom.  In other places, like wiki, we have altered font size within document.
 			if(Rule.EmailTemplateType==EmailType.RawHtml) {
 				//browserEmailBody.Document.Body.Style = "font-size:"+LayoutManager.ScaleF(12).ToString("f1")+";";

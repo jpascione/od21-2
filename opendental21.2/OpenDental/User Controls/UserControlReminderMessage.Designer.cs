@@ -83,6 +83,8 @@
 			this.browserEmailBody.Size = new System.Drawing.Size(696, 144);
 			this.browserEmailBody.TabIndex = 128;
 			this.browserEmailBody.WebBrowserShortcutsEnabled = false;
+			this.browserEmailBody.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.browserEmailBody_Navigating);
+			this.browserEmailBody.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.browserEmailBody_Navigated);
 			// 
 			// label2
 			// 
