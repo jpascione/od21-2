@@ -292,6 +292,7 @@ namespace OpenDental {
 						if(SheetFieldDefEdit!=null) {
 							radioItem.TextClick+=new EventHandler((sender,e) => {
 								SheetFieldDefEdit.Invoke(this,new SheetFieldDefEditArgs(new List<long> { sheetFieldRadioItem.SheetFieldDefNum },true));
+								SetHighlightedFieldDefs(new List<long> {sheetFieldRadioItem.SheetFieldDefNum });
 							});
 						}
 						radioItem.Selected+=new EventHandler((sender,e) => {
@@ -461,6 +462,9 @@ namespace OpenDental {
 						}
 						if(SheetFieldDefEdit!=null) { //Owner wants to handle editing.
 							SheetFieldDefEdit?.Invoke(this,new SheetFieldDefEditArgs(sheetFields.Select(x => x.SheetFieldDefNum).ToList(),false));
+							if(sheetField.FieldType==SheetFieldType.CheckBox) {
+								SetHighlightedFieldDefs(sheetFields.Select(x => x.SheetFieldDefNum).ToList());
+							}
 							return;
 						}
 						//Owner is not handling editing so handle it here.
@@ -498,9 +502,7 @@ namespace OpenDental {
 					panel.MouseUp+=new MouseEventHandler((sender,e) => {
 						#region MouseUp
 						if(panel.DragAtt.CanMouseUp) { //We have not moved the mouse far enough to be considered a drag so it must be a click.							
-							if(!isCheckBox) { //Checkbox will take care of its own selecting.
-								SheetFieldDefSelected?.Invoke(this,sheetField.SheetFieldDefNum);
-							}
+							SheetFieldDefSelected?.Invoke(this,sheetField.SheetFieldDefNum);
 						}
 						//Reset the panel for click and drag for next time.
 						panel.DragAtt.DisableMouseEvents();
@@ -771,6 +773,28 @@ namespace OpenDental {
 				err?.Invoke(e.Message);
 			}
 			return false;
+		}
+
+		///<summary>Gets the fieldDefNums for Highlighted radio/checkbox controls.</summary>
+		public List<long> GetHighlightedFieldDefs(List<long> listSheetFieldDefNums) {
+			List<long> listHighlightedSheetFields=new List<long>();
+			//Find any controls which these def nums belong to.
+			var controlsToHighlight=panelPreview.Controls.Cast<SheetEditMobilePanel>()
+				.SelectMany(x => x.Controls.Cast<Control>(), (x, y) => new {
+					Pnl=x,
+					Ctrl=y,
+					CtrlTag=(SheetFieldDef)((y.Tag is SheetFieldDef)?y.Tag:null),
+					PnlTag=(SheetFieldDef)((x.Tag is SheetFieldDef)?x.Tag:null),
+				});
+			controlsToHighlight
+				//Panel has child control which holds the tag.
+				.Where(x => x.CtrlTag!=null && listSheetFieldDefNums.Contains(x.CtrlTag.SheetFieldDefNum))
+				.ForEach(x => {
+					if(x.Ctrl is SheetEditMobileRadioButton && ((SheetEditMobileRadioButton)x.Ctrl).IsHighlighted) {
+						listHighlightedSheetFields.Add(x.CtrlTag.SheetFieldDefNum);
+					}
+				});
+			return listHighlightedSheetFields;
 		}
 
 		///<summary>Adds a highlighted border to panels which include any of the SheetFieldDefNums provided.</summary>
@@ -1076,6 +1100,9 @@ namespace OpenDental {
 		private Func<bool> _isReadOnly;
 		///<summary>Set to true to draw a red border around this panel. False removes the border.</summary>
 		public bool IsHighlighted {
+			get {
+				return _isHighlighted;
+			}
 			set {
 				_isHighlighted=value;
 				Invalidate(false);
