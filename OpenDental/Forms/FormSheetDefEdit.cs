@@ -1638,6 +1638,13 @@ namespace OpenDental {
 				}
 				List<SheetFieldDef> listSheetFieldDefs=_sheetDefCur.SheetFieldDefs.FindAll(x => e.SheetFieldDefNums.Contains(x.SheetFieldDefNum));
 				SheetFieldDef sheetFieldDef=listSheetFieldDefs[0];
+				//check to see if checkbox and if yes, check to see which one is highlighted or selected to pass in. 
+				if(listSheetFieldDefs.Any(x => x.FieldType==SheetFieldType.CheckBox)) {
+					List<long> listHighlighted=_sheetEditMobileCtrl.GetHighlightedFieldDefs(listSheetFieldDefs.Select(x => x.SheetFieldDefNum).ToList());//should only come back with 1
+					if(listHighlighted.Count > 0) {
+						sheetFieldDef=listSheetFieldDefs.FirstOrDefault(x => x.SheetFieldDefNum==listHighlighted.First());
+					}
+				}
 				LaunchEditWindow(sheetFieldDef,isEditMobile:true);
 			});
 		}
