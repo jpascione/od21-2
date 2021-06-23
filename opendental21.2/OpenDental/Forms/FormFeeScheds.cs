@@ -170,15 +170,14 @@ namespace OpenDental{
 		}
 
 		private void gridMain_CellClick(object sender,ODGridClickEventArgs e) {
-			int idx=e.Row;
 			if(!_IsMovingToOrder) {
 				return;
 			}
-			FeeScheds.RepositionFeeSched(_feeSchedToMove,_listFeeSchedsForType[idx].ItemOrder);
+			FeeScheds.RepositionFeeSched(_feeSchedToMove,((FeeSched)gridMain.ListGridRows[e.Row].Tag).ItemOrder);
 			FeeScheds.RefreshCache();
 			_listFeeScheds=FeeScheds.GetDeepCopy();
 			FillGrid();
-			gridMain.SetSelected(idx,true);
+			gridMain.SetSelected(e.Row,true);
 			_IsMovingToOrder=false;
 			_hasChanged=true;
 			butSetOrder.BackColor=SystemColors.Control;
@@ -234,11 +233,11 @@ namespace OpenDental{
 			}
 			//swap the orders.  This makes it work no matter which types are being viewed.
 			_hasChanged=true;
-			int oldItemOrder=_listFeeSchedsForType[idx].ItemOrder;
-			_listFeeSchedsForType[idx].ItemOrder=_listFeeSchedsForType[idx-1].ItemOrder;
-			FeeScheds.Update(_listFeeSchedsForType[idx]);
-			_listFeeSchedsForType[idx-1].ItemOrder=oldItemOrder;
-			FeeScheds.Update(_listFeeSchedsForType[idx-1]);
+			int oldItemOrder=((FeeSched)gridMain.ListGridRows[idx].Tag).ItemOrder;
+			((FeeSched)gridMain.ListGridRows[idx].Tag).ItemOrder=((FeeSched)gridMain.ListGridRows[idx-1].Tag).ItemOrder;
+			FeeScheds.Update((FeeSched)gridMain.ListGridRows[idx].Tag);
+			((FeeSched)gridMain.ListGridRows[idx-1].Tag).ItemOrder=oldItemOrder;
+			FeeScheds.Update((FeeSched)gridMain.ListGridRows[idx-1].Tag);
 			FillGrid();
 			gridMain.SetSelected(idx-1,true);
 		}
@@ -249,15 +248,15 @@ namespace OpenDental{
 				MsgBox.Show(this,"Please select a fee schedule first.");
 				return;
 			}
-			if(idx==_listFeeSchedsForType.Count-1){
+			if(idx==gridMain.ListGridRows.Count-1){
 				return;
 			}
 			_hasChanged=true;
-			int oldItemOrder=_listFeeSchedsForType[idx].ItemOrder;
-			_listFeeSchedsForType[idx].ItemOrder=_listFeeSchedsForType[idx+1].ItemOrder;
-			FeeScheds.Update(_listFeeSchedsForType[idx]);
-			_listFeeSchedsForType[idx+1].ItemOrder=oldItemOrder;
-			FeeScheds.Update(_listFeeSchedsForType[idx+1]);
+			int oldItemOrder=((FeeSched)gridMain.ListGridRows[idx].Tag).ItemOrder;
+			((FeeSched)gridMain.ListGridRows[idx].Tag).ItemOrder=((FeeSched)gridMain.ListGridRows[idx+1].Tag).ItemOrder;
+			FeeScheds.Update((FeeSched)gridMain.ListGridRows[idx].Tag);
+			((FeeSched)gridMain.ListGridRows[idx+1].Tag).ItemOrder=oldItemOrder;
+			FeeScheds.Update((FeeSched)gridMain.ListGridRows[idx+1].Tag);
 			FillGrid();
 			gridMain.SetSelected(idx+1,true);
 		}
@@ -269,7 +268,7 @@ namespace OpenDental{
 				return;
 			}
 			butSetOrder.BackColor=Color.Red;
-			_feeSchedToMove=_listFeeSchedsForType[idx];
+			_feeSchedToMove=(FeeSched)gridMain.ListGridRows[idx].Tag;
 			_IsMovingToOrder=true;
 		}
 
