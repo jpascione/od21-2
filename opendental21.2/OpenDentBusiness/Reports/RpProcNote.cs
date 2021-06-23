@@ -31,7 +31,7 @@ namespace OpenDentBusiness {
 						+@" AND procnote.EntryDateTime=(SELECT MAX(lastnote.EntryDateTime) 
 							FROM procnote lastnote 
 							WHERE procnote.ProcNum=lastnote.ProcNum)"
-						+@" GROUP BY procedurelog.PatNum,procedurelog.ProcDate
+						+@" GROUP BY procedurelog.ProcNum
 							HAVING LENGTH(procnote.Note)>0
 					) hasNotes ON hasNotes.PatNum=procedurelog.PatNum AND hasNotes.ProcDate=procedurelog.ProcDate ";
 				whereNotesClause=@"AND (n1.ProcNum IS NOT NULL OR hasNotes.PatNum IS NULL) AND IF(procedurecode.ProcCode IN ('D9986','D9987'),(n1.Note LIKE '%""%' OR n1.Note REGEXP '\[Prompt:""[a-zA-Z_0-9]+""\]'),TRUE) "; // if using no notes option, only show broken appointment codes that have empty quotes or prompts
