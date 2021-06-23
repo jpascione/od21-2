@@ -894,6 +894,7 @@ namespace OpenDentBusiness {
 					//we must save at least one document, pick first non-hidden image category.
 					Def imgCat=listImageCatDefs.FirstOrDefault(x => !x.IsHidden);
 					if(imgCat==null) {
+						Logger.WriteLine("There are currently no image categories","TreatmentPlans");
 						return false;
 					}
 					categories.Add(imgCat.DefNum);
@@ -933,7 +934,8 @@ namespace OpenDentBusiness {
 					Update(docSave);
 				}
 			}
-			catch(Exception) {
+			catch(Exception ex) {
+				Logger.WriteException(ex,"TreatmentPlans");
 				return false;
 			}
 			return true;
