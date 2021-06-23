@@ -9,6 +9,10 @@ namespace OpenDentBusiness.AutoComm {
 		protected virtual void ReplaceTagsChild(StringBuilder retVal,AutoCommObj autoCommObj,bool isEmail) { }
 		///<summary>Replaces any aggregate tags.</summary>
 		protected virtual void ReplaceTagsAggregateChild(StringBuilder sbTemplate,StringBuilder sbAutoCommObjsAggregate) { }
+		///<summary>Returns a list of AutoCommObjects that we will iterate through when creating an aggregate tag replacemnt.</summary>
+		protected virtual List<AutoCommObj> GetAggregateGrouping(List<AutoCommObj> listAutoCommObjs) {
+			return listAutoCommObjs.GroupBy(x => new {x.PatNum,x.DateTimeEvent.Date}).Select(x => x.OrderBy(y => y.DateTimeEvent).First()).ToList();
+		}
 		///<summary>Replaces one individual tag. Case insensitive.</summary>
 		protected void ReplaceOneTag(StringBuilder template,string tagToReplace,string replaceValue,bool isEmailBody) {
 			OpenDentBusiness.ReplaceTags.ReplaceOneTag(template,tagToReplace,replaceValue,isEmailBody);
@@ -46,8 +50,9 @@ namespace OpenDentBusiness.AutoComm {
 				return templateAll;
 			}
 			StringBuilder sbAgg=new StringBuilder();
+			List<AutoCommObj> listAutoCommObjsOrdered=GetAggregateGrouping(listAutoCommObjs);
 			//If there are multiple appointments for the same patient in this group, we are going to use just the first appointment to fill out the template.
-			foreach(AutoCommObj autoCommObj in listAutoCommObjs.GroupBy(x => x.PatNum).Select(x => x.OrderBy(y => y.DateTimeEvent).First())) {
+			foreach(AutoCommObj autoCommObj in listAutoCommObjsOrdered) {
 				StringBuilder sbOneAutoCommObj=new StringBuilder();
 				sbOneAutoCommObj.Append(ReplaceTags(templateSingle,autoCommObj,clinicCur,isEmailBody));
 				sbAgg.AppendLine(sbOneAutoCommObj.ToString());
