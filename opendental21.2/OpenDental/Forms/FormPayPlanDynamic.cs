@@ -570,71 +570,92 @@ namespace OpenDental {
 			}
 		}
 
-		private void butAddProd_Click(object sender,EventArgs e) {
-			using FormProdSelect formProdSelect=new FormProdSelect(_patCur,_famCur);
-			if(formProdSelect.ShowDialog()!=DialogResult.OK) {
-				return;
-			}
-			if(formProdSelect.ListSelectedEntries.IsNullOrEmpty()) {
-				return;
-			}
-			//Create lists of primary keys for production that are already attached to a payment plan.
+		//Returns an list of procedures/adjustments that are not attached to any payment plan, including the current one (account entries that are valid to be added to this payment plan).
+		private List<AccountEntry> GetAccountEntriesUnattached() {
+			//Gather account information as if an income transfer is about to be made so that explicit linking is the only type of linking performed.
+			PaymentEdit.ConstructResults constructResults=PaymentEdit.ConstructAndLinkChargeCredits(_famCur.GetPatNums(),_patCur.PatNum,
+				new List<PaySplit>(),new Payment(),new List<AccountEntry>(),isIncomeTxfr:true,doIncludeTreatmentPlanned:true);
+			List<Type> listProdTypes=new List<Type>() { typeof(Adjustment),typeof(Procedure) };
 			#region Invalid Procedures
-			List<long> listSelectedProcNums=formProdSelect.ListSelectedEntries.Where(x => x.GetType()==typeof(Procedure)).Select(x => x.PriKey).ToList();
-			List<PayPlanCharge> listPayPlanCreditsForProcs=PayPlanCharges.GetPatientPayPlanCreditsForProcs(listSelectedProcNums);
-			List<PayPlanLink> listPayPlanLinksForProcs=PayPlanLinks.GetForFKeysAndLinkType(listSelectedProcNums,PayPlanLinkType.Procedure);
+			List<AccountEntry> listAccountEntriesAll=constructResults.ListAccountCharges;
+			List<long> listProcNums=listAccountEntriesAll.Where(x => x.GetType()==typeof(Procedure)).Select(x => x.PriKey).ToList();
+			List<PayPlanCharge> listPayPlanCreditsForProcs=PayPlanCharges.GetPatientPayPlanCreditsForProcs(listProcNums);
+			List<PayPlanLink> listPayPlanLinksForProcs=PayPlanLinks.GetForFKeysAndLinkType(listProcNums,PayPlanLinkType.Procedure);
 			//Already attached to this dynamic payment plan.
-			List<long> listInvalidProcNums=_listPayPlanLinks.FindAll(x => x.LinkType==PayPlanLinkType.Procedure).Select(x => x.FKey).ToList();
+			List<long> listInvalidProcNums=_listPayPlanLinks
+				.FindAll(x => x.LinkType==PayPlanLinkType.Procedure)
+				.Select(x => x.FKey)
+				.ToList();
 			//Already attached to another patient payment plan.
 			listInvalidProcNums.AddRange(listPayPlanCreditsForProcs.Select(x => x.ProcNum));
 			//Already attached to another dynamic payment plan.
 			listInvalidProcNums.AddRange(listPayPlanLinksForProcs.Select(x => x.FKey));
 			#endregion
 			#region Invalid Adjustments
-			List<long> listSelectedAdjNums=formProdSelect.ListSelectedEntries.Where(x => x.GetType()==typeof(Adjustment)).Select(x => x.PriKey).ToList();
-			List<PayPlanLink> listPayPlanLinksForAdjs=PayPlanLinks.GetForFKeysAndLinkType(listSelectedAdjNums,PayPlanLinkType.Adjustment);
+			List<long> listAdjNums=listAccountEntriesAll
+				.Where(x => x.GetType()==typeof(Adjustment))
+				.Select(x => x.PriKey)
+				.ToList();
+			List<PayPlanLink> listPayPlanLinksForAdjs=PayPlanLinks.GetForFKeysAndLinkType(listAdjNums,PayPlanLinkType.Adjustment);
 			//Already attached to this dynamic payment plan.
-			List<long> listInvalidAdjNums=_listPayPlanLinks.FindAll(x => x.LinkType==PayPlanLinkType.Adjustment).Select(x => x.FKey).ToList();
+			List<long> listInvalidAdjNums=_listPayPlanLinks
+				.FindAll(x => x.LinkType==PayPlanLinkType.Adjustment)
+				.Select(x => x.FKey)
+				.ToList();
 			//Adjustments cannot be attached to patient payment plans so only get ones already attached to another dynamic payment plan.
 			listInvalidAdjNums.AddRange(listPayPlanLinksForAdjs.Select(x => x.FKey));
 			#endregion
-			bool hasInvalidProd=false;
-			foreach(AccountEntry accountEntry in formProdSelect.ListSelectedEntries) {
-				//Check to see if the production selected is already attached to a payment plan.
-				if(accountEntry.GetType()==typeof(Adjustment)) {
-					if(listInvalidAdjNums.Contains(accountEntry.PriKey)) {
-						hasInvalidProd=true;
-						continue;
-					}
-					Adjustment adjustmentAdding=(Adjustment)accountEntry.Tag;
+			List<AccountEntry> listAccountEntriesUnattached=new List<AccountEntry>();
+			for(int i=0;i<listAccountEntriesAll.Count;i++) {
+				if(listAccountEntriesAll[i].PatNum!=_patCur.PatNum || listAccountEntriesAll[i].AmountEnd==0 || !listProdTypes.Contains(listAccountEntriesAll[i].GetType())) {
+					continue;
+				}
+				if(listAccountEntriesAll[i].GetType()==typeof(Adjustment) && listInvalidAdjNums.Contains(listAccountEntriesAll[i].PriKey)) {
+					continue;
+				}
+				else if(listAccountEntriesAll[i].GetType()==typeof(Procedure) && listInvalidProcNums.Contains(listAccountEntriesAll[i].PriKey)) {
+					continue;
+				}
+				listAccountEntriesUnattached.Add(listAccountEntriesAll[i]);
+			}
+			return listAccountEntriesUnattached;
+		}
+
+		private void butAddProd_Click(object sender,EventArgs e) {
+			List<AccountEntry> listAccountEntriesUnattached=GetAccountEntriesUnattached();
+			using FormProdSelect formProdSelect=new FormProdSelect(_patCur,listAccountEntriesUnattached);
+			if(formProdSelect.ShowDialog()!=DialogResult.OK) {
+				return;
+			}
+			if(formProdSelect.ListAccountEntriesSelected.IsNullOrEmpty()) {
+				return;
+			}
+			List<AccountEntry> listAccountEntriesSelected=formProdSelect.ListAccountEntriesSelected;
+			//Add production selected procedures/adjustments. Adding to _listPayPlanLinks also prevents GetAccountEntriesUnattached() from adding currently linked procedures/adjustments.
+			for(int i=0;i<listAccountEntriesSelected.Count;i++) {
+				if(listAccountEntriesSelected[i].GetType()==typeof(Adjustment)) {
+					Adjustment adjustmentAdding=(Adjustment)listAccountEntriesSelected[i].Tag;
 					PayPlanLink creditAdding=new PayPlanLink() {
 						PayPlanNum=_payPlanCur.PayPlanNum,
 						LinkType=PayPlanLinkType.Adjustment,
 						FKey=adjustmentAdding.AdjNum
 					};
 					_listPayPlanLinks.Add(creditAdding);
-					_listPayPlanProductionEntries.Add(new PayPlanProductionEntry(adjustmentAdding,creditAdding,null,amountOriginal:accountEntry.AmountEnd));
+					_listPayPlanProductionEntries.Add(new PayPlanProductionEntry(adjustmentAdding,creditAdding,null,amountOriginal:listAccountEntriesSelected[i].AmountEnd));
 				}
-				else if(accountEntry.GetType()==typeof(Procedure)) {
-					if(listInvalidProcNums.Contains(accountEntry.PriKey)) {
-						hasInvalidProd=true;
-						continue;
-					}
-					Procedure proc=(Procedure)accountEntry.Tag;
+				else if(listAccountEntriesSelected[i].GetType()==typeof(Procedure)) {
+					Procedure proc=(Procedure)listAccountEntriesSelected[i].Tag;
 					PayPlanLink creditAdding=new PayPlanLink() {
 						PayPlanNum=_payPlanCur.PayPlanNum,
 						LinkType=PayPlanLinkType.Procedure,
 						FKey=proc.ProcNum
 					};
 					_listPayPlanLinks.Add(creditAdding);
-					_listPayPlanProductionEntries.Add(new PayPlanProductionEntry(proc,creditAdding,null,null,null,amountOriginal:accountEntry.AmountEnd));
+					_listPayPlanProductionEntries.Add(new PayPlanProductionEntry(proc,creditAdding,null,null,null,amountOriginal:listAccountEntriesSelected[i].AmountEnd));
 				}
 			}
 			textTotalPrincipal.Text=_sumAttachedProduction.ToString("f");
 			FillProduction();
-			if(hasInvalidProd) {
-				MsgBox.Show("Production can only be attached to one active payment plan at a time.");
-			}
 		}
 
 		private void ButDeleteProduction_Click(object sender,EventArgs e) {

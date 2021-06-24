@@ -1,22 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
+using CodeBase;
 using OpenDental.UI;
 using OpenDentBusiness;
 
 namespace OpenDental {
 	///<summary>A window for displaying and selecting outstanding production that utilizes some of the same logic from the income transfer system.</summary>
 	public partial class FormProdSelect:FormODBase {
-		public List<AccountEntry> ListSelectedEntries;
+		public List<AccountEntry> ListAccountEntriesSelected;
 		private Patient _patCur;
-		private Family _famCur;
+		private List<AccountEntry> _listAccountEntriesAll;
 
-		public FormProdSelect(Patient patCur,Family famCur) {
+		public FormProdSelect(Patient patCur,List<AccountEntry> listAccountEntries) {
 			InitializeComponent();
 			InitializeLayoutManager();
 			Lan.F(this);
 			_patCur=patCur;
-			_famCur=famCur;
+			_listAccountEntriesAll=listAccountEntries;
 		}
 
 		private void FormProdSelect_Load(object sender,EventArgs e) {
@@ -38,22 +40,19 @@ namespace OpenDental {
 			gridProduction.ListGridColumns.Add(new GridColumn(Lan.g(tran,"Amount\r\nOriginal"),60,HorizontalAlignment.Right,GridSortingStrategy.AmountParse));
 			gridProduction.ListGridColumns.Add(new GridColumn(Lan.g(tran,"Amount\r\nEnd"),60,HorizontalAlignment.Right,GridSortingStrategy.AmountParse));
 			gridProduction.ListGridRows.Clear();
-			//Gather account information as if an income transfer is about to be made so that explicit linking is the only type of linking performed.
-			PaymentEdit.ConstructResults constructResults=PaymentEdit.ConstructAndLinkChargeCredits(_famCur.GetPatNums(),_patCur.PatNum,
-				new List<PaySplit>(),new Payment(),new List<AccountEntry>(),isIncomeTxfr:true,doIncludeTreatmentPlanned:true);
 			List<Type> listProdTypes=new List<Type>() { typeof(Adjustment),typeof(Procedure) };
-			foreach(AccountEntry accountEntry in constructResults.ListAccountCharges) {
-				if(accountEntry.PatNum!=_patCur.PatNum || accountEntry.AmountEnd==0 || !listProdTypes.Contains(accountEntry.GetType())) {
+			for(int i=0;i<_listAccountEntriesAll.Count;i++) {
+				if(_listAccountEntriesAll[i].PatNum!=_patCur.PatNum || _listAccountEntriesAll[i].AmountEnd==0 || !listProdTypes.Contains(_listAccountEntriesAll[i].GetType())) {
 					continue;
 				}
 				GridRow row=new GridRow();
-				row.Cells.Add(accountEntry.Date.ToShortDateString());
-				row.Cells.Add(Providers.GetAbbr(accountEntry.ProvNum,includeHidden:true));
+				row.Cells.Add(_listAccountEntriesAll[i].Date.ToShortDateString());
+				row.Cells.Add(Providers.GetAbbr(_listAccountEntriesAll[i].ProvNum,includeHidden:true));
 				if(PrefC.HasClinicsEnabled) {
-					row.Cells.Add(Clinics.GetAbbr(accountEntry.ClinicNum));
+					row.Cells.Add(Clinics.GetAbbr(_listAccountEntriesAll[i].ClinicNum));
 				}
-				if(accountEntry.GetType()==typeof(Procedure)) {
-					Procedure proc=(Procedure)accountEntry.Tag;
+				if(_listAccountEntriesAll[i].GetType()==typeof(Procedure)) {
+					Procedure proc=(Procedure)_listAccountEntriesAll[i].Tag;
 					if(proc.ProcStatus==ProcStat.TP) {
 						row.Cells.Add(Lan.g(this,"Treatment Planned"));
 					}
@@ -65,21 +64,21 @@ namespace OpenDental {
 					}
 					row.Cells.Add($"{ProcedureCodes.GetStringProcCode(proc.CodeNum)} - {ProcedureCodes.GetLaymanTerm(proc.CodeNum)}");
 				}
-				else if(accountEntry.GetType()==typeof(Adjustment)) {
-					Adjustment adj=(Adjustment)accountEntry.Tag;
+				else if(this._listAccountEntriesAll[i].GetType()==typeof(Adjustment)) {
+					Adjustment adj=(Adjustment)this._listAccountEntriesAll[i].Tag;
 					row.Cells.Add(Lan.g(this,"Adjustment"));
 					row.Cells.Add($"{Defs.GetName(DefCat.AdjTypes,adj.AdjType)}");
 				}
-				row.Cells.Add(accountEntry.AmountOriginal.ToString("C"));
-				row.Cells.Add(accountEntry.AmountEnd.ToString("C"));
-				row.Tag=accountEntry;
+				row.Cells.Add(this._listAccountEntriesAll[i].AmountOriginal.ToString("C"));
+				row.Cells.Add(this._listAccountEntriesAll[i].AmountEnd.ToString("C"));
+				row.Tag=this._listAccountEntriesAll[i];
 				gridProduction.ListGridRows.Add(row);
 			}
 			gridProduction.EndUpdate();
 		}
 
 		private void gridProduction_CellDoubleClick(object sender,ODGridClickEventArgs e) {
-			ListSelectedEntries=gridProduction.SelectedTags<AccountEntry>();
+			ListAccountEntriesSelected=gridProduction.SelectedTags<AccountEntry>();
 			DialogResult=DialogResult.OK;
 		}
 
@@ -88,7 +87,7 @@ namespace OpenDental {
 				MsgBox.Show(this,"Please select an item first.");
 				return;
 			}
-			ListSelectedEntries=gridProduction.SelectedTags<AccountEntry>();
+			ListAccountEntriesSelected=gridProduction.SelectedTags<AccountEntry>();
 			DialogResult=DialogResult.OK;
 		}
 
