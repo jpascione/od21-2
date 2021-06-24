@@ -10,9 +10,9 @@ namespace OpenDentBusiness.SheetFramework{
 	public class ToothChartHelper{
 		//there should only be two methods in this class because the Sparks3D.dll might not be present, and we don't want to hit this class unless we have to.
 	
-		///<summary>Do not call this from OpenDental.exe.  There's a better version there in SheetPrinting.  This generates an Image of the ToothChart.  Set isForSheet=true for dimensions and colors appropriate for Sheets, false for dimensions and colors appropriate for display in Patient Dashboard (matches dimensions for .</summary>
+		///<summary>Do not call this from OpenDental.exe.  There's a better version there in SheetPrinting.  This generates an Image of the ToothChart.  Set isForSheet=true for dimensions and colors appropriate for Sheets, false for dimensions and colors appropriate for display in Patient Dashboard (matches dimensions for). Set isForWinForms to true if there is an associated window handle.</summary>
 		public static Image GetImage(long patNum,bool showCompleted,TreatPlan treatPlan=null,List<Procedure> listProceduresFilteredOverride=null
-			,bool isInPatientDashboard=false) 
+			,bool isInPatientDashboard=false,bool isForWinForms=false) 
 		{
 			int colorBackgroundIndex=14;
 			int colorTextIndex=15;
@@ -26,7 +26,7 @@ namespace OpenDentBusiness.SheetFramework{
 			}
 			ToothChart toothChart=null;
 			//if(ToothChartRelay.IsSparks3DPresent){
-				toothChart=new ToothChart(false);//Needs to be false, to tell ToothChart that there is no window
+				toothChart=new ToothChart(isForWinForms);//Needs to be false, to tell ToothChart that there is no window
 				toothChart.Size=new Size(width,height);
 			//}
 			toothChart.ResetTeeth();
