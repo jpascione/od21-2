@@ -176,12 +176,13 @@ namespace OpenDental {
 				try {
 					dc.SetDb(compName,databaseNameOriginal,textUsername.Text,textPassword.Text,"","",DataConnection.DBtype);
 					//Connection is considered to be successfull at this point. Now restart the slave process to force replication.
-					string command="STOP SLAVE; START SLAVE; SHOW SLAVE STATUS;";
+					string command="STOP SLAVE; START SLAVE;";
+					dc.NonQ(command);
+					command="SHOW SLAVE STATUS";
 					DataTable slaveStatus=dc.GetTable(command);
 					//Wait for the slave process to become active again.
 					for(int j=0;j<40 && slaveStatus.Rows[0]["Slave_IO_Running"].ToString().ToLower()!="yes";j++) {
 						Thread.Sleep(1000);
-						command="SHOW SLAVE STATUS";
 						slaveStatus=dc.GetTable(command);
 					}
 					if(slaveStatus.Rows[0]["Slave_IO_Running"].ToString().ToLower()!="yes") {
