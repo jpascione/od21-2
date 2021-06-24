@@ -260,6 +260,12 @@ namespace OpenDental {
 			ClinicPref clinicPrefProviderRule=ClinicPrefs.GetPref(PrefName.WebSchedProviderRule,comboClinicProvRule.SelectedClinicNum,isDefaultIncluded:true);
 			checkUseDefaultProvRule.Visible=(!comboClinicProvRule.IsUnassignedSelected);//"Use Defaults" checkbox visible when actual clinic is selected.
 			checkUseDefaultProvRule.Checked=(clinicPrefProviderRule==null);
+			if(checkUseDefaultProvRule.Visible) {
+				listBoxWebSchedProviderPref.Enabled=(!checkUseDefaultProvRule.Checked);
+			}
+			else {
+				listBoxWebSchedProviderPref.Enabled=true;
+			}
 			SetListBoxWebSchedProviderPref(clinicPrefProviderRule);//Select ClincPref's value, or default if no ClinicPref.
 		}
 
