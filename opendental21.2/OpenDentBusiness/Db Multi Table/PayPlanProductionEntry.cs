@@ -96,7 +96,8 @@ namespace OpenDentBusiness {
 			PatNum=adj.PatNum;
 			if(amountOriginal==decimal.MinValue) {
 				//Get the amount that was paid to the adjustment prior to the adjustment being attached to a payment plan.
-				decimal patPaid=(decimal)listPaySplits.FindAll(x => x.AdjNum==adj.AdjNum && x.PayPlanNum==0 && x.PayPlanChargeNum==0).Sum(x => x.SplitAmt);
+				decimal patPaid=(decimal)listPaySplits.FindAll(x => x.DatePay<=credit.SecDateTEntry && x.AdjNum==adj.AdjNum && x.PayPlanNum==0 && x.PayPlanChargeNum==0)
+					.Sum(x => x.SplitAmt);
 				AmountOriginal=(decimal)adj.AdjAmt-patPaid;
 			}
 			else {

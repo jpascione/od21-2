@@ -908,36 +908,37 @@ namespace OpenDentBusiness {
 				#endregion
 				#region FauxAccountEntry
 				//Negative payment splits are created for payment plan charges when money is transferred away from them. There should be offsetting splits when this scenario has happened.
-				//Apply any negative splits to positive splits that are explicitly linked to the same PayPlanCharge. We only honor splits that have set the PayPlanChargeNum.
-				foreach(AccountEntry payPlanChargeEntry in listPayPlanEntries) {
-					List<PaySplit> listPayPlanChargeSplitsNegative=listPatProvClinicSplits.FindAll(x => CompareDouble.IsLessThanZero(x.SplitAmt)
-						&& x.UnearnedType==0
-						&& x.PayPlanNum==payPlanChargeEntry.PayPlanNum
-						&& x.PayPlanChargeNum==payPlanChargeEntry.PayPlanChargeNum);
-					if(listPayPlanChargeSplitsNegative.IsNullOrEmpty()) {
+				//Apply any negative splits to positive splits that are explicitly linked to exact same production entry.
+				List<PaySplit> listPayPlanChargeSplitsNegative=listPatProvClinicSplits.FindAll(x => CompareDouble.IsLessThanZero(x.SplitAmt) && x.UnearnedType==0 && x.PayPlanNum > 0);
+				for(int i=0;i<listPayPlanChargeSplitsNegative.Count;i++) {
+					if(CompareDecimal.IsGreaterThanOrEqualToZero(listPayPlanChargeSplitsNegative[i].SplitAmt)) {
 						continue;
 					}
+					//Find any offsetting positive payment splits (linked to exactly the same production entry).
 					List<PaySplit> listPayPlanChargeSplitsPositive=listPatProvClinicSplits.FindAll(x => CompareDecimal.IsGreaterThanZero(x.SplitAmt)
-						&& x.UnearnedType==0
-						&& x.PayPlanNum==payPlanChargeEntry.PayPlanNum
-						&& x.PayPlanChargeNum==payPlanChargeEntry.PayPlanChargeNum);
-					foreach(PaySplit payPlanChargeSplitPositive in listPayPlanChargeSplitsPositive) {
-						foreach(PaySplit payPlanChargeSplitNegative in listPayPlanChargeSplitsNegative) {
-							if(CompareDouble.IsLessThanOrEqualToZero(payPlanChargeSplitPositive.SplitAmt)) {
-								break;
-							}
-							if(CompareDecimal.IsGreaterThanOrEqualToZero(payPlanChargeSplitNegative.SplitAmt)) {
-								continue;
-							}
-							double splitAmountBeingApplied=Math.Min(Math.Abs(payPlanChargeSplitNegative.SplitAmt),payPlanChargeSplitPositive.SplitAmt);
-							payPlanChargeSplitNegative.SplitAmt+=splitAmountBeingApplied;
-							if(dictPaySplitAccountEntries.TryGetValue((string)payPlanChargeSplitNegative.TagOD,out AccountEntry accountEntrySplitNegative)) {
-								accountEntrySplitNegative.AmountEnd-=(decimal)splitAmountBeingApplied;
-							}
-							payPlanChargeSplitPositive.SplitAmt-=splitAmountBeingApplied;
-							if(dictPaySplitAccountEntries.TryGetValue((string)payPlanChargeSplitPositive.TagOD,out AccountEntry accountEntrySplitPositive)) {
-								accountEntrySplitPositive.AmountEnd+=(decimal)splitAmountBeingApplied;
-							}
+							&& x.UnearnedType==listPayPlanChargeSplitsNegative[i].UnearnedType
+							&& x.PayPlanNum==listPayPlanChargeSplitsNegative[i].PayPlanNum
+							&& x.AdjNum==listPayPlanChargeSplitsNegative[i].AdjNum
+							&& x.ProcNum==listPayPlanChargeSplitsNegative[i].ProcNum)
+						.OrderByDescending(x => x.PayPlanChargeNum==listPayPlanChargeSplitsNegative[i].PayPlanChargeNum)
+						.ThenByDescending(x => Math.Abs(x.SplitAmt)==Math.Abs(listPayPlanChargeSplitsNegative[i].SplitAmt))
+						.ToList();
+					//Offset the payment splits as much as possible.
+					for(int j=0;j<listPayPlanChargeSplitsPositive.Count;j++) {
+						if(CompareDouble.IsLessThanOrEqualToZero(listPayPlanChargeSplitsPositive[j].SplitAmt)) {
+							break;
+						}
+						if(CompareDecimal.IsGreaterThanOrEqualToZero(listPayPlanChargeSplitsNegative[i].SplitAmt)) {
+							continue;
+						}
+						double splitAmountBeingApplied=Math.Min(Math.Abs(listPayPlanChargeSplitsNegative[i].SplitAmt),listPayPlanChargeSplitsPositive[j].SplitAmt);
+						listPayPlanChargeSplitsNegative[i].SplitAmt+=splitAmountBeingApplied;
+						if(dictPaySplitAccountEntries.TryGetValue((string)listPayPlanChargeSplitsNegative[i].TagOD,out AccountEntry accountEntrySplitNegative)) {
+							accountEntrySplitNegative.AmountEnd-=(decimal)splitAmountBeingApplied;
+						}
+						listPayPlanChargeSplitsPositive[j].SplitAmt-=splitAmountBeingApplied;
+						if(dictPaySplitAccountEntries.TryGetValue((string)listPayPlanChargeSplitsPositive[j].TagOD,out AccountEntry accountEntrySplitPositive)) {
+							accountEntrySplitPositive.AmountEnd+=(decimal)splitAmountBeingApplied;
 						}
 					}
 				}
@@ -1908,15 +1909,13 @@ namespace OpenDentBusiness {
 			if(listAllAccountEntries.IsNullOrEmpty()) {
 				return true;
 			}
-			//Do not allow transfers if there is a payment plan associated to the family that is for an amount that does not equal the Tx amount.
-			//E.g. A "Total Tx Amt" not equal to the "Total Amount" means the user is using a patient payment plan and didn't attach Tx Credits.
-			//This is a requirement for the transfer system because it needs to know what to take value from and what to give it to (pat/prov/clinic).
-			//Side note, dynamic payment plans can always be used in the imcome transfer manager.
 			if(listPayPlans==null) {
 				Family famCur=Patients.GetFamily(listAllAccountEntries.First().PatNum);
-				listPayPlans=PayPlans.GetForPats(famCur.GetPatNums(),famCur.Guarantor.Guarantor).FindAll(x => !x.IsDynamic);
+				listPayPlans=PayPlans.GetForPats(famCur.GetPatNums(),famCur.Guarantor.Guarantor);
 			}
-			if(!listPayPlans.IsNullOrEmpty()) {
+			List<PayPlan> listPayPlansPatient=listPayPlans.FindAll(x => !x.IsDynamic);
+			List<PayPlan> listPayPlansDynamic=listPayPlans.FindAll(x => x.IsDynamic);
+			if(!listPayPlansPatient.IsNullOrEmpty()) {
 				//PayPlanCharge Credits are not made when the PaymentPlanVersion is set to NoCharges.
 				//For now, do not allow income transfers to be made when the version is set to NoCharges because we don't know what has value to transfer.
 				if(PrefC.GetEnum<PayPlanVersions>(PrefName.PayPlansVersion)==PayPlanVersions.NoCharges) {
@@ -1924,9 +1923,12 @@ namespace OpenDentBusiness {
 						$"'{PayPlanVersions.NoCharges.GetDescription()}'."));
 					return false;
 				}
+				//Do not allow transfers if there is a payment plan associated to the family that is for an amount that does not equal the Tx amount.
+				//E.g. A "Total Tx Amt" not equal to the "Total Amount" means the user is using a patient payment plan and didn't attach Tx Credits.
+				//This is a requirement for the transfer system because it needs to know what to take value from and what to give it to (pat/prov/clinic).
 				List<long> listInvalidTotalPayPlanNums=new List<long>();
 				List<long> listInvalidNegPayPlanNums=new List<long>();
-				Dictionary<long,List<PayPlanCharge>> dictPayPlanCharges=PayPlanCharges.GetForPayPlans(listPayPlans.Select(x => x.PayPlanNum).ToList())
+				Dictionary<long,List<PayPlanCharge>> dictPayPlanCharges=PayPlanCharges.GetForPayPlans(listPayPlansPatient.Select(x => x.PayPlanNum).ToList())
 					.GroupBy(x => x.PayPlanNum)
 					.ToDictionary(x => x.Key,x => x.ToList());
 				foreach(long payPlanNum in dictPayPlanCharges.Keys) {
@@ -1956,15 +1958,49 @@ namespace OpenDentBusiness {
 				}
 				if(listInvalidTotalPayPlanNums.Count > 0) {
 					string errorMsgStart=Lans.g("PaymentEdit","The following payment plans have a 'Total Tx Amt' that does not match the 'Total Amount':");
-					List<PayPlan> listInvalidPayPlans=listPayPlans.FindAll(x => ListTools.In(x.PayPlanNum,listInvalidTotalPayPlanNums));
+					List<PayPlan> listInvalidPayPlans=listPayPlansPatient.FindAll(x => ListTools.In(x.PayPlanNum,listInvalidTotalPayPlanNums));
 					incomeTransferData.StringBuilderErrors.AppendLine(GetInvalidPayPlanDescription(errorMsgStart,listInvalidPayPlans,dictPayPlanCharges));
 					return false;
 				}
 				if(listInvalidNegPayPlanNums.Count > 0) {
 					string errorMsgStart=Lans.g("PaymentEdit","The following payment plans have an imbalance between negative debits and negative credits:");
-					List<PayPlan> listInvalidPayPlans=listPayPlans.FindAll(x => ListTools.In(x.PayPlanNum,listInvalidNegPayPlanNums));
+					List<PayPlan> listInvalidPayPlans=listPayPlansPatient.FindAll(x => ListTools.In(x.PayPlanNum,listInvalidNegPayPlanNums));
 					incomeTransferData.StringBuilderErrors.AppendLine(GetInvalidPayPlanDescription(errorMsgStart,listInvalidPayPlans,dictPayPlanCharges));
 					return false;
+				}
+			}
+			if(!listPayPlansDynamic.IsNullOrEmpty()) {
+				//Do not allow income transfers when there is negative production associated to a dynamic payment plan.
+				List<PayPlanLink> listPayPlanLinks=PayPlanLinks.GetForPayPlans(listPayPlansDynamic.Select(x => x.PayPlanNum).ToList());
+				for(int i=0;i<listPayPlansDynamic.Count;i++) {
+					List<PayPlanLink> listPayPlanLinksForPlan=listPayPlanLinks.FindAll(x => x.PayPlanNum==listPayPlansDynamic[i].PayPlanNum);
+					List<PayPlanProductionEntry> listPayPlanProductionEntries=PayPlanProductionEntry.GetProductionForLinks(listPayPlanLinksForPlan);
+					if(listPayPlanLinksForPlan.IsNullOrEmpty() || listPayPlanProductionEntries.IsNullOrEmpty()) {
+						incomeTransferData.StringBuilderErrors.AppendLine(
+							Lans.g("PaymentEdit","Transfers cannot be made for this family due to a dynamic payment plan with no production attached."));
+						return false;
+					}
+					if(listPayPlanProductionEntries.Any(x => CompareDecimal.IsLessThanZero(x.AmountOriginal))) {
+						incomeTransferData.StringBuilderErrors.AppendLine(
+							Lans.g("PaymentEdit","Transfers cannot be made for this family due to a dynamic payment plan with negative production attached."));
+						return false;
+					}
+					List<PayPlanCharge> listPayPlanCharges=PayPlanCharges.GetForPayPlan(listPayPlansDynamic[i].PayPlanNum);
+					var dictProductionPayPlanCharges=listPayPlanCharges.GroupBy(x => new { x.FKey,x.LinkType })
+						.ToDictionary(x => x.Key,x => x.ToList());
+					foreach(var kvp in dictProductionPayPlanCharges) {
+						PayPlanProductionEntry payPlanProductionEntry=listPayPlanProductionEntries.FirstOrDefault(x => x.LinkType==kvp.Key.LinkType && x.PriKey==kvp.Key.FKey);
+						if(payPlanProductionEntry==null) {
+							incomeTransferData.StringBuilderErrors.AppendLine(
+								Lans.g("PaymentEdit","Transfers cannot be made for this family due to a dynamic payment plan with a charge for production no longer linked to the plan."));
+							return false;
+						}
+						if(kvp.Value.Sum(x => x.Principal) > (double)payPlanProductionEntry.AmountOriginal) {
+							incomeTransferData.StringBuilderErrors.AppendLine(
+								Lans.g("PaymentEdit","Transfers cannot be made for this family due to a dynamic payment plan with overcharged production."));
+							return false;
+						}
+					}
 				}
 			}
 			listAllAccountEntries.Sort(AccountEntrySort);
@@ -2052,7 +2088,7 @@ namespace OpenDentBusiness {
 				//Some account entries could have been overpaid. These overpayments need to be available to transfer into payment plan entries.
 				listUnearnedEntries=listAllAccountEntries.FindAll(x => x.GetType()==typeof(PaySplit)
 					&& x.PayPlanNum==0
-					&& x.IsUnearned
+					&& (x.IsUnearned || x.IsUnallocated)
 					&& CompareDecimal.IsLessThanZero(x.AmountEnd));
 				listPayPlanEntries.AddRange(listUnearnedEntries);
 				//Loop through all of the income transfer layers except the Unearned layer which will be handled manually afterwards.

@@ -9532,6 +9532,80 @@ namespace UnitTests.PaymentEdit_Tests {
 			Assert.AreEqual(0,transferResults.ListSplitsCur.Count);
 		}
 
+		[TestMethod]
+		public void PaymentEdit_BalanceAndIncomeTransfer_DynamicPayPlanIncorrectlyLinkedAdjustmentSplit() {
+			//Make a payment directly to an adjustment that has 100% of it's value attached to a dynamic payment plan.
+			//A transfer should be made to move the payment to unearned and then back into the payment plan.
+			/*****************************************************
+				patient:  pat1
+				provider: provNum1
+				adj1      Today-1M  pat1  provNum1   $50
+				payPlan1  Today-1M  pat1  provNum1   $50
+					^100% of adj1 should be the only production attached.
+				payment    Today    pat1  provNum1   $15
+					^split1  Today    pat1  provNum1   $15 (attached to adj1 but NOT payPlan1) --> this should be attached to payPlan1!
+			Assert that the ITM will transfer the $15 away from adj1 and then back into the payment plan.
+			******************************************************/
+			string suffix=MethodBase.GetCurrentMethod().Name;
+			long unearnedType=PrefC.GetLong(PrefName.PrepaymentUnearnedType);
+			Patient pat=PatientT.CreatePatient(suffix);
+			long provNum1=ProviderT.CreateProvider($"{suffix}-1");
+			DateTime datePayPlan=DateTime.Today.AddMonths(-1);
+			Adjustment adj1=AdjustmentT.MakeAdjustment(pat.PatNum,50,adjDate:datePayPlan,provNum:provNum1);
+			PayPlan payPlan1=PayPlanT.CreateDynamicPaymentPlan(pat.PatNum,pat.Guarantor,datePayPlan,0,0,50,
+				new List<Procedure>(),new List<Adjustment>() { adj1 },provNum:provNum1);
+			List<PayPlanLink> listPayPlanLinks=PayPlanLinks.GetListForPayplan(payPlan1.PayPlanNum);
+			//Manually manipulate the security date on these link entries so that the payment plan has an accurate representation of when the credits were 'created'.
+			PayPlanLinkT.UpdatePayPlanLinkSecurityDate(listPayPlanLinks[0].PayPlanLinkNum,datePayPlan);
+			//Pay $15 directly to the adjustment which should not be directly attached to the adjustment but instead should be attached to the payment plan.
+			DateTime datePay=DateTime.Today;
+			Payment pay1=PaymentT.MakePayment(pat.PatNum,15,payDate:datePay,provNum:provNum1,adjNum:adj1.AdjNum);
+			PaymentEdit.IncomeTransferData transferResults=PaymentT.BalanceAndIncomeTransfer(pat.PatNum);
+			/*****************************************************
+			Paysplit1:  Today  provNum1  pat  -$15
+				^adj1
+			Paysplit2:  Today  provNum1  pat   $15
+				^Unearned
+			Paysplit3:  Today  provNum1  pat  -$15
+				^Unearned
+			Paysplit4:  Today  provNum1  pat   $15
+				^Dynamic Payment Plan / adj1
+			******************************************************/
+			Assert.AreEqual(4,transferResults.ListSplitsCur.Count);
+			Assert.AreEqual(1,transferResults.ListSplitsCur.Count(x => x.PatNum==adj1.PatNum
+				&& x.ProvNum==adj1.ProvNum
+				&& x.AdjNum==adj1.AdjNum
+				&& x.ProcNum==0
+				&& x.PayPlanNum==0
+				&& x.SplitAmt==-15
+				&& x.UnearnedType==0));
+			Assert.AreEqual(1,transferResults.ListSplitsCur.Count(x => x.PatNum==adj1.PatNum
+				&& x.ProvNum==adj1.ProvNum
+				&& x.AdjNum==0
+				&& x.ProcNum==0
+				&& x.PayPlanNum==0
+				&& x.SplitAmt==15
+				&& x.UnearnedType==unearnedType));
+			Assert.AreEqual(1,transferResults.ListSplitsCur.Count(x => x.PatNum==adj1.PatNum
+				&& x.ProvNum==adj1.ProvNum
+				&& x.AdjNum==0
+				&& x.ProcNum==0
+				&& x.PayPlanNum==0
+				&& x.SplitAmt==-15
+				&& x.UnearnedType==unearnedType));
+			Assert.AreEqual(1,transferResults.ListSplitsCur.Count(x => x.PatNum==adj1.PatNum
+				&& x.ProvNum==adj1.ProvNum
+				&& x.AdjNum==adj1.AdjNum
+				&& x.ProcNum==0
+				&& x.PayPlanNum==payPlan1.PayPlanNum
+				&& x.SplitAmt==15
+				&& x.UnearnedType==0));
+			//Make the income transfer official by inserting the splits into the database and then run the transfer again.  No splits should be made!
+			PaySplits.InsertMany(0,transferResults.ListSplitsCur);
+			transferResults=PaymentT.BalanceAndIncomeTransfer(pat.PatNum);
+			Assert.AreEqual(0,transferResults.ListSplitsCur.Count);
+		}
+
 		#endregion
 
 		[TestMethod]
