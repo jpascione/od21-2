@@ -25,5 +25,9 @@ namespace UnitTestsCore {
 			return link;
 		}
 
+		public static void UpdatePayPlanLinkSecurityDate(long payPlanLinkNum,DateTime secDateTEntry) {
+			DataCore.NonQ($"UPDATE payplanlink SET SecDateTEntry={POut.DateT(secDateTEntry)} WHERE PayPlanLinkNum={POut.Long(payPlanLinkNum)}");
+		}
+
 	}
 }
