@@ -339,9 +339,9 @@ namespace OpenDentBusiness{
 			Db.NonQ(command);
 			command="INSERT INTO recalltype (RecallTypeNum,Description,DefaultInterval,TimePattern,Procedures,AppendToSpecial) VALUES (3,'Scaling (Child)',0,'XX','11111,11117',1)";
 			Db.NonQ(command);
-			command="INSERT INTO recalltype (RecallTypeNum,Description,DefaultInterval,Procedures) VALUES (4,'Pan',50331648,'02601')";
+			command="INSERT INTO recalltype (RecallTypeNum,Description,DefaultInterval,Procedures,AppendToSpecial) VALUES (4,'Pan',50331648,'02601',1)";
 			Db.NonQ(command);
-			command="INSERT INTO recalltype (RecallTypeNum,Description,DefaultInterval,Procedures) VALUES (5,'Recall',393216,'11101,01202')";
+			command="INSERT INTO recalltype (RecallTypeNum,Description,DefaultInterval,Procedures,AppendToSpecial) VALUES (5,'Recall',393216,'11101,01202',1)";
 			Db.NonQ(command);
 			command="TRUNCATE recalltrigger";//OK to delete triggers for manually added recalls, because deleting the triggers disables the recall type.
 			Db.NonQ(command);
