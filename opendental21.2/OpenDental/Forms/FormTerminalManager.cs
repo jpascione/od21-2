@@ -194,7 +194,9 @@ namespace OpenDental {
 							return;
 						}
 						device.SetPatNum(0);
-						TreatPlans.RemoveMobileAppDeviceNum(device.MobileDevice.MobileAppDeviceNum);
+						if(device.MobileDevice != null) { // device might have disconnected without the grid being updated yet
+							TreatPlans.RemoveMobileAppDeviceNum(device.MobileDevice.MobileAppDeviceNum);
+						}
 					}
 					FillGrid();
 				}
