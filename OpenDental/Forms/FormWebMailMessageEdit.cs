@@ -300,11 +300,10 @@ namespace OpenDental {
 				return true;
 			}
 			List<Userod> listUsers=Userods.GetUsersByProvNum(_provCur.ProvNum);//Get all potential users for this provider.
-			using InputBox FormIB=new InputBox(Lan.g(this,"Input a password for a User that is associated to provider:")+"\r\n"+_provCur.GetFormalName());
-			FormIB.textResult.PasswordChar='*';
 			while(true) {
 				//Get the password for a user that is associated to the provider chosen.
-				FormIB.textResult.Text="";
+				using InputBox FormIB=new InputBox(Lan.g(this,"Input a password for a User that is associated to provider:")+"\r\n"+_provCur.GetFormalName());
+				FormIB.textResult.PasswordChar='*';
 				FormIB.ShowDialog();
 				if(FormIB.DialogResult==DialogResult.OK) {
 					//Validate the password typed in against all the users associated to the selected provider.
