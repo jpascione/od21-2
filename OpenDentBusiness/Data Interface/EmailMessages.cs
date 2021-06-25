@@ -168,8 +168,9 @@ namespace OpenDentBusiness{
 			EmailPlatform emailTypesExcludeWebMail=EmailPlatform.All & ~EmailPlatform.WebMail;
 			List<EmailSentOrReceived> listReceivedTypes=GetReadTypes(emailTypesExcludeWebMail).Concat(GetUnreadTypes(emailTypesExcludeWebMail)).ToList();
 			string receivedTypesStr=string.Join(",",listReceivedTypes.Select(x => POut.Int((int)x)));
-			List<EmailSentOrReceived> listWebMailSentTypes=GetSentTypes(EmailPlatform.WebMail);
-			string webMailSentTypesStr=string.Join(",",listWebMailSentTypes.Select(x => POut.Int((int)x)));
+			EmailPlatform emailTypesExcludeAck=EmailPlatform.All & ~EmailPlatform.Ack;
+			List<EmailSentOrReceived> listSentTypes=GetSentTypes(emailTypesExcludeAck);
+			string sentTypesStr=string.Join(",",listSentTypes.Select(x => POut.Int((int)x)));
 			string command=@"SELECT 
 				(CASE WHEN address.ToAddress='"+fromAddress+@"' THEN '' ELSE address.ToAddress END) ToAddress,
 				(CASE WHEN address.FromAddress='"+fromAddress+@"' THEN '' ELSE address.FromAddress END) FromAddress,
@@ -185,7 +186,7 @@ namespace OpenDentBusiness{
 					LEFT(emailmessage.BccAddress,500) BccAddress
 					FROM emailmessage
 					WHERE (SentOrReceived IN ("+receivedTypesStr+") AND RecipientAddress LIKE '%"+recipientAddress+"%') "
-						+"OR (SentOrReceived IN("+webMailSentTypesStr+") AND FromAddress LIKE '%"+fromAddress+@"%') 
+						+"OR (SentOrReceived IN("+sentTypesStr+") AND FromAddress LIKE '%"+fromAddress+@"%') 
 			) address";
 			DataTable table=Db.GetTable(command);
 			List<EmailMessage> listMessages=new List<EmailMessage>();
