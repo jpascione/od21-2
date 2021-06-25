@@ -361,6 +361,35 @@ namespace UnitTests.PaymentEdit_Tests {
 				&& x.SplitAmt==20));
 		}
 
+		[TestMethod]
+		public void PaymentEdit_AllocateUnearned_SelectedAccountEntriesImplicitlyLinkLast() {
+			string suffix=MethodBase.GetCurrentMethod().Name;
+			long provNum1=ProviderT.CreateProvider($"{suffix}-1");
+			long provNum2=ProviderT.CreateProvider($"{suffix}-2");
+			Patient pat=PatientT.CreatePatient(suffix);
+			//Complete proc1 for provNum1 that comes prior to proc2.
+			Procedure proc1=ProcedureT.CreateProcedure(pat,"SAEIL1",ProcStat.C,"",50,procDate:new DateTime(2020,1,1),provNum:provNum1);
+			//Complete proc2 for provNum2 that comes after proc1.
+			Procedure proc2=ProcedureT.CreateProcedure(pat,"SAEIL2",ProcStat.C,"",100,procDate:new DateTime(2020,2,2),provNum:provNum2);
+			//Create a negative adjustment that is not allocated to anything. Open Dental doesn't know what this adjustment applies to.
+			//FIFO logic will always apply this adjustment to proc1.
+			//However, if the user manually selects proc1 for allocating unearned it should apply to proc2 instead.
+			Adjustment adj1=AdjustmentT.MakeAdjustment(pat.PatNum,-50,adjDate:new DateTime(2020,3,3));
+			//Create an unearned payment that is not explicitly linked to anything for the amount of proc1.
+			PaySplitT.CreatePrepayment(pat.PatNum,50,DateTime.Today);
+			//Act like the dental office manually selected proc1 and wants to allocate the unearned money to it.
+			//The unallocated adjustment should not stop this from happening because the office is explicitly telling us where unearned should go.
+			AccountEntry accountEntryProc1=new AccountEntry(proc1);
+			List<PaySplit> listPaySplits=PaymentEdit.AllocateUnearned(0,50,ListTools.FromSingle(accountEntryProc1));
+			Assert.AreEqual(2,listPaySplits.Count);
+			Assert.AreEqual(1,listPaySplits.Count(x => x.SplitAmt==-50
+				&& x.UnearnedType > 0));
+			Assert.AreEqual(1,listPaySplits.Count(x => x.SplitAmt==50
+				&& x.ProvNum==provNum1
+				&& x.ProcNum==proc1.ProcNum
+				&& x.UnearnedType==0));
+		}
+
 		#endregion
 
 		#region AutoSplitForPayment Tests

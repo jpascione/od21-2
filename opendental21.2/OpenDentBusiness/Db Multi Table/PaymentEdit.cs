@@ -1132,6 +1132,12 @@ namespace OpenDentBusiness {
 				&& ((FauxAccountEntry)x.Tag).AccountEntryProc!=null
 				&& ((FauxAccountEntry)x.Tag).AccountEntryProc.GetType()==typeof(Procedure)
 				&& ((Procedure)((FauxAccountEntry)x.Tag).AccountEntryProc.Tag).ProcStatus==ProcStat.TP);
+			//Push account entries that correspond to the account entries that should be 'paid first' to the end of the implicit charge list.
+			//This will cause unallocated account entries to prefer other account entries first in order to leave as much value as possible on the 'paid first' entries.
+			if(!listPayFirstAcctEntries.IsNullOrEmpty()) {
+				//Shove all of the selected account entries to the bottom of listImplicitCharges so that they are implicitly linked to last.
+				listImplicitCharges=listImplicitCharges.OrderBy(x => listPayFirstAcctEntries.Any(y => y.PriKey==x.PriKey && y.GetType()==x.GetType())).ToList();
+			}
 			foreach(AccountBalancingLayers layer in Enum.GetValues(typeof(AccountBalancingLayers))) {
 				if(layer==AccountBalancingLayers.Unearned) {
 					continue;
@@ -1468,7 +1474,7 @@ namespace OpenDentBusiness {
 			double amountRemaining=amountUnearned;
 			//Perform explicit and implicit linking on the entire account and get the actual account entries that make up the current unearned bucket.
 			ConstructResults constructResults=ConstructAndLinkChargeCredits(fam.GetPatNums(),fam.Guarantor.PatNum,new List<PaySplit>(),new Payment(),
-				new List<AccountEntry>(),isIncomeTxfr:true,isAllocateUnearned:true);
+				listAccountEntries,isIncomeTxfr:true,isAllocateUnearned:true);
 			//The account entries passed in may not have had explicit linking executed on them so find the same entries from our results.
 			//Allow allocating to account entries that are related by proxy (e.g. payment plan debits that are linked to procedures via credits).
 			List<AccountEntry> listAllocateEntries=new List<AccountEntry>();
