@@ -3289,9 +3289,10 @@ namespace OpenDental{
 				return;
 			}
 			if(IsNew){
-				//for(int i=0;i<RefList.Length;i++){
-				//	RefAttaches.Delete(RefList[i]);
-				//}
+				List<RefAttach> listRefAttaches=RefAttaches.GetRefAttaches(new List<long> { _patientCur.PatNum });
+				for(int i=0;i<listRefAttaches.Count;i++) {
+					RefAttaches.Delete(listRefAttaches[i]);
+				}
 				Patients.Delete(_patientCur);
 				SecurityLogs.MakeLogEntry(Permissions.PatientEdit,_patientCur.PatNum,Lan.g(this,"Canceled creating new patient. Deleting patient record."));
 			}

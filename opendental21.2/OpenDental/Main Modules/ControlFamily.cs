@@ -1559,7 +1559,7 @@ namespace OpenDental{
 					message+=Lan.g(this,"Insurance plans")+"\r";
 				}
 				if(hasRef) {
-					message+=Lan.g(this,"References")+"\r";
+					message+=Lan.g(this,"Referrals")+"\r";
 				}
 				if(hasMeds) {
 					message+=Lan.g(this,"Medications")+"\r";
